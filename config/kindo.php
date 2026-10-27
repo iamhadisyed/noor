@@ -12,6 +12,7 @@ return [
         'cooldown_seconds' => (int) env('KINDO_OTP_COOLDOWN', 60),
     ],
     'token_ttl_days' => 30,
+    'backup' => ['password' => env('KINDO_BACKUP_PASSWORD'), 'keep' => (int) env('KINDO_BACKUP_KEEP', 7)],
     'household_max' => 3,   // people a parent can share their children with
     'admin_token_ttl_hours' => 12,
 

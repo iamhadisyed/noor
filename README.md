@@ -73,4 +73,6 @@ Games: practice earns play minutes and games unlock while there are minutes (see
 
 Privacy: parents can download all their data and delete their account from Settings (`GET /api/v1/me/export`, `POST /me/delete-code` then `DELETE /me`). Deletion needs working email, since it asks for a code.
 
+Backups: set `KINDO_BACKUP_PASSWORD` in `.env`; a nightly encrypted backup then runs by itself (`php artisan kindo:backup` by hand, `php artisan kindo:restore FILE --force` to restore). Read `docs/BACKUPS.md`, especially the part about keeping a copy off the server.
+
 Browser tests: `tests/e2e/run.sh` (see `tests/e2e/README.md`).
