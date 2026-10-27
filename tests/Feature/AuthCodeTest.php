@@ -69,7 +69,7 @@ class AuthCodeTest extends TestCase
     {
         $code = $this->ask('new@example.com');
 
-        $res = $this->postJson('/api/v1/auth/verify', ['email' => 'new@example.com', 'code' => $code, 'device_name' => 'web'])->assertOk();
+        $res = $this->postJson('/api/v1/auth/verify', ['email' => 'new@example.com', 'code' => $code, 'device_name' => 'web', 'accept_terms' => true])->assertOk();
 
         $res->assertJsonPath('is_new', true)->assertJsonPath('user.role', 'parent');
         $user = User::where('email', 'new@example.com')->first();
@@ -82,9 +82,9 @@ class AuthCodeTest extends TestCase
     public function test_a_code_works_only_once(): void
     {
         $code = $this->ask();
-        $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $code])->assertOk();
+        $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $code, 'accept_terms' => true])->assertOk();
 
-        $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $code])->assertStatus(422);
+        $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $code, 'accept_terms' => true])->assertStatus(422);
     }
 
     public function test_wrong_code_is_rejected_and_five_misses_kill_the_code(): void
@@ -96,7 +96,7 @@ class AuthCodeTest extends TestCase
             $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $wrong])->assertStatus(422);
         }
         // even the right code no longer works
-        $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $code])->assertStatus(422);
+        $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $code, 'accept_terms' => true])->assertStatus(422);
     }
 
     public function test_expired_code_is_rejected(): void
@@ -104,7 +104,7 @@ class AuthCodeTest extends TestCase
         $code = $this->ask();
         $this->travel(11)->minutes();
 
-        $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $code])->assertStatus(422);
+        $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $code, 'accept_terms' => true])->assertStatus(422);
     }
 
     public function test_second_code_request_inside_the_cooldown_is_refused_with_retry_after(): void
@@ -123,7 +123,7 @@ class AuthCodeTest extends TestCase
     {
         config(['kindo.super_admins' => ['owner@example.com']]);
 
-        $res = $this->postJson('/api/v1/auth/verify', ['email' => 'owner@example.com', 'code' => $this->ask('owner@example.com')])->assertOk();
+        $res = $this->postJson('/api/v1/auth/verify', ['email' => 'owner@example.com', 'code' => $this->ask('owner@example.com'), 'accept_terms' => true])->assertOk();
         $res->assertJsonPath('user.role', 'super_admin');
         $this->assertSame(
             (int) config('kindo.admin_token_ttl_hours'),
@@ -131,7 +131,7 @@ class AuthCodeTest extends TestCase
         );
         $this->as($res->json('token'))->getJson('/api/v1/admin/ping')->assertOk();
 
-        $parent = $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $this->ask('mama@example.com')])->assertOk();
+        $parent = $this->postJson('/api/v1/auth/verify', ['email' => 'mama@example.com', 'code' => $this->ask('mama@example.com'), 'accept_terms' => true])->assertOk();
         $parent->assertJsonPath('user.role', 'parent');
         $this->as($parent->json('token'))->getJson('/api/v1/admin/ping')->assertStatus(403);
     }
@@ -140,7 +140,7 @@ class AuthCodeTest extends TestCase
     {
         $u = User::factory()->create(['email' => 'was@example.com', 'role' => 'super_admin']);
 
-        $res = $this->postJson('/api/v1/auth/verify', ['email' => 'was@example.com', 'code' => $this->ask('was@example.com')])->assertOk();
+        $res = $this->postJson('/api/v1/auth/verify', ['email' => 'was@example.com', 'code' => $this->ask('was@example.com'), 'accept_terms' => true])->assertOk();
 
         $res->assertJsonPath('user.role', 'parent');
         $this->assertSame('parent', $u->fresh()->role);
@@ -156,7 +156,7 @@ class AuthCodeTest extends TestCase
 
         $this->as($token)->getJson('/api/v1/me')->assertStatus(403);
         $this->assertSame(0, $u->tokens()->count());
-        $this->postJson('/api/v1/auth/verify', ['email' => 'sus@example.com', 'code' => $this->ask('sus@example.com')])->assertStatus(403);
+        $this->postJson('/api/v1/auth/verify', ['email' => 'sus@example.com', 'code' => $this->ask('sus@example.com'), 'accept_terms' => true])->assertStatus(403);
     }
 
     public function test_sessions_can_be_listed_and_revoked_and_logout_ends_the_current_one(): void

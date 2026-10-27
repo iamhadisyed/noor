@@ -55,6 +55,10 @@ class LessonRules
 
         $maxChoices = $lesson->settings['max_choices'] ?? $lesson->child?->support_profile['max_choices'] ?? 4;
 
+        if ($lesson->flags()->where('status', 'open')->exists()) {
+            $problems[] = ['task_id' => null, 'position' => null, 'title' => null, 'missing' => ['review'], 'message' => 'A moderator is reviewing this lesson. It can be published again after the review.'];
+        }
+
         foreach ($lesson->tasks as $i => $task) {
             $rule = self::TYPES[$task->type] ?? null;
             $missing = [];

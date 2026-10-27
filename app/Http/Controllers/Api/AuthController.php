@@ -60,6 +60,7 @@ class AuthController extends Controller
             'email' => 'required|email:rfc|max:191',
             'code' => 'required|digits:6',
             'device_name' => 'nullable|string|max:60',
+            'accept_terms' => 'nullable|boolean',
         ]);
         $email = strtolower($data['email']);
 
@@ -76,10 +77,15 @@ class AuthController extends Controller
 
             return response()->json(['message' => self::BAD_CODE], 422);
         }
-        $code->update(['consumed_at' => now()]);
 
         $user = User::firstOrNew(['email' => $email]);
         $isNew = ! $user->exists;
+        $acceptedNow = (bool) ($data['accept_terms'] ?? false);
+        if ($isNew && ! $acceptedNow && ! in_array($email, config('kindo.super_admins', []), true)) {
+            // The code is still valid: the client shows the terms, then sends the same code again with accept_terms.
+            return response()->json(['message' => 'Please read and accept the terms to create your account.', 'terms_required' => true, 'terms_version' => config('legal.version')], 422);
+        }
+        $code->update(['consumed_at' => now()]);
         if ($isNew) {
             $user->name = Str::before($email, '@');
         }
@@ -89,6 +95,10 @@ class AuthController extends Controller
 
         $user->role = in_array($email, config('kindo.super_admins', []), true) ? 'super_admin' : 'parent';   // configuration is the source of truth
         $user->email_verified_at ??= now();
+        if ($acceptedNow) {
+            $user->terms_accepted_at = now();
+            $user->terms_version = config('legal.version');
+        }
         $user->last_login_at = now();
         $user->save();
 
@@ -155,6 +165,23 @@ class AuthController extends Controller
     private function present(User $u): array
     {
         return ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'phone' => $u->phone, 'role' => $u->role,
-            'plan' => $u->isPro() ? 'pro' : 'free', 'email_verified' => (bool) $u->email_verified_at];
+            'plan' => $u->isPro() ? 'pro' : 'free', 'email_verified' => (bool) $u->email_verified_at,
+            'terms_required' => ! $u->isSuperAdmin() && $u->terms_version !== config('legal.version'), 'terms_version' => config('legal.version')];
+    }
+
+    /** The public terms and privacy text (also shown before sign-up). */
+    public function terms(): JsonResponse
+    {
+        return response()->json(config('legal'));
+    }
+
+    /** An existing parent accepts a newer version of the terms. */
+    public function acceptTerms(Request $request): JsonResponse
+    {
+        $request->validate(['accept' => 'required|accepted']);
+        $request->user()->update(['terms_accepted_at' => now(), 'terms_version' => config('legal.version')]);
+        AuditLog::record($request->user(), 'auth.terms_accepted', $request->user(), ['version' => config('legal.version')]);
+
+        return response()->json($this->present($request->user()->fresh()));
     }
 }

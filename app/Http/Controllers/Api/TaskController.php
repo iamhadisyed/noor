@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
 use App\Models\LessonTask;
+use App\Services\ContentFilter;
 use App\Services\LessonRules;
 use App\Services\MediaStore;
 use Illuminate\Http\JsonResponse;
@@ -62,8 +63,9 @@ class TaskController extends Controller
         $this->checkCorrect($data);
 
         $task = $lesson->tasks()->create($data + ['position' => ($lesson->tasks()->max('position') ?? 0) + 1]);
+        app(ContentFilter::class)->scanTask($task);
 
-        return response()->json(self::present($task, $this->media), 201);
+        return response()->json(self::present($task, $this->media) + ['lesson_unpublished' => LessonController::revalidate($lesson)], 201);
     }
 
     public function update(Request $request, int $id): JsonResponse
@@ -72,6 +74,7 @@ class TaskController extends Controller
         $data = $request->validate($this->taskRules(true));
         $this->checkCorrect($data);
         $task->update($data);
+        app(ContentFilter::class)->scanTask($task);
 
         return $this->done($task);
     }

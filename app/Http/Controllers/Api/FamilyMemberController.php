@@ -35,6 +35,8 @@ class FamilyMemberController extends Controller
             'audio_prompt_path' => $request->file('audio')->store("family/{$child->id}", 'public'),
         ]);
 
+        app(\App\Services\ContentFilter::class)->scanFamilyMember($member, $request->user()->id);
+
         return response()->json($member, 201);
     }
 }

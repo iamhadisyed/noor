@@ -13,5 +13,6 @@ class Lesson extends Model
     protected $casts = ['settings' => 'array', 'is_template' => 'boolean', 'published_at' => 'datetime'];
 
     public function child(): BelongsTo { return $this->belongsTo(Child::class); }
+    public function flags(): HasMany { return $this->hasMany(ContentFlag::class); }
     public function tasks(): HasMany { return $this->hasMany(LessonTask::class)->orderBy('position'); }
 }
