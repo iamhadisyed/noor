@@ -154,7 +154,9 @@ class ContentReviewController extends Controller
 
     private function removeContent(ContentFlag $flag): void
     {
-        if ($flag->family_member_id && ($m = FamilyMember::find($flag->family_member_id))) {
+        if ($flag->assignment_id) {
+            \App\Models\Assignment::whereKey($flag->assignment_id)->delete();
+        } elseif ($flag->family_member_id && ($m = FamilyMember::find($flag->family_member_id))) {
             $this->media->forgetFamily($m);
             $m->delete();
         } elseif ($flag->lesson_id && ($lesson = Lesson::find($flag->lesson_id))) {
@@ -166,7 +168,7 @@ class ContentReviewController extends Controller
     {
         return [
             'id' => $f->id, 'reason' => $f->reason, 'term' => $f->term, 'excerpt' => $f->excerpt, 'status' => $f->status, 'action' => $f->action,
-            'note' => $f->note, 'lesson_id' => $f->lesson_id, 'task_id' => $f->task_id, 'family_member_id' => $f->family_member_id,
+            'note' => $f->note, 'lesson_id' => $f->lesson_id, 'task_id' => $f->task_id, 'family_member_id' => $f->family_member_id, 'assignment_id' => $f->assignment_id,
             'owner' => $f->relationLoaded('owner') && $f->owner ? ['id' => $f->owner->id, 'email' => $f->owner->email, 'status' => $f->owner->status] : ['id' => $f->user_id],
             'created_at' => $f->created_at, 'reviewed_at' => $f->reviewed_at,
         ];

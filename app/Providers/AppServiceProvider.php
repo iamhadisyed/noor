@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        foreach ([\App\Models\Child::class, \App\Models\Lesson::class, \App\Models\LessonTask::class, \App\Models\FamilyMember::class, \App\Models\ChildNeedsLog::class, \App\Models\RewardLedger::class] as $model) {
+        foreach ([\App\Models\Child::class, \App\Models\Lesson::class, \App\Models\LessonTask::class, \App\Models\FamilyMember::class, \App\Models\ChildNeedsLog::class, \App\Models\RewardLedger::class, \App\Models\Assignment::class] as $model) {
             $model::observe(\App\Observers\SyncObserver::class);
         }
 

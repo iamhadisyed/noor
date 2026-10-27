@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\PecsController;
 use App\Http\Controllers\Api\PrivacyController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SessionController;
+use App\Http\Controllers\Api\SpecialistController;
 use App\Http\Controllers\Api\SyncController;
 use Illuminate\Support\Facades\Route;
 
@@ -94,6 +95,23 @@ Route::prefix('v1')->group(function () {
         Route::delete('household/joined/{id}', [HouseholdController::class, 'leave']);
         Route::post('household/invitations/{id}/accept', [HouseholdController::class, 'accept']);
         Route::post('household/invitations/{id}/decline', [HouseholdController::class, 'decline']);
+
+        // therapists and teachers: the parent's side
+        Route::get('children/{child}/specialists', [SpecialistController::class, 'index']);
+        Route::post('children/{child}/specialists', [SpecialistController::class, 'invite'])->middleware('throttle:20,60');
+        Route::post('specialists/{id}/new-code', [SpecialistController::class, 'newCodeFor'])->middleware('throttle:20,60');
+        Route::delete('specialists/{id}', [SpecialistController::class, 'revoke']);
+        Route::get('children/{child}/assignments', [SpecialistController::class, 'parentAssignments']);
+        Route::post('assignments/{id}/done', [SpecialistController::class, 'complete']);
+        // the specialist's side (any signed-in person who has a code)
+        Route::post('specialist/redeem', [SpecialistController::class, 'redeem'])->middleware('throttle:10,60');
+        Route::get('specialist/children', [SpecialistController::class, 'shared']);
+        Route::get('specialist/children/{child}/summary', [SpecialistController::class, 'summary']);
+        Route::delete('specialist/children/{child}', [SpecialistController::class, 'leave']);
+        Route::get('specialist/children/{child}/assignments', [SpecialistController::class, 'myAssignments']);
+        Route::post('specialist/children/{child}/assignments', [SpecialistController::class, 'assign'])->middleware('throttle:60,60');
+        Route::patch('specialist/assignments/{id}', [SpecialistController::class, 'updateAssignment']);
+        Route::delete('specialist/assignments/{id}', [SpecialistController::class, 'deleteAssignment']);
 
         Route::post('devices', [AuthController::class, 'registerDevice']);
 

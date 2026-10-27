@@ -82,6 +82,7 @@ class SyncController extends Controller
         foreach ($kids as $c) { $changes[] = ['entity' => 'child', 'id' => $c->id, 'op' => 'upsert', 'data' => $this->children->present($c)]; }
         foreach (Lesson::where('is_template', false)->whereIn('child_id', $ids)->orderBy('id')->get() as $l) { $changes[] = ['entity' => 'lesson', 'id' => $l->id, 'op' => 'upsert', 'data' => $this->lessons->present($l)]; }
         foreach (FamilyMember::whereIn('child_id', $ids)->orderBy('id')->get() as $m) { $changes[] = ['entity' => 'family_member', 'id' => $m->id, 'op' => 'upsert', 'data' => FamilyMemberController::present($m, $this->media)]; }
+        foreach (\App\Models\Assignment::whereIn('child_id', $ids)->with('author:id,name,email')->orderBy('id')->get() as $x) { $changes[] = ['entity' => 'assignment', 'id' => $x->id, 'op' => 'upsert', 'data' => SpecialistController::presentAssignment($x)]; }
         foreach (ChildNeedsLog::whereIn('child_id', $ids)->where('created_at', '>=', now()->subDays(self::NEEDS_DAYS))->orderBy('id')->get() as $n) { $changes[] = ['entity' => 'need', 'id' => $n->id, 'op' => 'upsert', 'data' => $this->needs->present($n)]; }
 
         return ['snapshot' => true, 'cursor' => $latest, 'has_more' => false, 'changes' => $changes];
@@ -102,6 +103,7 @@ class SyncController extends Controller
             'lesson' => ($l = Lesson::where('is_template', false)->whereIn('child_id', $ids)->find($id)) ? $this->lessons->present($l) : null,
             'family_member' => ($m = FamilyMember::whereIn('child_id', $ids)->find($id)) ? FamilyMemberController::present($m, $this->media) : null,
             'need' => ($n = ChildNeedsLog::whereIn('child_id', $ids)->find($id)) ? $this->needs->present($n) : null,
+            'assignment' => ($x = \App\Models\Assignment::whereIn('child_id', $ids)->with('author:id,name,email')->find($id)) ? SpecialistController::presentAssignment($x) : null,
             default => null,
         };
 
