@@ -8,10 +8,11 @@
     .grid { width: 100%; border-collapse: collapse; }
     .card-cell { width: 50%; height: 68mm; padding: 4mm; vertical-align: top; }
     .card-border { border: 2px dashed #9E9E9E; border-radius: 8px; height: 60mm; text-align: center; padding: 6px; background-color: #FAFAFA; }
-    .icon-container { height: 38mm; margin-top: 2mm; }
-    .card-icon { max-height: 36mm; max-width: 36mm; }
+    .icon-container { height: 30mm; margin-top: 1mm; }
+    .card-icon { max-height: 28mm; max-width: 28mm; }
     .label-en { font-size: 14pt; font-weight: bold; letter-spacing: 1px; color: #1F2421; margin-top: 2mm; text-transform: uppercase; }
     .label-ur { font-size: 16pt; font-weight: bold; color: #E07A5F; direction: rtl; margin-top: 1mm; }
+    .ur-img { height: 9mm; }
     .cut-guide { font-size: 7pt; color: #BDBDBD; margin-bottom: 2px; }
 </style>
 </head>
@@ -32,7 +33,13 @@
                         @endif
                     </div>
                     <div class="label-en">{{ $card->english_label }}</div>
-                    <div class="label-ur">{{ $card->urdu_label }}</div>
+                    <div class="label-ur">
+                        @if($ur = \App\Support\UrduText::imageDataUri($card->urdu_label, 96, '#E07A5F'))
+                        <img src="{{ $ur }}" class="ur-img" alt="{{ $card->urdu_label }}">
+                        @else
+                        {{ $card->urdu_label }}
+                        @endif
+                    </div>
                 </div>
             </td>
             @endforeach
