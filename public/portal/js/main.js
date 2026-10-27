@@ -14,11 +14,13 @@ const routes = [
   { path: '/children', view: lazy('./views/children.js'), role: 'parent', nav: 'children' },
   { path: '/lessons', view: lazy('./views/lessons.js'), role: 'parent', nav: 'lessons' },
   { path: '/lessons/:id', view: lazy('./views/lesson-editor.js'), role: 'parent', nav: 'lessons' },
+  { path: '/rewards', view: lazy('./views/rewards.js'), role: 'parent', nav: 'rewards' },
   { path: '/reports', view: lazy('./views/reports.js'), role: 'parent', nav: 'reports' },
   { path: '/alerts', view: lazy('./views/alerts.js'), role: 'parent', nav: 'alerts' },
   { path: '/settings', view: lazy('./views/settings.js'), nav: 'settings' },
   { path: '/admin', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-overview', name: 'overview' },
   { path: '/admin/usage', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-usage', name: 'usage' },
+  { path: '/admin/games', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-games', name: 'games' },
   { path: '/admin/content', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-content', name: 'content' },
   { path: '/admin/quality', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-quality', name: 'quality' },
   { path: '/admin/alerts', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-alerts', name: 'alerts' },
@@ -28,8 +30,8 @@ const routes = [
   { path: '/admin/health', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-health', name: 'health' },
 ];
 const NAV = {
-  parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['settings', '#/settings', 'gear', 'Settings']],
-  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
+  parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['rewards', '#/rewards', 'star', 'Rewards'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['settings', '#/settings', 'gear', 'Settings']],
+  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-games', '#/admin/games', 'star', 'Game library'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
 };
 
 export const go = (hash) => { if (location.hash === hash) route(); else location.hash = hash; };
@@ -96,7 +98,7 @@ function shell(active, content) {
   const role = state.user?.role || 'parent';
   const items = NAV[role];
   const link = (n, cls) => h('a', { href: n[1], 'aria-current': n[0] === active ? 'page' : null }, icon(n[2], 22), cls === 'bottom' ? h('span', null, n[3]) : n[3]);
-  const bottom = (role === 'parent' ? items.filter((n) => n[0] !== 'reports') : items.filter((n) => ['a-overview', 'a-content', 'a-accounts', 'a-quality', 'settings'].includes(n[0])));
+  const bottom = (role === 'parent' ? items.filter((n) => !['reports', 'children'].includes(n[0])) : items.filter((n) => ['a-overview', 'a-content', 'a-accounts', 'a-quality', 'settings'].includes(n[0])));
   return h('div', { class: 'shell' },
     h('a', { class: 'skip', href: '#content', onclick: (e) => { e.preventDefault(); document.getElementById('content')?.focus(); } }, 'Skip to content'),
     h('aside', { class: 'side' },

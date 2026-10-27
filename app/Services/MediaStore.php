@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\FamilyMember;
+use App\Models\GameItem;
 use App\Models\LessonTask;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -116,6 +117,38 @@ class MediaStore
         $has = $kind === 'photo' ? $m->photo_path : $m->audio_prompt_path;
 
         return $has ? URL::temporarySignedRoute('media.family', now()->addMinutes(15), ['member' => $m->id, 'kind' => $kind]) : null;
+    }
+
+    // ---------- game library (platform content, uploaded by the administrator) ----------
+
+    public function storeGameImage(GameItem $i, UploadedFile $file): void
+    {
+        $jpeg = $this->encodeJpeg($file->getRealPath());
+        $this->forget($i->image_path);
+        $i->image_path = "games/{$i->id}/" . Str::uuid() . '.jpg';
+        Storage::disk(self::DISK)->put($i->image_path, $jpeg);
+    }
+
+    public function storeGameAudio(GameItem $i, UploadedFile $file): void
+    {
+        [$mime, $ext] = $this->audioKind($file->getRealPath());
+        $this->forget($i->audio_path);
+        $i->audio_path = "games/{$i->id}/" . Str::uuid() . '.' . $ext;
+        Storage::disk(self::DISK)->put($i->audio_path, file_get_contents($file->getRealPath()));
+        $i->audio_mime = $mime;
+    }
+
+    public function forgetGame(GameItem $i): void
+    {
+        $this->forget($i->image_path);
+        $this->forget($i->audio_path);
+    }
+
+    public function gameUrl(GameItem $i, string $kind): ?string
+    {
+        $has = $kind === 'image' ? $i->image_path : $i->audio_path;
+
+        return $has ? URL::temporarySignedRoute('media.game', now()->addMinutes(15), ['item' => $i->id, 'kind' => $kind]) : null;
     }
 
     private function familyPath(FamilyMember $m, string $ext): string

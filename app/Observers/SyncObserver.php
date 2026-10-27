@@ -8,6 +8,7 @@ use App\Models\ChildNeedsLog;
 use App\Models\FamilyMember;
 use App\Models\Lesson;
 use App\Models\LessonTask;
+use App\Models\RewardLedger;
 use App\Models\SyncChange;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -41,6 +42,7 @@ class SyncObserver
             $m instanceof LessonTask => [$m->lesson?->is_template ? null : $m->lesson?->user_id, 'lesson', $m->lesson_id, 'upsert'],
             $m instanceof FamilyMember => [$m->child?->user_id, 'family_member', $m->id, $op],
             $m instanceof ChildNeedsLog => [$m->child?->user_id, 'need', $m->id, $op],
+            $m instanceof RewardLedger => [$m->child?->user_id, 'child', $m->child_id, 'upsert'],
             default => [null, '', 0, $op],
         };
         if (! $user) {

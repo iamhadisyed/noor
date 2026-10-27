@@ -69,4 +69,6 @@ Content review: the super admin's **Content review** page lists flagged lessons,
 
 Family-card photos and voices are private (signed links only). On an installation that already has cards, run once after deploying: `php artisan kindo:privatize-media` (moves old public files to private storage, safe to repeat).
 
+Games: practice earns play minutes and games unlock while there are minutes (see `docs/GAMES.md`). Set `APP_TIMEZONE` (for example `Asia/Karachi`) so "today" matches the family's day. After deploying run `php artisan migrate` and, on an existing install, `php artisan db:seed --class=GameItemSeeder`, then upload each animal's picture and sound in the admin **Game library** (the listening games open once 4 animals are complete).
+
 Browser tests: `tests/e2e/run.sh` (see `tests/e2e/README.md`).
