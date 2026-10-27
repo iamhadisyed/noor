@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FamilyMember extends Model
 {
-    protected $fillable = ['child_id', 'relation_title', 'display_name', 'photo_path', 'audio_prompt_path', 'audio_mime'];
+    protected $fillable = ['child_id', 'relation_title', 'display_name', 'photo_path', 'audio_prompt_path', 'audio_mime', 'consented_at', 'consented_by'];
+
+    protected $casts = ['consented_at' => 'datetime'];
 
     protected $hidden = ['photo_path', 'audio_prompt_path'];   // storage paths never leave the server; clients get signed links
 

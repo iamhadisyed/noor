@@ -151,7 +151,7 @@ class SyncTest extends TestCase
     {
         $c = $this->child();
         $l = $this->lesson($c['id']);
-        $f = $this->postJson("/api/v1/children/{$c['id']}/family", ['relation_title' => 'Mama', 'display_name' => 'Mama',
+        $f = $this->postJson("/api/v1/children/{$c['id']}/family", ['consent' => true, 'relation_title' => 'Mama', 'display_name' => 'Mama',
             'photo' => \Illuminate\Http\UploadedFile::fake()->image('p.jpg', 100, 100), 'audio' => $this->wav()])->assertCreated();
         $log = ChildNeedsLog::create(['child_id' => $c['id'], 'need_type' => 'water']);
         $cursor = $this->sync()->json('cursor');

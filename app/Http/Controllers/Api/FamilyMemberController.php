@@ -19,7 +19,7 @@ class FamilyMemberController extends Controller
         return [
             'id' => $m->id, 'child_id' => $m->child_id, 'relation_title' => $m->relation_title, 'display_name' => $m->display_name,
             'photo_url' => $media->familyUrl($m, 'photo'), 'audio_url' => $media->familyUrl($m, 'audio'),
-            'created_at' => $m->created_at, 'updated_at' => $m->updated_at,
+            'consented_at' => $m->consented_at, 'created_at' => $m->created_at, 'updated_at' => $m->updated_at,
         ];
     }
 
@@ -48,9 +48,11 @@ class FamilyMemberController extends Controller
             'display_name' => 'required|string|max:100',
             'photo' => 'required|file|max:' . MediaStore::MAX_IMAGE_UPLOAD_KB,
             'audio' => 'required|file|max:' . MediaStore::MAX_AUDIO_KB,
-        ]);
+            // The parent confirms they may use this person's photo and voice, and that it is suitable for a child.
+            'consent' => 'required|accepted',
+        ], ['consent.accepted' => 'Please confirm you have permission to use this photo and voice.', 'consent.required' => 'Please confirm you have permission to use this photo and voice.']);
 
-        $member = new FamilyMember(['child_id' => $child->id, 'relation_title' => $data['relation_title'], 'display_name' => $data['display_name']]);
+        $member = new FamilyMember(['child_id' => $child->id, 'relation_title' => $data['relation_title'], 'display_name' => $data['display_name'], 'consented_at' => now(), 'consented_by' => $request->user()->id]);
         try {
             $this->media->storeFamilyPhoto($member, $request->file('photo'));
             $this->media->storeFamilyAudio($member, $request->file('audio'));
