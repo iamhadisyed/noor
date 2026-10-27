@@ -17,7 +17,7 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 | Weekly scheduling | Sunday 20:00 job dispatch for every child of an active Pro parent | ✅ |
 | Push alerts (§5.1, §9.2 server side) | `FcmService`: FCM HTTP v1 via service-account JWT, Android HIGH priority + channel `urgent_needs_channel`, iOS critical interruption, dead-token cleanup | 🟡 payload tested; never sent to real FCM |
 | Need/potty alert API (§9.1 server side) | `POST child/alert` logs the need and pushes to all parent devices; live feed; acknowledge | ✅ |
-| Auth | Register, login, bearer tokens (Sanctum), device-token registration | ✅ |
+| Auth | Passwordless email-code sign-in, roles (parent, super admin), sessions, audit log, device tokens | ✅ (see `docs/PORTAL_PRD.md` for the web portal plan) |
 | Child profiles (§4 multi-profile) | List/create; free = 1 profile, Pro = 4 (HTTP 402 beyond limit) | ✅ |
 | Family cards (§5.1) | List/create with photo (≤300 KB) and audio (≤150 KB) upload; free = 2 cards. Game and add-card screens designed (`design/`); game results not recorded server-side | 🟡 (no edit/delete, no game results) |
 | AAC cards (§5.1, §4) | Stock-card seeder (13 cards, EN + Urdu labels); free tier sees only non-Pro cards | 🟡 (no custom-card CRUD, no icon images shipped) |

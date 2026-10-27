@@ -14,7 +14,9 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'phone', 'password', 'subscription_tier', 'subscription_expires_at'];
+    protected $fillable = ['name', 'email', 'phone', 'password', 'subscription_tier', 'subscription_expires_at', 'role', 'status', 'last_login_at'];
+
+    protected $attributes = ['role' => 'parent', 'status' => 'active'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -23,12 +25,23 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'subscription_expires_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
 
     public function children(): HasMany { return $this->hasMany(Child::class); }
     public function deviceTokens(): HasMany { return $this->hasMany(DeviceToken::class); }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
 
     public function isPro(): bool
     {
