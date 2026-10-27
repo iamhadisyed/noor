@@ -86,6 +86,25 @@ class ContentFilter
         }
     }
 
+    /** An exercise set by a therapist or teacher. The flag belongs to the parent whose child it is for. */
+    public function scanAssignment(\App\Models\Assignment $a): void
+    {
+        $owner = $a->child?->user_id;
+        if (! $owner) {
+            return;
+        }
+        foreach ([$a->title, $a->note] as $text) {
+            $term = self::find($text);
+            if (! $term) {
+                continue;
+            }
+            $fingerprint = sha1(implode('|', [$owner, 'assignment', $a->id, $term, self::normalise((string) $text)]));
+            if (! ContentFlag::where('fingerprint', $fingerprint)->exists()) {
+                ContentFlag::create(['user_id' => $owner, 'assignment_id' => $a->id, 'reason' => 'bad_word', 'term' => $term, 'excerpt' => mb_substr((string) $text, 0, 200), 'fingerprint' => $fingerprint]);
+            }
+        }
+    }
+
     public function scanFamilyMember(FamilyMember $member, int $userId): void
     {
         $this->check($userId, null, null, $member->id, $member->display_name);

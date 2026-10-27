@@ -166,6 +166,7 @@ class AuthController extends Controller
     {
         return ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'phone' => $u->phone, 'role' => $u->role,
             'plan' => $u->isPro() ? 'pro' : 'free', 'email_verified' => (bool) $u->email_verified_at,
+            'shared_children' => \App\Models\SpecialistAccess::where('user_id', $u->id)->where('status', 'active')->count(),
             'terms_required' => ! $u->isSuperAdmin() && $u->terms_version !== config('legal.version'), 'terms_version' => config('legal.version')];
     }
 

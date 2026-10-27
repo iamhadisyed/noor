@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ContentFlag extends Model
 {
-    protected $fillable = ['user_id', 'lesson_id', 'task_id', 'family_member_id', 'reason', 'term', 'excerpt', 'fingerprint', 'status', 'action', 'note', 'reviewed_by', 'reviewed_at'];
+    protected $fillable = ['user_id', 'lesson_id', 'task_id', 'family_member_id', 'assignment_id', 'reason', 'term', 'excerpt', 'fingerprint', 'status', 'action', 'note', 'reviewed_by', 'reviewed_at'];
 
     protected $casts = ['reviewed_at' => 'datetime'];
 
