@@ -69,4 +69,6 @@ Content review: the super admin's **Content review** page lists flagged lessons,
 
 Family-card photos and voices are private (signed links only). On an installation that already has cards, run once after deploying: `php artisan kindo:privatize-media` (moves old public files to private storage, safe to repeat).
 
+Privacy: parents can download all their data and delete their account from Settings (`GET /api/v1/me/export`, `POST /me/delete-code` then `DELETE /me`). Deletion needs working email, since it asks for a code.
+
 Browser tests: `tests/e2e/run.sh` (see `tests/e2e/README.md`).

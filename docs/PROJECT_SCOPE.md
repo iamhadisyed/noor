@@ -26,6 +26,7 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 | Web portal (portal phase 4) | `/portal`: passwordless sign-in, children and support profile, lesson builder with pictures, recorded or uploaded sound and the publish checklist, reports, alerts, settings, and the 8-page super admin console. Plain ES modules, no build step, strict CSP, no HTML injection of data. Browser tests in `tests/e2e` | ✅ |
 | Trust and safety | Terms accepted at sign-up (versioned), bad-word filter on parent text with an admin-managed word list, review queue, admin can open any parent-made lesson with its pictures and sounds (audited), remove content, make accounts inactive with a reason | ✅ (family-card media not yet viewable, see PRD §10b) |
 | Sync for web and app | `GET /sync` change feed with cursors and deletes, safe retries via `Idempotency-Key`, silent push nudge, contract in `docs/SYNC.md`. The app itself is not built yet | ✅ server side |
+| Privacy tools | Download all my data (zip with pictures and voices) and delete my account with an emailed code, in the portal and the API; private media; terms record | ✅ (no per-photo consent record yet) |
 | Practice sync (§5.2 data side) | `POST children/{id}/sessions` stores a session + its mistakes | ✅ |
 | AI reports API (§4 Pro) | Generate (queued, Pro only) and fetch latest | ✅ |
 | Printable PECS PDF (§8.3) | Endpoint + Blade view; free = 4-card sample, Pro = chosen cards, A4/Letter. Urdu labels render joined and in the right order (Noto Naskh Arabic, drawn as images); verified against a Chromium reference. Style is Naskh, not Nastaliq | ✅ |
@@ -59,7 +60,7 @@ Nothing open. Last completed: Urdu in the PECS PDF. DomPDF cannot shape Arabic-s
 | Tracing results storage (§5.2) | Tracing screens are designed and the snap-to-guide behaviour is proven in `design/`; the API has no per-letter tracing results or per-child assist settings, and letter spline data does not exist yet |
 | Free-tier "basic accuracy score" (§4) | No stats endpoint |
 | Subscriptions / billing (§4) | `subscription_tier` exists, but nothing sets it (no Play/App Store receipt or payment handling) |
-| Account basics | No password reset, email verification, profile update/delete |
+| Account basics | Sign-in is passwordless, so there is no password reset; email is verified at sign-in; profile update, data export and full account deletion are done (see the Privacy row above) |
 | CRUD gaps | Update/delete child, delete family member, custom AAC cards, report history list |
 | Needs analytics for parent | No potty-timing summary endpoint beyond the AI report; no alert-feed history, reply-time or "seen" endpoints, and acknowledging does not yet notify the child (see `design/README.md`) |
 | Tier gating of lesson content (§4) | Urdu letters Alif–Se, 50 CVC words etc. are content/client rules; not modelled server-side |
