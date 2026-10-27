@@ -8,11 +8,11 @@ use Illuminate\Mail\Mailables\Envelope;
 
 class LoginCodeMail extends Mailable
 {
-    public function __construct(public string $code, public int $minutes) {}
+    public function __construct(public string $code, public int $minutes, public string $purpose = 'login') {}
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: "Your Kindo sign-in code: {$this->code}");
+        return new Envelope(subject: $this->purpose === 'delete' ? "Confirm deleting your Kindo account: {$this->code}" : "Your Kindo sign-in code: {$this->code}");
     }
 
     public function content(): Content

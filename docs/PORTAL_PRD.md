@@ -85,6 +85,8 @@ Per child and date range: practice time, accuracy, tracing steadiness by letter,
 Invite a second parent by email (same code sign-in); both receive alerts and either can reply. Invite a therapist or teacher by a 6-digit code with read-only access to one child (phase 3).
 
 ### 5.5 Privacy tools
+**Built:** `GET /me/export` (a zip with `data.json` and every picture and voice), and account deletion confirmed by an emailed code (`POST /me/delete-code`, then `DELETE /me`), in both the portal Settings and the API for the app. Deletion removes children, lessons, files, devices, sessions and flags; the audit log keeps only that it happened, with no email or name. A delete code cannot sign anyone in, and a sign-in code cannot delete. Administrators cannot delete themselves here. Still to do: a per-photo consent record.
+
 Export all data for a child, delete a child with everything attached (photos and voices included), and a visible consent record for family photos and voices.
 
 ## 6. Super admin console (web only)

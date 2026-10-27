@@ -1,6 +1,6 @@
-import { api } from '../api.js';
-import { h, icon, fmt, toast, errorText, confirmBox } from '../ui.js';
-import { state, signOut } from '../main.js';
+import { api, auth } from '../api.js';
+import { h, icon, fmt, toast, errorText, confirmBox, modal } from '../ui.js';
+import { state, signOut, go } from '../main.js';
 import { meta } from './children.js';
 
 export async function render() {
@@ -29,5 +29,58 @@ export async function render() {
         h('ul', { style: 'padding-left:20px;margin-top:10px;display:grid;gap:6px' },
           h('li', null, pro ? `Up to ${m.limits.children_pro} children` : `${m.limits.children_free} child profile`), h('li', null, pro ? 'Unlimited lessons' : `${m.limits.lessons_per_child_free} lessons per child`), h('li', null, pro ? 'Weekly AI insight, unlimited family cards and printable cards' : 'Weekly insight, extra family cards and printing are in Pro')),
         pro ? null : h('p', { class: 'hint', style: 'margin-top:12px;color:var(--ink-2)' }, 'Online upgrade is coming soon. Contact us to switch on Pro.')),
-      h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:12px' }, 'Account'), h('button', { class: 'btn soft block', onclick: signOut }, icon('logout', 20), 'Sign out')))));
+      h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:12px' }, 'Account'), h('button', { class: 'btn soft block', onclick: signOut }, icon('logout', 20), 'Sign out'),
+        h('p', { class: 'hint', style: 'margin-top:12px' }, h('a', { href: '#/terms' }, 'Terms and conditions'), u.terms_version ? ` (version ${u.terms_version})` : '')),
+      u.role === 'super_admin' ? null : privacyCard())));
+}
+
+/** The parent's rights: a full copy of their data, and complete deletion confirmed by an emailed code. */
+function privacyCard() {
+  const dl = h('button', { class: 'btn soft block', 'data-act': 'export', onclick: async () => {
+    dl.disabled = true;
+    try {
+      const res = await fetch('/api/v1/me/export', { headers: { Authorization: `Bearer ${auth.token}`, Accept: 'application/zip' } });
+      if (!res.ok) throw new Error(res.status === 429 ? 'You can download your data a few times an hour. Please try again later.' : 'We could not prepare your data. Please try again.');
+      const blob = await res.blob();
+      const a = h('a', { href: URL.createObjectURL(blob), download: `kindo-my-data-${new Date().toISOString().slice(0, 10)}.zip` });
+      document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+      toast('Your data is downloading.');
+    } catch (e) { toast(e.message || errorText(e), 'err'); } finally { dl.disabled = false; }
+  } }, icon('download', 20), 'Download my data');
+
+  const del = h('button', { class: 'btn danger block', 'data-act': 'delete', onclick: () => deleteFlow() }, icon('trash', 20), 'Delete my account');
+  return h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:6px' }, 'Your data'),
+    h('p', { class: 'muted', style: 'margin-bottom:16px' }, 'Get a copy of everything we hold (one file with your children, lessons, pictures and voices), or delete your account for good.'), h('div', { class: 'list' }, dl, del));
+}
+
+function deleteFlow() {
+  modal((box, close) => {
+    const err = h('div', { class: 'msg-err', role: 'alert' });
+    const step1 = () => {
+      const send = h('button', { class: 'btn danger', onclick: async () => {
+        send.disabled = true;
+        try { await api('/me/delete-code', { method: 'POST' }); step2(); } catch (e) { send.disabled = false; err.textContent = errorText(e); }
+      } }, 'Email me a confirmation code');
+      box.replaceChildren(h('h2', null, 'Delete your account?'),
+        h('p', { class: 'muted' }, 'This permanently removes your account, your children’s profiles, every lesson, picture and voice, and your alerts and reports. It cannot be undone. Consider downloading your data first.'),
+        err, h('div', { class: 'actions' }, h('button', { class: 'btn soft', onclick: close }, 'Keep my account'), send));
+    };
+    const step2 = () => {
+      err.textContent = '';
+      const code = h('input', { class: 'input', id: 'dc', inputmode: 'numeric', autocomplete: 'one-time-code', maxlength: '6', 'aria-label': '6-digit code', placeholder: '6-digit code', oninput: (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); ok.disabled = e.target.value.length !== 6; } });
+      const ok = h('button', { class: 'btn danger', disabled: true, onclick: async () => {
+        ok.disabled = true; err.textContent = '';
+        try {
+          await api('/me', { method: 'DELETE', body: { code: code.value } });
+          auth.token = null; auth.user = null; state.user = null; state.children = null; state.childId = null;
+          close(); go('#/login'); toast('Your account and everything in it was deleted.');
+        } catch (e) { ok.disabled = false; err.textContent = errorText(e); }
+      } }, 'Delete everything');
+      box.replaceChildren(h('h2', null, 'Check your email'), h('p', { class: 'muted' }, 'Enter the 6-digit code we sent to confirm. The code works once.'),
+        h('div', { class: 'field', style: 'margin-top:16px' }, h('label', { for: 'dc' }, 'Confirmation code'), code), err,
+        h('div', { class: 'actions' }, h('button', { class: 'btn soft', onclick: close }, 'Cancel'), ok));
+      code.focus();
+    };
+    step1();
+  });
 }

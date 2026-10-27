@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\NeedsController;
 use App\Http\Controllers\Api\PecsController;
+use App\Http\Controllers\Api\PrivacyController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\SyncController;
@@ -34,6 +35,9 @@ Route::prefix('v1')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::patch('me', [AuthController::class, 'updateMe']);
         Route::post('me/terms', [AuthController::class, 'acceptTerms']);
+        Route::get('me/export', [PrivacyController::class, 'export'])->middleware('throttle:3,60');
+        Route::post('me/delete-code', [PrivacyController::class, 'requestDeleteCode'])->middleware('throttle:5,60');
+        Route::delete('me', [PrivacyController::class, 'destroy'])->middleware('throttle:10,60');
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::get('me/sessions', [AuthController::class, 'sessions']);
         Route::delete('me/sessions/{id}', [AuthController::class, 'revokeSession']);
