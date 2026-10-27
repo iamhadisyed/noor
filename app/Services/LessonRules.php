@@ -1,0 +1,103 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Lesson;
+use App\Models\LessonTask;
+
+/**
+ * One place that says what each kind of task needs. The API enforces it, and
+ * `GET /task-types` hands the same table to the web portal and the app.
+ */
+class LessonRules
+{
+    public const REQUIRED = 'required';
+    public const OPTIONAL = 'optional';
+    public const NONE = 'none';
+
+    /** type => [label, image, audio, needs a target?, what the target is] */
+    public const TYPES = [
+        'trace_letter' => ['label' => 'Trace a letter',    'image' => self::OPTIONAL, 'audio' => self::OPTIONAL, 'target' => true,  'target_label' => 'Letter'],
+        'spell_word'   => ['label' => 'Spell a word',      'image' => self::OPTIONAL, 'audio' => self::REQUIRED, 'target' => true,  'target_label' => 'Word'],
+        'pick_picture' => ['label' => 'Pick the picture',  'image' => self::REQUIRED, 'audio' => self::OPTIONAL, 'target' => false, 'target_label' => null],
+        'match_face'   => ['label' => 'Match a face',      'image' => self::REQUIRED, 'audio' => self::REQUIRED, 'target' => false, 'target_label' => null],
+        'listen_repeat' => ['label' => 'Listen and repeat', 'image' => self::OPTIONAL, 'audio' => self::REQUIRED, 'target' => true,  'target_label' => 'Phrase'],
+        'routine_step' => ['label' => 'Routine step',      'image' => self::REQUIRED, 'audio' => self::OPTIONAL, 'target' => false, 'target_label' => null],
+    ];
+
+    public static function types(): array
+    {
+        return collect(self::TYPES)->map(fn ($t, $k) => ['type' => $k] + $t)->values()->all();
+    }
+
+    public static function needsAudio(LessonTask $task): bool
+    {
+        return (self::TYPES[$task->type]['audio'] ?? self::NONE) === self::REQUIRED || $task->needs_audio;
+    }
+
+    public static function needsImage(LessonTask $task): bool
+    {
+        return (self::TYPES[$task->type]['image'] ?? self::NONE) === self::REQUIRED;
+    }
+
+    /**
+     * Everything that stops a lesson from being published. Empty problems = ready.
+     * Drafts are never checked, so a parent can always save half-finished work.
+     */
+    public static function readiness(Lesson $lesson): array
+    {
+        $lesson->loadMissing('tasks', 'child');
+        $problems = [];
+
+        if ($lesson->tasks->isEmpty()) {
+            $problems[] = ['task_id' => null, 'position' => null, 'title' => null, 'missing' => ['tasks'], 'message' => 'Add at least one task.'];
+        }
+
+        $maxChoices = $lesson->settings['max_choices'] ?? $lesson->child?->support_profile['max_choices'] ?? 4;
+
+        foreach ($lesson->tasks as $i => $task) {
+            $rule = self::TYPES[$task->type] ?? null;
+            $missing = [];
+
+            if ($rule && $rule['target'] && trim((string) $task->target) === '') {
+                $missing[] = 'target';
+            }
+            if (self::needsImage($task) && ! $task->image_path) {
+                $missing[] = 'image';
+            }
+            if (self::needsAudio($task) && ! $task->audio_path) {
+                $missing[] = 'sound';
+            }
+            if ($task->type === 'pick_picture') {
+                $choices = $task->options['choices'] ?? [];
+                if (count($choices) < 2) {
+                    $missing[] = 'choices';
+                } elseif (count($choices) > $maxChoices) {
+                    $missing[] = 'fewer_choices';
+                }
+            }
+
+            if ($missing) {
+                $problems[] = [
+                    'task_id' => $task->id, 'position' => $i + 1, 'title' => $task->title, 'missing' => $missing,
+                    'message' => self::message($i + 1, $task->title, $missing, $maxChoices),
+                ];
+            }
+        }
+
+        return ['ready' => $problems === [], 'problems' => $problems];
+    }
+
+    private static function message(int $n, string $title, array $missing, int $maxChoices): string
+    {
+        $words = [
+            'sound' => 'a sound', 'image' => 'a picture', 'target' => 'its letter or word',
+            'choices' => 'at least two answer choices', 'fewer_choices' => "no more than {$maxChoices} choices for this child",
+        ];
+        $parts = array_map(fn ($m) => $words[$m] ?? $m, $missing);
+        $last = array_pop($parts);
+        $list = $parts ? implode(', ', $parts) . ' and ' . $last : $last;
+
+        return "Task {$n} \"{$title}\" needs {$list}.";
+    }
+}

@@ -37,6 +37,14 @@ Run `php artisan config:cache` in production; keys are read through `config/kind
 | GET/POST | children | free: 1 profile, pro: 4 (402 beyond) |
 | POST | child/alert | logs need + high-priority FCM push to parent devices |
 | GET | children/{id}/needs · POST needs/{id}/acknowledge | live feed |
+| GET/PATCH/DELETE | children/{id} | profile, **track** (standard or special) and **support profile**; delete removes all stored media |
+| GET | task-types | the per-type picture and sound rules, shared by web and app |
+| GET | lesson-templates | starter lessons for the standard and special tracks |
+| GET/POST | children/{id}/lessons (+ `/from-template/{id}`) | free plan: 3 lessons per child |
+| GET/PATCH/DELETE | lessons/{id} | DELETE archives |
+| POST | lessons/{id}/publish · unpublish · duplicate | publish returns 422 with the exact missing pictures and sounds |
+| POST/PATCH/DELETE | lessons/{id}/tasks · tasks/{id} · reorder | |
+| POST/DELETE | tasks/{id}/media | `kind=image` (re-encoded to a 600 px JPEG) or `kind=audio` (≤150 KB, checked by content); stored privately, served by short-lived signed links |
 | GET | aac-cards · pecs.pdf | free tier: 4 core cards |
 | GET/POST | children/{id}/family | free: 2 cards; photo ≤300 KB, audio ≤150 KB |
 | POST | children/{id}/sessions | offline sync of practice results + mistakes |
