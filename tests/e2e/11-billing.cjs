@@ -27,7 +27,7 @@ const { BASE, OUT, launch, login, check } = require('./lib.cjs');
   await baba.fill('#vc', codes[0]); await baba.click('[data-act=redeem]'); await baba.waitForTimeout(700);
   check('the same code cannot be used again', /Free plan/.test(await baba.textContent('[data-card=plan]')) && /not valid/.test(await baba.textContent('[data-card=plan]')));
 
-  await page.reload(); await page.waitForSelector('#vd'); await page.click('.seg >> text=Used'); await page.waitForTimeout(600);
+  await page.reload(); await page.waitForSelector('#vd'); await page.click('.seg button:text-is("Used")'); await page.waitForTimeout(600);
   check('the admin sees who used it', new RegExp(`mama${stamp}@kindo.test`).test(await page.textContent('[data-voucher]')));
 
   await page.click('nav.nav >> text=Accounts'); await page.waitForSelector('tbody tr'); await page.fill('input[type=search]', `baba${stamp}`); await page.waitForTimeout(900);

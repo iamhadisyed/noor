@@ -131,7 +131,7 @@ Support access to a parent's data is **not** impersonation. It is a time-limited
 10. Scheduling: assign lessons to days and a daily routine with the First, Then card.
 11. Report PDF and CSV export; weekly email summary.
 12. Urdu and English portal, right-to-left layout, keyboard and screen-reader support.
-13. Billing: plan, receipts, and store receipt validation for the apps.
+13. Billing: plan, receipts, and store receipt validation for the apps. **Built:** one-time voucher codes (the owner makes batches, sells or gives them out; a parent redeems in Settings), Pro time that stacks after any current period, admin grants, a history of every period, a warning email three days before Pro ends, and ended plans move back to free. **Not built:** buying inside the app stores (needs Google Play / App Store accounts and receipt validation); the ledger already has a `store` source for it.
 
 **P2, later**
 14. Therapist and teacher access with a 6-digit code and assignments.
