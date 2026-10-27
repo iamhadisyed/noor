@@ -2,6 +2,20 @@ import { api, auth } from './api.js';
 import { h, clear, icon, spinner, toast, initial, errorText } from './ui.js';
 
 const root = document.getElementById('app');
+
+/* ---------- messages from the platform owner, shown above every page until dismissed ---------- */
+const announce = h('div', { class: 'announce', 'aria-live': 'polite' });
+let announcedAt = 0;
+async function refreshAnnouncements(force = false) {
+  if (!auth.token || (!force && Date.now() - announcedAt < 60000)) return;
+  announcedAt = Date.now();
+  try {
+    const rows = await api('/announcements');
+    announce.replaceChildren(...rows.map((a) => h('div', { class: `ann ${a.level}`, role: 'status', 'data-announcement': a.id },
+      h('div', { class: 'grow' }, h('b', null, a.title), h('span', null, a.body)),
+      h('button', { class: 'icon-btn', 'aria-label': 'Dismiss this message', onclick: async () => { try { await api(`/announcements/${a.id}/dismiss`, { method: 'POST' }); } catch { /* shown again next time */ } refreshAnnouncements(true); } }, icon('x', 18)))));
+  } catch { /* a missing banner is not worth an error */ }
+}
 export const state = { user: null, children: null, childId: null };
 
 /* ---------- routes (hash based, so it works on any static host) ---------- */
@@ -20,6 +34,7 @@ const routes = [
   { path: '/settings', view: lazy('./views/settings.js'), nav: 'settings' },
   { path: '/admin', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-overview', name: 'overview' },
   { path: '/admin/usage', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-usage', name: 'usage' },
+  { path: '/admin/announcements', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-news', name: 'announcements' },
   { path: '/admin/games', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-games', name: 'games' },
   { path: '/admin/content', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-content', name: 'content' },
   { path: '/admin/quality', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-quality', name: 'quality' },
@@ -31,7 +46,7 @@ const routes = [
 ];
 const NAV = {
   parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['rewards', '#/rewards', 'star', 'Rewards'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['settings', '#/settings', 'gear', 'Settings']],
-  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-games', '#/admin/games', 'star', 'Game library'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
+  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-games', '#/admin/games', 'star', 'Game library'], ['a-news', '#/admin/announcements', 'bell', 'Announcements'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
 };
 
 export const go = (hash) => { if (location.hash === hash) route(); else location.hash = hash; };
@@ -82,6 +97,7 @@ async function route() {
     m.route.public ? clear(root).append(bad) : place(m.route.nav, bad);
   }
   document.title = `${titleOf(m)} · Kindo`;
+  if (!m.route.public) refreshAnnouncements();
 }
 const titleOf = (m) => (m.route.nav ? (Object.values(NAV).flat().find((n) => n[0] === m.route.nav) || [])[3] || 'Kindo' : 'Sign in');
 
@@ -91,7 +107,7 @@ export const homeFor = () => (state.user?.role === 'super_admin' ? '#/admin' : '
 function place(active, content) {
   const slot = document.getElementById('content');
   if (!slot) return clear(root).append(shell(active, content));
-  clear(slot).append(content);
+  clear(slot).append(announce, content);
   slot.focus({ preventScroll: true });
 }
 function shell(active, content) {
@@ -107,12 +123,13 @@ function shell(active, content) {
       h('div', { class: 'foot' },
         h('div', { class: 'who' }, h('div', { class: 'av' }, initial(state.user?.name || state.user?.email)), h('div', null, h('b', null, state.user?.name || state.user?.email), h('span', null, role === 'super_admin' ? 'Super admin' : state.user?.plan === 'pro' ? 'Pro plan' : 'Free plan'))),
         h('button', { class: 'btn soft', onclick: signOut }, icon('logout', 20), 'Sign out'))),
-    h('main', { class: 'main', id: 'content', tabindex: '-1' }, content),
+    h('main', { class: 'main', id: 'content', tabindex: '-1' }, announce, content),
     h('nav', { class: 'bottom-nav', 'aria-label': 'Main' }, bottom.map((n) => link(n, 'bottom'))));
 }
 export async function signOut() {
   try { await api('/auth/logout', { method: 'POST' }); } catch { /* token may already be gone */ }
   auth.token = null; auth.user = null; state.user = null; state.children = null; state.childId = null;
+  announce.replaceChildren(); announcedAt = 0;
   go('#/login');
 }
 auth.onExpire = () => { state.user = null; toast('Your session ended. Please sign in again.', 'err'); go('#/login'); };

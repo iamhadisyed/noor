@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\GameLibraryController;
@@ -35,6 +36,8 @@ Route::prefix('v1')->group(function () {
 
         Route::get('me', [AuthController::class, 'me']);
         Route::patch('me', [AuthController::class, 'updateMe']);
+        Route::get('announcements', [AnnouncementController::class, 'mine']);
+        Route::post('announcements/{id}/dismiss', [AnnouncementController::class, 'dismiss']);
         Route::post('me/terms', [AuthController::class, 'acceptTerms']);
         Route::get('me/export', [PrivacyController::class, 'export'])->middleware('throttle:3,60');
         Route::post('me/delete-code', [PrivacyController::class, 'requestDeleteCode'])->middleware('throttle:5,60');
@@ -63,6 +66,10 @@ Route::prefix('v1')->group(function () {
             Route::post('games/items', [GameLibraryController::class, 'store']);
             Route::post('games/items/{id}', [GameLibraryController::class, 'update'])->middleware('throttle:60,1');
             Route::delete('games/items/{id}', [GameLibraryController::class, 'destroy']);
+            Route::get('announcements', [AnnouncementController::class, 'index']);
+            Route::post('announcements', [AnnouncementController::class, 'store']);
+            Route::patch('announcements/{id}', [AnnouncementController::class, 'update']);
+            Route::delete('announcements/{id}', [AnnouncementController::class, 'destroy']);
             Route::get('content/family/{id}', [ContentReviewController::class, 'familyShow']);
             Route::post('content/lessons/{id}/flag', [ContentReviewController::class, 'flagLesson']);
             Route::get('content/terms', [ContentReviewController::class, 'terms']);

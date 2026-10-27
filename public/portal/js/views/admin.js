@@ -5,7 +5,7 @@ import { state } from '../main.js';
 
 /** Super admin console. Everything here is aggregate or operational; no child names, pictures or voices. */
 export async function render(ctx, params, query, name) {
-  const view = { overview, usage, quality, content, games, alerts, ai, accounts, audit, health }[name] || overview;
+  const view = { overview, usage, quality, content, games, announcements, alerts, ai, accounts, audit, health }[name] || overview;
   const page = h('div', { class: 'page' }, spinner());
   const out = await view(ctx, page);
   return out || page;
@@ -268,6 +268,40 @@ async function games(ctx, page) {
       h('div', { class: 'row wrap', style: 'justify-content:flex-end' }, h('span', { class: `chip ${i.complete ? 'sage' : 'warn'}` }, i.complete ? 'Ready' : !i.active ? 'Off' : 'Incomplete'),
         h('button', { class: 'btn soft sm', onclick: async () => { try { const f = new FormData(); f.append('active', i.active ? '0' : '1'); await api(`/admin/games/items/${i.id}`, { method: 'POST', form: f }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, i.active ? 'Turn off' : 'Turn on'),
         h('button', { class: 'icon-btn', 'aria-label': `Remove ${i.name_en}`, onclick: async () => { if (!(await confirmBox({ title: `Remove ${i.name_en}?`, body: 'Its picture and sound are deleted.', confirm: 'Remove', danger: true }))) return; try { await api(`/admin/games/items/${i.id}`, { method: 'DELETE' }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, icon('trash', 18))));
+  };
+  await draw();
+}
+
+/* ---------- announcements: messages everyone sees until they end ---------- */
+async function announcements(ctx, page) {
+  const body = h('div', null, spinner());
+  page.replaceChildren(head('Announcements', 'A message shown at the top of the portal and in the app until you end it. Parents can dismiss it.'), body);
+  const local = (iso) => iso ? new Date(iso).toLocaleString() : 'no limit';
+  const draw = async () => {
+    const rows = await api('/admin/announcements');
+    const title = h('input', { class: 'input', id: 'an-title', maxlength: '120', placeholder: 'Short headline', 'aria-label': 'Headline' });
+    const text = h('textarea', { class: 'textarea', id: 'an-body', maxlength: '2000', placeholder: 'What do you want parents to know?', 'aria-label': 'Message' });
+    const level = h('select', { class: 'select', id: 'an-level', 'aria-label': 'Importance' }, [['info', 'Information'], ['important', 'Important']].map(([v, l]) => h('option', { value: v }, l)));
+    const from = h('input', { class: 'input', type: 'datetime-local', id: 'an-from', 'aria-label': 'Show from (optional)' });
+    const until = h('input', { class: 'input', type: 'datetime-local', id: 'an-until', 'aria-label': 'Show until (optional)' });
+    const err = h('div', { class: 'msg-err', role: 'alert' });
+    const iso = (el) => (el.value ? new Date(el.value).toISOString() : null);
+    body.replaceChildren(
+      h('section', { class: 'card', style: 'margin-bottom:16px' }, h('h2', { style: 'margin-bottom:12px' }, 'New announcement'),
+        h('div', { class: 'field' }, h('label', { for: 'an-title' }, 'Headline'), title), h('div', { class: 'field' }, h('label', { for: 'an-body' }, 'Message'), text),
+        h('div', { class: 'grid2' }, h('div', { class: 'field' }, h('label', { for: 'an-level' }, 'Importance'), level), h('div', { class: 'field' }, h('label', { for: 'an-from' }, 'Show from (optional)'), from)),
+        h('div', { class: 'field' }, h('label', { for: 'an-until' }, 'Show until (optional)'), until), err,
+        h('button', { class: 'btn primary', 'data-act': 'publish', onclick: async () => {
+          err.textContent = '';
+          try { await api('/admin/announcements', { method: 'POST', body: { title: title.value.trim(), body: text.value.trim(), level: level.value, starts_at: iso(from), ends_at: iso(until) } }); toast('Published.'); draw(); } catch (e) { err.textContent = errorText(e); }
+        } }, icon('plus', 20), 'Publish')),
+      h('div', { class: 'list' }, rows.length ? rows.map((a) => h('article', { class: 'item', 'data-announcement-row': a.id, style: 'align-items:flex-start' },
+        h('div', { class: 'grow' }, h('b', null, a.title), h('span', null, a.body), h('span', { class: 'hint' }, `Shown ${local(a.starts_at)} until ${local(a.ends_at)} · dismissed by ${a.dismissed_by}`)),
+        h('span', { class: `chip ${a.live ? 'sage' : ''}` }, a.live ? 'Live' : !a.active ? 'Ended' : a.starts_at && new Date(a.starts_at) > new Date() ? 'Scheduled' : 'Over'),
+        a.level === 'important' ? h('span', { class: 'chip orchid' }, 'Important') : null,
+        a.active ? h('button', { class: 'btn soft sm', onclick: async () => { try { await api(`/admin/announcements/${a.id}`, { method: 'PATCH', body: { active: false } }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, 'End now') : null,
+        h('button', { class: 'icon-btn', 'aria-label': `Delete ${a.title}`, onclick: async () => { if (!(await confirmBox({ title: `Delete "${a.title}"?`, body: 'It disappears for everyone.', confirm: 'Delete', danger: true }))) return; try { await api(`/admin/announcements/${a.id}`, { method: 'DELETE' }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, icon('trash', 18))))
+        : h('p', { class: 'muted' }, 'No announcements yet.')));
   };
   await draw();
 }
