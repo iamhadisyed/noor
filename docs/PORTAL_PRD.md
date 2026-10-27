@@ -110,7 +110,7 @@ The super admin sees **aggregates and operational data**, not children's media.
 | Accounts | Search by email; see role, plan, verified, last sign-in, number of children; suspend or restore; change plan |
 | Content review | Flagged or reported media, with remove and warn actions (media is shown only on a flagged item) |
 | Audit log | Who did what and when, filterable, exportable |
-| Announcements | A message shown in the portal and app |
+| Announcements | A message shown in the portal and app. **Built:** headline, message, importance, optional start and end, end early, delete; parents see live ones above every page and can dismiss; the app reads `GET /announcements`. |
 
 Support access to a parent's data is **not** impersonation. It is a time-limited read-only "support view" that the parent must approve, and every use is audited. This is phase 3.
 
@@ -120,7 +120,7 @@ Support access to a parent's data is **not** impersonation. It is a time-limited
 1. Private media: family and lesson images and sounds are stored on a private disk and served through short-lived signed links, never public URLs. **Done**, including family cards (`php artisan kindo:privatize-media` moves older files).
 2. Audit log, account suspension, and neutral error messages on sign-in.
 3. Consent and privacy: parental consent text, data export, full delete, retention rules. Children's data triggers COPPA, GDPR-K and local rules.
-4. Backups of the database and media, and a restore test.
+4. Backups of the database and media, and a restore test. **Done:** encrypted nightly backups with a check, a restore command, and the admin health page; see `docs/BACKUPS.md` (copying them off the server is still the owner's job).
 5. Per-user and per-IP rate limits; upload size and type checks; virus-safe file handling (re-encode images, transcode audio).
 
 **P1, strongly recommended**

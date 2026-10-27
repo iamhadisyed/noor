@@ -32,3 +32,5 @@ Schedule::call(function () {
 
 // Pro expiry warnings (3 days ahead) and moving ended plans back to free.
 Schedule::command('kindo:billing-daily')->dailyAt('04:05')->name('billing-daily');
+// Nightly backup. Without KINDO_BACKUP_PASSWORD it does nothing and the admin health page shows no recent backup.
+Schedule::command('kindo:backup')->dailyAt('02:30')->when(fn () => (bool) config('kindo.backup.password'))->name('nightly-backup')->onFailure(fn () => \Illuminate\Support\Facades\Log::error('Nightly backup failed'));

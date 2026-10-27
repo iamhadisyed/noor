@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AdminBillingController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\BillingController;
+use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\GameLibraryController;
@@ -38,6 +39,8 @@ Route::prefix('v1')->group(function () {
 
         Route::get('me', [AuthController::class, 'me']);
         Route::patch('me', [AuthController::class, 'updateMe']);
+        Route::get('announcements', [AnnouncementController::class, 'mine']);
+        Route::post('announcements/{id}/dismiss', [AnnouncementController::class, 'dismiss']);
         Route::get('me/notifications', [NotificationPrefsController::class, 'show']);
         Route::patch('me/notifications', [NotificationPrefsController::class, 'update']);
         Route::get('billing', [BillingController::class, 'show']);
@@ -74,6 +77,10 @@ Route::prefix('v1')->group(function () {
             Route::post('vouchers', [AdminBillingController::class, 'createVouchers']);
             Route::delete('vouchers/{id}', [AdminBillingController::class, 'revoke']);
             Route::post('users/{id}/grant', [AdminBillingController::class, 'grant']);
+            Route::get('announcements', [AnnouncementController::class, 'index']);
+            Route::post('announcements', [AnnouncementController::class, 'store']);
+            Route::patch('announcements/{id}', [AnnouncementController::class, 'update']);
+            Route::delete('announcements/{id}', [AnnouncementController::class, 'destroy']);
             Route::get('content/family/{id}', [ContentReviewController::class, 'familyShow']);
             Route::post('content/lessons/{id}/flag', [ContentReviewController::class, 'flagLesson']);
             Route::get('content/terms', [ContentReviewController::class, 'terms']);
