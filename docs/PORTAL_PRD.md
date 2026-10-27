@@ -110,7 +110,7 @@ The super admin sees **aggregates and operational data**, not children's media.
 | Accounts | Search by email; see role, plan, verified, last sign-in, number of children; suspend or restore; change plan |
 | Content review | Flagged or reported media, with remove and warn actions (media is shown only on a flagged item) |
 | Audit log | Who did what and when, filterable, exportable |
-| Announcements | A message shown in the portal and app |
+| Announcements | A message shown in the portal and app. **Built:** headline, message, importance, optional start and end, end early, delete; parents see live ones above every page and can dismiss; the app reads `GET /announcements`. |
 
 Support access to a parent's data is **not** impersonation. It is a time-limited read-only "support view" that the parent must approve, and every use is audited. This is phase 3.
 

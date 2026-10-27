@@ -302,3 +302,11 @@ a.btn, a.chip { text-decoration: none; }
 .row.wrap { flex-wrap: wrap; gap: 8px; }
 .chip.bad { background: var(--warn-tint); color: var(--warn); }
 @media (max-width: 640px) { .review-task { grid-template-columns: 1fr; } .terms { max-height: 38vh; } }
+
+/* announcements */
+.announce { display: grid; gap: 10px; margin-bottom: 16px; }
+.announce:empty { display: none; }
+.ann { display: flex; gap: 12px; align-items: center; border-radius: 24px; padding: 14px 16px 14px 22px; background: var(--butter); }
+.ann.important { background: var(--lilac); }
+.ann .grow { display: grid; gap: 2px; min-width: 0; }
+.ann .grow span { color: var(--ink-2, #5d5668); overflow-wrap: anywhere; }
