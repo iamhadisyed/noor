@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kindo UI Prototype</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ======================= ICON + ART SPRITE ======================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4.5 10.4 12 4.2l7.5 6.2V18a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2z"/><path d="M9.4 14.3c1.4 1.3 4 1.3 5.2 0"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M7.5 3.8h9A1.5 1.5 0 0 1 18 5.3v13.4a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 18.7V5.3a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M6 17.2h12M9.2 7.8h5.6M9.2 10.8h3.4"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><path d="M8.6 5H6.7A1.7 1.7 0 0 0 5 6.7v11.6A1.7 1.7 0 0 0 6.7 20h10.6a1.7 1.7 0 0 0 1.7-1.7V6.7A1.7 1.7 0 0 0 17.3 5h-1.9"/><rect x="8.6" y="3.3" width="6.8" height="3.4" rx="1.2"/><path d="m8.6 12.2 1.4 1.4 2.4-2.6M14 12.4h2.6M8.6 16.6h8"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="9.6" r="6"/><path d="m8.7 14.3-1.4 6.2 4.7-2.3 4.7 2.3-1.4-6.2"/><path d="m12 6.7.9 1.8 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3z"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.3"/><path d="M10.2 3.6h3.6l.5 2.3 1.6.9 2.2-.8 1.8 3.1-1.7 1.6v1.8l1.7 1.6-1.8 3.1-2.2-.8-1.6.9-.5 2.3h-3.6l-.5-2.3-1.6-.9-2.2.8-1.8-3.1 1.7-1.6v-1.8L4.1 9.2l1.8-3.1 2.2.8 1.6-.9z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.4 17.4h11.2l-1.6-2.1v-4.2a4.4 4.4 0 0 0-8.8 0v4.2z"/><path d="M10.2 19.4a2 2 0 0 0 3.6 0M12 5.4V4.4"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7.5 16.5 16.5 7.5M9 7.5h7.5V15"/></symbol>
+    <symbol id="i-dots" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="12" cy="5.5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="18.5" r="1.7"/></g></symbol>
+    <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></symbol>
+    <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+
+    <!-- status bar -->
+    <symbol id="s-signal" viewBox="0 0 18 12"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></symbol>
+    <symbol id="s-wifi" viewBox="0 0 17 12"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.5 4.3a10 10 0 0 1 14 0"/><path d="M4.2 7.2a6 6 0 0 1 8.6 0"/></g><circle cx="8.5" cy="10.3" r="1.6" fill="currentColor"/></symbol>
+    <symbol id="s-battery" viewBox="0 0 27 13"><rect x=".75" y=".75" width="22.5" height="11.5" rx="3.6" fill="none" stroke="currentColor" opacity=".4" stroke-width="1.5"/><rect x="2.4" y="2.4" width="19.2" height="8.2" rx="2.2" fill="currentColor"/><path d="M25 4.4v4.2c.9-.3 1.6-1.2 1.6-2.1S25.900 4.700 25 4.400z" fill="currentColor" opacity=".5"/></symbol>
+
+    <!-- avatars (64x64) -->
+    <symbol id="av-ayan" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#d4c6f6"/><path d="M12 64c1-10 9-14 20-14s19 4 20 14z" fill="#6aa6d8"/><path d="M26 49h12v6c-2 3-10 3-12 0z" fill="#f2bf95"/><circle cx="32" cy="31" r="15" fill="#f6c9a0"/><path d="M16.500 29c-1-11 6-17 15.500-17 11 0 17.500 6 15.500 17-2-5-5-8-9-8-5 2-14 2-18 0-2 1-3 4-4 8z" fill="#8a5232"/><g fill="none" stroke="#2c2230" stroke-width="1.6"><circle cx="25.500" cy="32" r="5"/><circle cx="38.500" cy="32" r="5"/><path d="M30.500 31.500h3"/></g><circle cx="25.500" cy="32" r="1.600" fill="#2c2230"/><circle cx="38.500" cy="32" r="1.600" fill="#2c2230"/><path d="M27.500 40.500c2.500 2.200 6.500 2.200 9 0" fill="none" stroke="#b5654a" stroke-width="1.600" stroke-linecap="round"/><circle cx="21" cy="38" r="2.600" fill="#f29a8a" opacity=".5"/><circle cx="43" cy="38" r="2.600" fill="#f29a8a" opacity=".5"/></symbol>
+    <symbol id="av-papa" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#fde8b8"/><path d="M10 64c1-10 9-14 22-14s21 4 22 14z" fill="#3f5f8a"/><path d="M26 49h12v6c-2 3-10 3-12 0z" fill="#e8b184"/><circle cx="32" cy="31" r="15" fill="#efbd92"/><path d="M17 29c-2-12 7-17 16-17 10 0 16 6 14 17-2-4-4-7-8-8-6 2-13 2-17 0-2 1-4 4-5 8z" fill="#2a2430"/><path d="M26 39c1.500 3 10.500 3 12 0-3 1.200-9 1.200-12 0z" fill="#2a2430"/><circle cx="26" cy="31.500" r="1.700" fill="#2a2430"/><circle cx="38" cy="31.500" r="1.700" fill="#2a2430"/><path d="M28 42.500c2.500 1.800 5.500 1.800 8 0" fill="none" stroke="#a85c46" stroke-width="1.600" stroke-linecap="round"/></symbol>
+    <symbol id="av-mama" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#f8c9f4"/><path d="M8 64c2-11 10-15 24-15s22 4 24 15z" fill="#2f8f83"/><path d="M26 49h12v6c-2 3-10 3-12 0z" fill="#f2bf95"/><circle cx="32" cy="31" r="14.500" fill="#f6c9a0"/><path d="M14 36C10 18 20 9 32 9s22 9 18 27c-1-6-3-11-5-14-4 3-10 4-13 4-4 0-9-2-12-5-2 3-4 8-6 15z" fill="#b34a6b"/><circle cx="26.500" cy="32" r="1.700" fill="#2c2230"/><circle cx="37.500" cy="32" r="1.700" fill="#2c2230"/><path d="M28 40.500c2.500 2 5.500 2 8 0" fill="none" stroke="#b5504a" stroke-width="1.700" stroke-linecap="round"/><circle cx="21.500" cy="37.500" r="2.600" fill="#f29a8a" opacity=".5"/><circle cx="42.500" cy="37.500" r="2.600" fill="#f29a8a" opacity=".5"/></symbol>
+    <symbol id="av-dadi" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#cdbdf0"/><path d="M8 64c2-11 10-15 24-15s22 4 24 15z" fill="#8a6bb8"/><path d="M26 49h12v6c-2 3-10 3-12 0z" fill="#ecb890"/><circle cx="32" cy="14" r="6" fill="#ece8f2"/><circle cx="32" cy="31" r="14.500" fill="#f1c29b"/><path d="M17 30C15 17 23 12 32 12s17 5 15 18c-2-6-5-10-9-11-5 1-12 1-16-1-2 2-4 6-5 12z" fill="#ece8f2"/><g fill="none" stroke="#5b4a6e" stroke-width="1.500"><circle cx="26" cy="32" r="4.500"/><circle cx="38" cy="32" r="4.500"/><path d="M30.500 31.500h3"/></g><circle cx="26" cy="32" r="1.500" fill="#2c2230"/><circle cx="38" cy="32" r="1.500" fill="#2c2230"/><path d="M28 40.500c2.500 2 5.500 2 8 0" fill="none" stroke="#b5504a" stroke-width="1.700" stroke-linecap="round"/></symbol>
+
+    <!-- tile-sized icon bubbles -->
+    <symbol id="ic-cap" viewBox="0 0 52 52"><path d="M26 11 6 20l20 9 20-9z" fill="#4a4366"/><path d="M14 25v8c0 3 5 6 12 6s12-3 12-6v-8l-12 5z" fill="#6b6390"/><path d="M44 21v11" stroke="#e7a93a" stroke-width="2" stroke-linecap="round"/><circle cx="44" cy="34" r="2.400" fill="#e7a93a"/></symbol>
+    <symbol id="ic-openbook" viewBox="0 0 52 52"><path d="M26 15c-5-3-12-3-18-1v22c6-2 13-2 18 1 5-3 12-3 18-1V14c-6-2-13-2-18 1z" fill="#fff" stroke="#4d62b5" stroke-width="2.200" stroke-linejoin="round"/><path d="M26 15v22" stroke="#4d62b5" stroke-width="2"/><path d="M12 20c3-.8 7-.8 10 .6M12 25c3-.8 7-.8 10 .6M30 21c3-1.400 7-1.400 10-.6M30 26c3-1.400 7-1.400 10-.6" stroke="#b9c3ea" stroke-width="1.600" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="ic-cal" viewBox="0 0 52 52"><rect x="9" y="12" width="34" height="31" rx="7" fill="#6f8be0"/><rect x="9" y="12" width="34" height="9" rx="4.500" fill="#4a62c0"/><g fill="#fff" opacity=".95"><circle cx="17" cy="27" r="2.200"/><circle cx="26" cy="27" r="2.200"/><circle cx="35" cy="27" r="2.200"/><circle cx="17" cy="35" r="2.200"/><circle cx="26" cy="35" r="2.200"/></g><rect x="15" y="7" width="4" height="9" rx="2" fill="#2f3f8a"/><rect x="33" y="7" width="4" height="9" rx="2" fill="#2f3f8a"/><circle cx="35" cy="36" r="5.500" fill="#f0c04a"/><path d="M35 33v3.200l2 1.200" stroke="#6a4a10" stroke-width="1.400" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="ic-chart" viewBox="0 0 54 54"><circle cx="27" cy="27" r="19" fill="#4a79c4"/><circle cx="27" cy="27" r="19" fill="none" stroke="#2f5aa6" stroke-width="5" stroke-dasharray="5 4"/><circle cx="27" cy="27" r="13" fill="#f3b73f"/><rect x="19" y="28" width="5" height="8" rx="1.200" fill="#fff"/><rect x="26" y="22" width="5" height="14" rx="1.200" fill="#fff"/><rect x="33" y="25" width="4" height="11" rx="1.200" fill="#fff" opacity=".85"/></symbol>
+    <symbol id="ic-swirl" viewBox="0 0 54 54"><circle cx="27" cy="27" r="20" fill="#3d63b8"/><circle cx="27" cy="27" r="14" fill="#6b4fc4"/><path d="M27 13a14 14 0 0 1 14 14H27z" fill="#f09a45"/><path d="M27 27H13a14 14 0 0 1 14-14z" fill="#e0556b"/><circle cx="27" cy="27" r="6" fill="#f6dc6e"/></symbol>
+    <symbol id="ic-bookbtn" viewBox="0 0 48 48"><path d="M24 15c-5-3-12-3-17-1v21c5-2 12-2 17 1 5-3 12-3 17-1V14c-5-2-12-2-17 1z" fill="#fff" stroke="#3b52a8" stroke-width="2.200" stroke-linejoin="round"/><path d="M24 15v21" stroke="#3b52a8" stroke-width="2"/></symbol>
+  </defs>
+</svg>
+
+<div class="viewport">
+<div class="stage" id="stage">
+
+<!-- ====================================================================== -->
+<!-- 1 · WELCOME                                                            -->
+<!-- ====================================================================== -->
+<section class="phone phone--welcome" data-screen="welcome" aria-label="Welcome screen">
+  <svg class="bgblob" viewBox="0 0 330 560" aria-hidden="true"><path d="M60 40C130 10 250 40 300 120S330 330 300 430 170 560 90 520 20 330 30 200 10 70 60 40z" fill="#d6c9f5" opacity=".55"/></svg>
+
+  <div class="status" aria-hidden="true"><time>9:40 PM</time>
+    <div class="icons"><svg width="18" height="12"><use href="#s-signal"/></svg><svg width="17" height="12"><use href="#s-wifi"/></svg><svg width="27" height="13"><use href="#s-battery"/></svg></div></div>
+
+  <div class="dots" aria-label="Step 2 of 3"><i></i><i class="on"></i><i></i></div>
+  <button class="skip">Skip</button>
+
+  <!-- tilted title card (280 x 181, rotated -17deg, anchored at measured top-left corner) -->
+  <div class="tagcard">
+    <svg viewBox="0 0 280 181" width="280" height="181" aria-hidden="true" overflow="visible">
+      <rect x="0" y="0" width="280" height="181" rx="16" fill="none" stroke="#fff" stroke-width="1.600" opacity=".9"/>
+      <g fill="#fff"><circle cx="0" cy="0" r="11"/><circle cx="280" cy="0" r="11"/><circle cx="280" cy="181" r="11"/><circle cx="0" cy="181" r="11"/></g>
+    </svg>
+    <h1 class="tag-text"><span class="l1">Welcome</span><span class="l2">to Kindo</span><span class="l3"><mark><b>L</b>earning</mark></span></h1>
+  </div>
+  <svg class="spark" viewBox="0 0 80 80" aria-hidden="true" fill="none" stroke="#fff" stroke-width="1.800" stroke-linecap="round" opacity=".9"><path d="M54 6 38 44M68 14 50 46M30 42 4 36"/></svg>
+
+  <svg class="abc" viewBox="0 0 200 330" aria-hidden="true" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <g font-family="Lexend, Onest, sans-serif" font-weight="700" font-size="150">
+      <text x="48" y="130" transform="rotate(-22 100 90)">C</text>
+      <text x="22" y="258" transform="rotate(-22 80 210)">B</text>
+      <text x="-26" y="372" transform="rotate(-22 40 330)">A</text>
+    </g>
+  </svg>
+
+  <!-- mascot: child on a pencil (original artwork) -->
+  <svg class="hero-kid" viewBox="0 0 426 530" aria-hidden="true">
+    <defs>
+      <linearGradient id="pencilBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc25a"/><stop offset=".5" stop-color="#f7972f"/><stop offset="1" stop-color="#d9751c"/></linearGradient>
+      <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd9ad"/><stop offset="1" stop-color="#f5bb84"/></linearGradient>
+      <linearGradient id="sweater" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2d77bd"/><stop offset="1" stop-color="#1b4f86"/></linearGradient>
+      <linearGradient id="capTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7b7aa2"/><stop offset="1" stop-color="#4b4b73"/></linearGradient>
+    </defs>
+    <ellipse cx="230" cy="520" rx="150" ry="12" fill="#6b57a8" opacity=".12"/>
+
+    <!-- pencil -->
+    <g transform="translate(222 395) rotate(-20.300)">
+      <rect x="-252" y="-37" width="44" height="74" rx="13" fill="#e23b3b"/><rect x="-252" y="-37" width="20" height="74" rx="12" fill="#c62a30"/>
+      <rect x="-212" y="-37" width="36" height="74" fill="#a9b0ad"/><path d="M-203-37v74M-188-37v74" stroke="#5f6866" stroke-width="3"/>
+      <rect x="-176" y="-37" width="338" height="74" fill="url(#pencilBody)"/>
+      <rect x="-176" y="-24" width="338" height="9" fill="#fff" opacity=".3"/><rect x="-176" y="27" width="338" height="10" fill="#b85f12" opacity=".35"/>
+      <path d="M154-37 172-22 160-8 174 6 160 20 170 37 252 9V-9L170-37z" fill="#f8e1bd"/>
+      <rect x="150" y="-37" width="12" height="74" fill="#46423c"/><rect x="140" y="-37" width="9" height="74" fill="#e6b13b"/>
+      <path d="M232-4.500 280-2V2L232 4.500z" fill="#b9534a"/>
+    </g>
+
+    <!-- back leg + shoe -->
+    <path d="M196 392c20-12 54-6 62 14l-4 46-34 2z" fill="#8a5c3b"/>
+    <path d="M196 448c6-10 26-12 42-6l6 22c-14 10-36 10-52 2z" fill="#d94a45"/><path d="M190 466c16 10 44 10 58-2l3 8c-8 12-46 16-62 2z" fill="#f3f2f6"/>
+    <!-- front leg + shoe -->
+    <path d="M176 366c48-18 112-8 130 28l-6 62-42 2-4-48c-26 4-54 2-82-8z" fill="#9c6a46"/>
+    <path d="M232 396c24 4 46 2 62-6" stroke="#7a4f32" stroke-width="3" fill="none" opacity=".5"/>
+    <path d="M262 452c6-12 30-16 50-10 14 4 24 12 24 22l-3 10c-16 10-52 10-72-2z" fill="#d94a45"/>
+    <path d="M258 470c20 12 58 12 78-4l4 9c-10 14-62 18-84 2z" fill="#f3f2f6"/><path d="M290 450l12-4M296 458l13-4" stroke="#fff" stroke-width="3.500" stroke-linecap="round"/>
+
+    <g transform="translate(172 0) scale(.82 1) translate(-172 0)">
+    <ellipse cx="172" cy="300" rx="26" ry="22" fill="#f1b27c"/>
+    <!-- torso -->
+    <path d="M92 306c26-34 126-38 154-6l22 100c-36 30-130 34-168 4z" fill="url(#sweater)"/>
+    <path d="M156 288 178 314 204 288z" fill="#fff"/><path d="M178 314v96" stroke="#1d5088" stroke-width="2.500" opacity=".5"/><circle cx="178" cy="346" r="3.500" fill="#e9c15a"/>
+    <!-- left arm resting on pencil -->
+    <path d="M106 304c-24 34-30 84-20 126l36 4c-4-40 2-78 18-108z" fill="url(#sweater)"/>
+    <path d="M84 404h42l4 24H82z" fill="#fff"/>
+    <path d="M82 428c-10 16-2 34 16 36 14 2 26-8 28-18l-4-18z" fill="url(#skin)"/><path d="M98 450c4 4 12 4 16 0" stroke="#d99a68" stroke-width="2.500" fill="none"/>
+    <!-- raised arm, pointing -->
+    <path d="M222 300c36 4 62-34 70-92l32 8c-8 62-40 110-96 122z" fill="url(#sweater)"/>
+    <path d="M286 200l40 10-6 24-40-10z" fill="#fff"/>
+    <path d="M296 176c-8-8-2-22 10-20l26 6c14 6 14 26 0 32l-18 8c-10 2-16-4-18-12z" fill="url(#skin)"/>
+    <path d="M304 168c-6-22 0-46 10-50 8-2 14 6 12 18-1 12-3 24-6 34z" fill="url(#skin)"/>
+    <path d="M300 180c6 4 14 4 20-2" stroke="#d99a68" stroke-width="2.500" fill="none"/>
+
+    </g>
+    <g transform="translate(-14 -28) translate(172 215) scale(.8) translate(-172 -215)">
+    <!-- neck + head -->
+    <ellipse cx="172" cy="292" rx="30" ry="20" fill="#f1b27c"/>
+    <ellipse cx="66" cy="224" rx="19" ry="27" fill="#f5bb84"/><ellipse cx="68" cy="226" rx="9" ry="14" fill="#e59d6d"/>
+    <ellipse cx="278" cy="200" rx="15" ry="24" fill="#f1b27c"/>
+    <ellipse cx="172" cy="206" rx="108" ry="98" fill="url(#skin)"/>
+    <!-- hair -->
+    <path d="M58 188C64 124 116 92 172 92c58 0 108 32 116 96-22-34-58-48-92-42-34 6-62-2-96 22-12 8-26 22-42 20z" fill="#f4a028"/>
+    <path d="M62 176c-16 28-10 56 8 72-22-8-34-40-8-72zM282 170c14 26 8 52-8 70 22-10 30-42 8-70z" fill="#f4a028"/>
+    <path d="M118 128c-8-14-4-26 4-34 2 12 10 20 22 22zM190 118c4-12 14-18 26-18-4 10-12 18-26 18z" fill="#f4a028"/>
+    <!-- eyes -->
+    <ellipse cx="120" cy="208" rx="25" ry="29" fill="#fff"/><ellipse cx="224" cy="196" rx="24" ry="28" fill="#fff"/>
+    <circle cx="125" cy="211" r="16.500" fill="#4ea5da"/><circle cx="226" cy="199" r="16" fill="#4ea5da"/>
+    <circle cx="126" cy="212" r="9" fill="#2a1d1d"/><circle cx="227" cy="200" r="9" fill="#2a1d1d"/>
+    <circle cx="131" cy="204" r="4.500" fill="#fff"/><circle cx="232" cy="192" r="4.500" fill="#fff"/>
+    <path d="M90 174c14-14 34-16 50-8M200 160c16-9 36-7 46 6" stroke="#8a4a1c" stroke-width="5.500" fill="none" stroke-linecap="round"/>
+    <path d="M176 228c4 6 10 6 14 0" stroke="#d58a5c" stroke-width="3.500" fill="none" stroke-linecap="round"/>
+    <ellipse cx="94" cy="246" rx="16" ry="10" fill="#f28b7c" opacity=".55"/><ellipse cx="256" cy="232" rx="16" ry="10" fill="#f28b7c" opacity=".55"/>
+    <path d="M124 252c16 46 88 44 104-10-26 12-76 14-104 10z" fill="#c8445a"/>
+    <path d="M126 250c26 6 74 4 100-8l-3-7c-26 12-70 14-97 7z" fill="#fff"/>
+    <path d="M148 276c18 12 46 10 56-4-14-10-46-10-56 4z" fill="#f08a96"/>
+
+    </g>
+    <!-- graduation cap -->
+    <path d="M70 112c-2 28 10 42 40 46l98-24 16-16z" fill="#46466c"/>
+    <path d="M5 106 5 93 225 118V131z" fill="#3a3a5c"/><path d="M225 118 287 48V60L225 131z" fill="#3a3a5c"/>
+    <path d="M5 93 112 33 287 48 225 118z" fill="url(#capTop)"/>
+    <path d="M112 33 287 48" stroke="#fff" stroke-width="2" opacity=".3"/>
+    <circle cx="150" cy="76" r="8" fill="#e7a93a"/><path d="M150 76 14 98" stroke="#e7a93a" stroke-width="3"/><path d="M14 98v70" stroke="#e7a93a" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="14" cy="176" r="10" fill="#d93a3a"/><path d="M8 184l-6 38M14 186v42M20 184l7 36" stroke="#b27040" stroke-width="5.500" stroke-linecap="round"/>
+  </svg>
+
+  <div class="cta">
+    <button class="back" aria-label="Back"><svg width="24" height="24" fill="none" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chev-l"/></svg></button>
+    <button class="go"><span class="badge"><svg width="48" height="48"><use href="#ic-bookbtn"/></svg></span><span>Get Started</span>
+      <span class="chev" aria-hidden="true"><svg width="22" height="22" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chev-r"/></svg><svg width="22" height="22" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chev-r"/></svg><svg width="22" height="22" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chev-r"/></svg></span></button>
+  </div>
+  <div class="home-indicator"></div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- 2 · CHILD HOME                                                         -->
+<!-- ====================================================================== -->
+<section class="phone phone--home" data-screen="home" aria-label="Child home">
+  <div class="status" aria-hidden="true"><time>9:40 PM</time>
+    <div class="icons"><svg width="18" height="12"><use href="#s-signal"/></svg><svg width="17" height="12"><use href="#s-wifi"/></svg><svg width="27" height="13"><use href="#s-battery"/></svg></div></div>
+
+  <div class="who">
+    <svg class="face" viewBox="0 0 64 64"><use href="#av-ayan"/></svg>
+    <div><h1>Hey, Ayan</h1><p>Little learner</p></div>
+  </div>
+  <button class="round-btn bell" aria-label="Notifications"><svg width="26" height="26" fill="none" stroke="#120c15" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bell"/></svg></button>
+
+  <div class="hero">
+    <svg class="bgshape" viewBox="0 0 388 245" aria-hidden="true">
+      <defs><clipPath id="heroClip"><path id="heroPath" d="M38 14C128 6 255 22 350 8c22-3 35 12 35 34v154c0 18-13 30-35 30-92 12-220-8-310 4-22 2-37-12-37-34V46c0-18 15-30 35-32z"/></clipPath></defs>
+      <use href="#heroPath" fill="#cbebc8" transform="rotate(-1.800 194 122) translate(-2 -3)"/>
+      <use href="#heroPath" fill="#c6b7ee" transform="rotate(1.800 194 122) translate(2 3)"/>
+      <use href="#heroPath" fill="#eeadfe"/>
+      <g clip-path="url(#heroClip)" fill="none" stroke="#fff" stroke-linecap="round" opacity=".22" stroke-width="9">
+        <path d="M20 215 160 40M92 232 252 22M186 236 330 60M270 232 372 110M-10 150 90 30"/>
+      </g>
+    </svg>
+    <div class="copy">
+      <h2>Alif se Ye<br><mark>Mastery</mark> Hub</h2>
+      <p>Trace Urdu letters and spell English words.</p>
+    </div>
+    <button class="start">Start</button>
+
+    <svg class="girl" viewBox="0 0 200 250" aria-hidden="true">
+      <defs>
+        <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe46c"/><stop offset="1" stop-color="#e9a41c"/></linearGradient>
+        <linearGradient id="tee" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc0f2"/><stop offset="1" stop-color="#58a0dc"/></linearGradient>
+        <clipPath id="girlClip"><rect x="-30" y="-20" width="260" height="266"/></clipPath>
+      </defs>
+      <g clip-path="url(#girlClip)" stroke="#2f2420" stroke-width="2.200" stroke-linejoin="round" stroke-linecap="round">
+        <g fill="none" stroke-width="2.400"><path d="M16 46 6 38M31 34 25 20M50 30V14M69 34l6-14M84 44l10-8"/></g>
+        <g transform="translate(130 119) scale(.78) translate(-130 -119)">
+        <!-- hair behind -->
+        <path d="M104 112c-6 22 0 40 14 50l26 6c22 0 40-16 38-40-2-12-10-20-20-22 4-8 0-16-10-18-16-4-42 4-48 24z" fill="#4a2c26"/>
+        <path d="M168 112c12-6 24 2 30 14-10-4-20-2-26 2z" fill="#4a2c26"/>
+        <!-- body -->
+        <path d="M88 340l8-166c8-22 70-26 90-4l12 170z" fill="url(#tee)"/>
+        <path d="M122 170l22 40 22-40" fill="none" stroke="#d9473f" stroke-width="5"/>
+        <circle cx="144" cy="214" r="12" fill="#f3c13a"/><path d="m144 207 2.200 4.600 5 .7-3.600 3.500.9 5-4.500-2.400-4.500 2.400.9-5-3.600-3.500 5-.7z" fill="#d49412" stroke="none"/>
+        <!-- raised right arm -->
+        <path d="M172 186c14-20 22-54 22-92" fill="none" stroke="#2f2420" stroke-width="19"/><path d="M172 186c14-20 22-54 22-92" fill="none" stroke="#f4c6a0" stroke-width="15"/>
+        <path d="M168 196c4-14 12-20 22-22l-2 24z" fill="url(#tee)"/>
+        <circle cx="194" cy="86" r="10" fill="#f4c6a0"/>
+        <!-- head -->
+        <circle cx="130" cy="119" r="30" fill="#f4c6a0"/>
+        <path d="M100 112c0-20 14-32 32-31 18 1 30 14 29 31-6-10-16-14-30-13-14 0-24 5-31 13z" fill="#4a2c26"/>
+        <path d="M100 109c14-10 44-12 62 0l-1 10c-18-10-44-10-60 0z" fill="#2f5fa0"/>
+        <path d="M113 126c3-4 8-4 11 0M138 126c3-4 8-4 11 0" fill="none" stroke-width="2.600"/>
+        <path d="M115 134c4 18 26 18 30 0z" fill="#8c2f3a"/><path d="M122 143c4 4 14 4 18 0-4-3-14-3-18 0z" fill="#f08a96" stroke="none"/>
+        <ellipse cx="108" cy="134" rx="5.500" ry="4" fill="#f28b7c" opacity=".6" stroke="none"/><ellipse cx="152" cy="134" rx="5.500" ry="4" fill="#f28b7c" opacity=".6" stroke="none"/>
+        <!-- left arm holding trophy -->
+        <path d="M108 190C94 170 66 156 32 142" fill="none" stroke="#2f2420" stroke-width="19"/><path d="M108 190C94 170 66 156 32 142" fill="none" stroke="#f4c6a0" stroke-width="15"/>
+        <path d="M106 206c-2-10 0-18 8-22l8 14z" fill="url(#tee)"/>
+        <rect x="26" y="130" width="14" height="10" rx="3" fill="#2f4f8f" transform="rotate(30 33 135)"/>
+        </g>
+        <!-- trophy -->
+        <path d="M30 68C6 62 4 96 30 100" fill="none" stroke="#2f2420" stroke-width="8"/><path d="M30 68C6 62 4 96 30 100" fill="none" stroke="#f5d86a" stroke-width="4.500"/>
+        <path d="M72 68c24-6 26 28 0 32" fill="none" stroke="#2f2420" stroke-width="8"/><path d="M72 68c24-6 26 28 0 32" fill="none" stroke="#f5d86a" stroke-width="4.500"/>
+        <path d="M28 56h46v28c0 24-10 36-23 38-13-2-23-14-23-38z" fill="url(#gold)"/>
+        <path d="M36 62v22c0 14 4 24 10 30" fill="none" stroke="#fff" stroke-width="4" opacity=".55" stroke-linecap="round"/>
+        <rect x="44" y="122" width="14" height="14" fill="#e8b32c"/>
+        <path d="M32 136h38l4 14H28z" fill="#2c2420"/><rect x="38" y="140" width="26" height="5" rx="2" fill="#f3c13a" stroke="none"/>
+        <ellipse cx="58" cy="140" rx="7" ry="8" fill="#f4c6a0" transform="rotate(35 58 140)"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="sheet">
+    <svg class="top" viewBox="0 0 426 520" aria-hidden="true"><path d="M0 40Q0 0 40 0H176C192 0 196 22 213 22S234 0 250 0H386Q426 0 426 40V520H0Z" fill="#fff"/></svg>
+    <div class="handle"></div>
+    <h3>Your Activity</h3><button class="see">See All</button>
+
+    <article class="activity activity--a" style="--c:#cabaef">
+      <svg class="shape" viewBox="0 0 383 168" aria-hidden="true"><path d="M36 0H347C367 0 383 16 383 36V76C383 90 372 100 358 100H338C322 100 312 112 312 128V130C312 150 300 168 276 168H36C16 168 0 152 0 132V36C0 16 16 0 36 0Z" fill="#cabaef"/></svg>
+      <div class="tile">
+        <svg viewBox="0 0 163 152" aria-hidden="true">
+          <rect width="163" height="152" fill="#fce9b4"/>
+          <g fill="none" stroke="#8a7a4a" stroke-opacity=".16" stroke-width="5" stroke-linejoin="round"><rect x="44" y="-6" width="110" height="150" rx="12" transform="rotate(-8 100 70)"/><path d="M40 104 112 90M40 126 112 112"/></g>
+          <path d="M18 62 74 44c10-3 20-1 28 6l-44 44-36-10z" fill="#27409a"/>
+          <path d="M20 66 78 48l-8 52-48-8z" fill="#3452b8"/>
+          <path d="M22 62C48 52 70 52 84 64l-6 40C62 94 40 92 24 98z" fill="#fff"/>
+          <path d="M84 64c18-14 44-16 66-4l-4 34c-24-8-48-4-68 10z" fill="#f4f4f6"/>
+          <path d="M84 64v40" stroke="#d6d6dc" stroke-width="2"/>
+          <g stroke="#c7c9d4" stroke-width="3" stroke-linecap="round"><path d="M32 70c14-4 28-4 40 2M32 78c14-4 28-4 40 2M32 86c14-4 26-4 38 2M96 72c14-6 30-6 44-2M96 80c14-6 30-6 42-2M96 88c14-6 28-6 40-2"/></g>
+          <path d="M20 96c20-6 40-4 58 8 20-14 44-16 70-8" fill="none" stroke="#27409a" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h4>Urdu Letters</h4>
+      <div class="avatars" aria-label="Family: Mama, Papa, Dadi, and 2 more"><svg viewBox="0 0 64 64"><use href="#av-papa"/></svg><svg viewBox="0 0 64 64"><use href="#av-mama"/></svg><svg viewBox="0 0 64 64"><use href="#av-dadi"/></svg><span class="count">30+</span></div>
+      <div class="num">12</div><div class="unit">letters</div>
+      <button class="arrow-btn" aria-label="Open Urdu letters" style="box-shadow:0 0 0 3px #d7caf6"><svg width="26" height="26" fill="none" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow"/></svg></button>
+    </article>
+
+    <article class="activity activity--b" style="--c:#fff0ad">
+      <svg class="shape" viewBox="0 0 383 168" aria-hidden="true"><path d="M36 0H347C367 0 383 16 383 36V76C383 90 372 100 358 100H338C322 100 312 112 312 128V130C312 150 300 168 276 168H36C16 168 0 152 0 132V36C0 16 16 0 36 0Z" fill="#fff0ad"/></svg>
+      <div class="tile">
+        <svg viewBox="0 0 163 152" aria-hidden="true">
+          <rect width="163" height="152" fill="#ccbbee"/>
+          <g fill="none" stroke="#5a4a8a" stroke-opacity=".16" stroke-width="5" stroke-linejoin="round"><rect x="44" y="-6" width="110" height="150" rx="12" transform="rotate(-8 100 70)"/></g>
+          <g transform="rotate(-8 62 96)"><path d="M30 60h56v56H30z" fill="#f6c93f"/><path d="M30 60l12-12h56L86 60z" fill="#ffe38a"/><path d="M86 60l12-12v56l-12 12z" fill="#d79f1a"/>
+          <text x="58" y="104" text-anchor="middle" font-family="Lexend, Onest, sans-serif" font-weight="700" font-size="38" fill="#3b2a6a">A</text></g>
+          <g transform="rotate(7 112 70)"><path d="M84 30h50v50H84z" fill="#e697f2"/><path d="M84 30l11-11h50l-11 11z" fill="#f6c6fb"/><path d="M134 30l11-11v50l-11 11z" fill="#c066d0"/>
+          <text x="109" y="68" text-anchor="middle" font-family="Lexend, Onest, sans-serif" font-weight="700" font-size="32" fill="#3b2a6a">B</text></g>
+          <path d="M70 128 82 112 94 128" fill="none" stroke="none"/>
+          <ellipse cx="82" cy="136" rx="46" ry="6" fill="#5a4a8a" opacity=".16"/>
+        </svg>
+      </div>
+      <h4>Phonics</h4>
+      <div class="avatars"><svg viewBox="0 0 64 64"><use href="#av-ayan"/></svg><svg viewBox="0 0 64 64"><use href="#av-papa"/></svg><svg viewBox="0 0 64 64"><use href="#av-mama"/></svg><span class="count">40+</span><span class="join">Join</span></div>
+      <div class="num">43</div><div class="unit">words</div>
+      <button class="arrow-btn" aria-label="Open phonics" style="box-shadow:0 0 0 3px #fff7c4"><svg width="26" height="26" fill="none" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow"/></svg></button>
+    </article>
+  </div>
+
+  <nav class="nav" aria-label="Main">
+    <span class="pill" aria-hidden="true"></span>
+    <button data-i="0" aria-label="Home" aria-current="page"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg></span></button>
+    <button data-i="1" aria-label="Learn"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-book"/></svg></span></button>
+    <button data-i="2" aria-label="Needs board"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clip"/></svg></span></button>
+    <button data-i="3" aria-label="Rewards"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-award"/></svg></span></button>
+    <button data-i="4" aria-label="Settings"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-gear"/></svg></span></button>
+  </nav>
+  <div class="home-indicator"></div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- 3 · PARENT · WEEKLY PLAN                                               -->
+<!-- ====================================================================== -->
+<section class="phone phone--plan" data-screen="plan" aria-label="Parent progress">
+  <div class="status" aria-hidden="true"><time>9:40 PM</time>
+    <div class="icons"><svg width="18" height="12"><use href="#s-signal"/></svg><svg width="17" height="12"><use href="#s-wifi"/></svg><svg width="27" height="13"><use href="#s-battery"/></svg></div></div>
+
+  <h1 class="title">Learning Plan</h1>
+  <button class="round-btn menu" aria-label="Menu"><svg width="24" height="24" fill="none"><use href="#i-dots"/></svg></button>
+
+  <div class="stats">
+    <button class="stat">
+      <svg class="shape" viewBox="0 0 123 150" aria-hidden="true"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9a8f4"/><stop offset="1" stop-color="#df8fee"/></linearGradient></defs><path d="M66 0H87C107 0 123 14 123 36V114C123 134 107 150 87 150H36C16 150 0 134 0 114V76C0 66 8 58 18 58H40C52 58 62 48 62 36V20C62 8 64 0 66 0Z" fill="url(#g1)"/></svg>
+      <span class="ico" style="background:#cf8ede;box-shadow:0 0 0 3px #f4e4f7"><svg width="38" height="38"><use href="#ic-cap"/></svg></span>
+      <svg class="go" width="24" height="24" fill="none" stroke="#120c15" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round" style="position:absolute"><use href="#i-arrow"/></svg>
+      <span class="lbl">Urdu<br>Letters</span><span class="big">20<small>Total</small></span>
+    </button>
+    <button class="stat">
+      <svg class="shape" viewBox="0 0 123 150" aria-hidden="true"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d6c8f6"/><stop offset="1" stop-color="#c9b9ef"/></linearGradient></defs><path d="M66 0H87C107 0 123 14 123 36V114C123 134 107 150 87 150H36C16 150 0 134 0 114V76C0 66 8 58 18 58H40C52 58 62 48 62 36V20C62 8 64 0 66 0Z" fill="url(#g2)"/></svg>
+      <span class="ico" style="background:#c3b2ec;box-shadow:0 0 0 3px #efe9fb"><svg width="40" height="40"><use href="#ic-openbook"/></svg></span>
+      <svg class="go" width="24" height="24" fill="none" stroke="#120c15" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round" style="position:absolute"><use href="#i-arrow"/></svg>
+      <span class="lbl">English<br>Words</span><span class="big">48<small>Total</small></span>
+    </button>
+    <button class="stat">
+      <svg class="shape" viewBox="0 0 123 150" aria-hidden="true"><path d="M66 0H87C107 0 123 14 123 36V114C123 134 107 150 87 150H36C16 150 0 134 0 114V76C0 66 8 58 18 58H40C52 58 62 48 62 36V20C62 8 64 0 66 0Z" fill="#fff0ad"/></svg>
+      <span class="ico" style="background:#f6e589;box-shadow:0 0 0 3px #fff9d4"><svg width="40" height="40"><use href="#ic-cal"/></svg></span>
+      <svg class="go" width="24" height="24" fill="none" stroke="#120c15" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round" style="position:absolute"><use href="#i-arrow"/></svg>
+      <span class="lbl">Potty<br>Alerts</span><span class="big">5<small>Total</small></span>
+    </button>
+  </div>
+
+  <div class="card card--avg">
+    <svg class="swoosh" viewBox="0 0 383 183" aria-hidden="true"><g fill="none" stroke="#e6e6ec" stroke-width="22" stroke-linecap="round" opacity=".55"><path d="M60 20 200 -10M170 70 330 10M20 120 260 40"/></g></svg>
+    <span class="ring"><svg width="40" height="40"><use href="#ic-chart"/></svg></span>
+    <h3>Average Progress</h3>
+    <button class="arrow-btn" aria-label="Open average progress"><svg width="24" height="24" fill="none" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow"/></svg></button>
+    <span class="lbl">Progress</span><span class="val" id="pct">78%</span>
+    <div class="slider" id="slider" role="slider" tabindex="0" aria-label="Average progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="78">
+      <div class="track"></div><div class="done" id="done"></div><div class="knob" id="knob"></div>
+    </div>
+  </div>
+
+  <div class="card card--week">
+    <span class="ring"><svg width="40" height="40"><use href="#ic-swirl"/></svg></span>
+    <h3>Practice Time</h3><span class="sub">04hr54min</span>
+    <button class="more" aria-label="More"><svg width="22" height="22" fill="none"><use href="#i-dots"/></svg></button>
+    <div class="chart" id="chart">
+      <div class="grid" style="top:95px"></div><div class="grid" style="top:134px"></div><div class="grid" style="top:173px"></div><div class="grid" style="top:251px"></div>
+      <div class="bars" id="bars"></div>
+      <div class="days"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+    </div>
+  </div>
+
+  <nav class="nav" aria-label="Main">
+    <span class="pill" aria-hidden="true"></span>
+    <button data-i="0" aria-label="Home"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg></span></button>
+    <button data-i="1" aria-label="Plan" aria-current="page"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-book"/></svg></span></button>
+    <button data-i="2" aria-label="Needs log"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clip"/></svg></span></button>
+    <button data-i="3" aria-label="Milestones"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-award"/></svg></span></button>
+    <button data-i="4" aria-label="Settings"><span><svg width="26" height="26" fill="none" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><use href="#i-gear"/></svg></span></button>
+  </nav>
+  <div class="home-indicator"></div>
+</section>
+
+</div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

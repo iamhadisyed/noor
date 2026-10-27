@@ -1,0 +1,241 @@
+/* Kindo / Noor — UI prototype. Pixel spec measured from the approved reference (426 x 918 phone). */
+
+@font-face { font-family: "Onest"; font-weight: 400; src: url(fonts/onest-latin-400-normal.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Onest"; font-weight: 500; src: url(fonts/onest-latin-500-normal.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Onest"; font-weight: 600; src: url(fonts/onest-latin-600-normal.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Onest"; font-weight: 700; src: url(fonts/onest-latin-700-normal.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Onest"; font-weight: 800; src: url(fonts/onest-latin-800-normal.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Lexend"; font-weight: 500; src: url(fonts/lexend-latin-500-normal.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Lexend"; font-weight: 700; src: url(fonts/lexend-latin-700-normal.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Noto Nastaliq Urdu"; font-weight: 400; src: url(fonts/noto-nastaliq-urdu-arabic-400-normal.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Noto Nastaliq Urdu"; font-weight: 700; src: url(fonts/noto-nastaliq-urdu-arabic-700-normal.woff2) format("woff2"); font-display: swap; }
+
+:root {
+  --lavender: #cabaef;
+  --lavender-soft: #d7c6f5;
+  --lilac: #eeadfe;
+  --orchid: #e697f2;
+  --butter: #fff0ad;
+  --cream: #fce9b4;
+  --ink: #120c15;
+  --ink-2: #2a242e;
+  --mist: #eef2f5;
+  --gray: #8b8a90;
+  --white: #fff;
+  --font-ui: "Onest", system-ui, sans-serif;
+  --font-learn: "Lexend", "Onest", sans-serif;
+  --font-urdu: "Noto Nastaliq Urdu", serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: #ece4ee;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  overflow: hidden;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+svg { display: block; }
+
+/* ---------- stage ---------- */
+.viewport { position: fixed; inset: 0; overflow: hidden;
+  background: linear-gradient(135deg, #ebdfee 0%, #eee9f0 52%, #ecdcee 100%); }
+.stage { position: absolute; left: 50%; top: 50%; width: 1504px; height: 1128px; transform-origin: center; transform: translate(-50%, -50%); }
+.stage::before { content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(520px 700px at 273px 540px, rgba(202, 186, 239, .38), transparent 70%),
+    radial-gradient(520px 700px at 752px 590px, rgba(238, 173, 254, .22), transparent 70%),
+    radial-gradient(520px 700px at 1232px 540px, rgba(215, 198, 245, .3), transparent 70%);
+  pointer-events: none; }
+
+/* ---------- phone shell ---------- */
+.phone { position: absolute; width: 426px; height: 918px; border-radius: 58px; overflow: hidden; isolation: isolate;
+  box-shadow: 0 30px 70px rgba(122, 86, 156, .18), 0 6px 18px rgba(122, 86, 156, .08); }
+.phone::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .92); pointer-events: none; z-index: 20; }
+.phone--welcome { left: 60px; top: 80px; background: linear-gradient(180deg, #cabaef 0%, #c9b9ee 55%, #d3c6f3 100%); }
+.phone--home { left: 538px; top: 129px; height: 921px; background: var(--mist); }
+.phone--plan { left: 1018px; top: 79px; background: linear-gradient(160deg, #f4f5f7 0%, #ebedf1 100%); }
+.phone > * { position: absolute; }
+.screen { position: absolute; inset: 0; }
+
+.status { left: 0; right: 0; top: 0; height: 58px; }
+.status time { position: absolute; left: 31px; top: 19px; font-size: 15px; font-weight: 600; letter-spacing: .1px; }
+.status .icons { position: absolute; right: 32px; top: 23px; display: flex; gap: 6px; align-items: center; }
+.home-indicator { left: 50%; bottom: 10px; width: 105px; height: 5px; margin-left: -52.5px; border-radius: 3px; background: var(--ink); z-index: 5; }
+
+/* ---------- shared bits ---------- */
+.round-btn { width: 62px; height: 62px; border-radius: 50%; background: #fff; display: grid; place-items: center;
+  box-shadow: 0 6px 16px rgba(110, 90, 140, .08); transition: transform .15s ease; }
+.round-btn:active { transform: scale(.94); }
+.arrow-btn { width: 58px; height: 58px; border-radius: 50%; background: var(--ink); display: grid; place-items: center;
+  transition: transform .15s ease; }
+.arrow-btn:active { transform: scale(.92); }
+/* spec: child touch targets >= 64dp; extend the hit area without changing the visual size */
+.round-btn::before, .arrow-btn::before { content: ""; position: absolute; inset: -4px; border-radius: 50%; }
+.arrow-btn svg { stroke: #fff; }
+.avatars { display: flex; align-items: center; }
+.avatars svg, .avatars .count { width: 35px; height: 35px; border-radius: 50%; flex: none; }
+.avatars svg + svg, .avatars svg + .count { margin-left: -8px; }
+.avatars svg { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .9); }
+.count { background: var(--ink); color: #fff; font-size: 11.5px; font-weight: 700; display: grid; place-items: center; z-index: 1; }
+
+/* ---------- bottom nav ---------- */
+.nav { left: 52px; top: 818px; width: 324px; height: 69px; z-index: 4; }
+.phone--plan .nav { left: 50px; top: 820px; }
+.nav .pill { position: absolute; top: 0; height: 69px; border-radius: 35px; background: #0a010c; transition: left .3s ease, width .3s ease; }
+.nav button { position: absolute; top: 0; width: 69px; height: 69px; border-radius: 50%; padding: 4px; background: #0a010c; z-index: 1;
+  transition: left .3s ease; }
+.nav button span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; background: var(--ink-2);
+  position: relative; transition: background .25s ease; }
+.nav button svg { stroke: #fff; }
+.nav button[aria-current="page"] span { background: var(--orchid); }
+.nav button[aria-current="page"] svg { stroke: var(--ink); }
+.nav button[aria-current="page"] span::after { content: ""; position: absolute; left: 50%; bottom: 9px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #fff; }
+.nav button:focus-visible, .round-btn:focus-visible, .arrow-btn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* ================= 1. WELCOME ================= */
+.phone--welcome .dots { left: 20px; top: 67px; display: flex; gap: 4px; }
+.phone--welcome .dots i { width: 25px; height: 6px; border-radius: 4px; background: var(--ink); }
+.phone--welcome .dots i.on { background: #ebb6f7; }
+.phone--welcome .skip { right: 22px; top: 62px; font-size: 16px; font-weight: 500; padding: 4px 2px; }
+.phone--welcome .bgblob { left: 150px; top: 80px; width: 330px; height: 560px; }
+.phone--welcome .tagcard { left: 12px; top: 132px; width: 280px; height: 181px; transform: rotate(-17deg); transform-origin: 0 0; }
+.phone--welcome .tagcard svg { position: absolute; left: 0; top: 0; }
+.phone--welcome .tag-text { position: absolute; left: 0; top: 0; width: 280px; height: 181px; font-weight: 800; letter-spacing: -.6px; }
+.phone--welcome .tag-text span { position: absolute; white-space: nowrap; line-height: 1; }
+.phone--welcome .tag-text .l1 { left: 34px; top: 22px; font-size: 49px; }
+.phone--welcome .tag-text .l2 { left: 34px; top: 76px; font-size: 41px; }
+.phone--welcome .tag-text .l3 { left: 26px; top: 124px; }
+.phone--welcome .tag-text mark { display: inline-block; background: var(--butter); color: var(--ink); padding: 3px 12px 6px 8px; border-radius: 3px; font-size: 34px; font-weight: 700; letter-spacing: -.3px; line-height: 1.05; }
+.phone--welcome .tag-text mark b { font-size: 44px; font-weight: 800; }
+.phone--welcome .spark { left: -14px; top: 92px; width: 80px; height: 80px; }
+.phone--welcome .abc { left: 232px; top: 252px; width: 200px; height: 330px; pointer-events: none; }
+.phone--welcome .hero-kid { left: 0; top: 262px; width: 426px; height: 530px; }
+.phone--welcome .cta { left: 22px; top: 814px; width: 383px; height: 74px; z-index: 3; }
+.phone--welcome .back { position: absolute; left: 0; top: 0; width: 74px; height: 74px; border-radius: 50%; background: var(--ink);
+  box-shadow: inset 0 0 0 3px #fff; display: grid; place-items: center; }
+.phone--welcome .back svg { stroke: #fff; }
+.phone--welcome .go { position: absolute; left: 70px; top: 0; right: 0; height: 74px; border-radius: 37px; background: #0a010c; display: flex; align-items: center; padding: 0 22px 0 4px; gap: 18px;
+  color: #fff; font-size: 16px; font-weight: 500; text-align: left; }
+.phone--welcome .go .badge { width: 66px; height: 66px; border-radius: 50%; background: var(--lilac); box-shadow: 0 0 0 2px #fff inset; display: grid; place-items: center; flex: none; }
+.phone--welcome .go .chev { margin-left: auto; display: flex; }
+.phone--welcome .go .chev svg { stroke: #fff; margin-left: -4px; }
+.phone--welcome .go .chev svg:nth-child(2) { opacity: .7; }
+.phone--welcome .go .chev svg:nth-child(3) { opacity: .4; }
+@media (prefers-reduced-motion: no-preference) {
+  .phone--welcome .go .chev svg { animation: chev 1.6s ease-in-out infinite; }
+  .phone--welcome .go .chev svg:nth-child(2) { animation-delay: .15s; }
+  .phone--welcome .go .chev svg:nth-child(3) { animation-delay: .3s; }
+  @keyframes chev { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+  .phone--welcome .hero-kid { animation: bob 5s ease-in-out infinite; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+}
+
+/* ================= 2. HOME ================= */
+.phone--home .who { left: 22px; top: 68px; display: flex; align-items: center; gap: 14px; }
+.phone--home .who .face { width: 60px; height: 60px; border-radius: 50%; }
+.phone--home .who h1 { font-size: 22px; font-weight: 700; line-height: 26px; letter-spacing: -.1px; }
+.phone--home .who p { font-size: 16px; color: var(--gray); line-height: 21px; margin-top: 2px; }
+.phone--home .bell { right: 20px; top: 66px; }
+.phone--home .hero { left: 20px; top: 146px; width: 388px; height: 245px; }
+.phone--home .hero svg.bgshape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.phone--home .hero .copy { position: absolute; left: 21px; top: 29px; color: #fff; }
+.phone--home .hero h2 { font-size: 31px; line-height: 37px; font-weight: 700; letter-spacing: -.2px; }
+.phone--home .hero h2 mark { background: var(--butter); color: var(--ink); padding: 1px 6px 1px 5px; border-radius: 4px; margin-left: -6px; }
+.phone--home .hero p { font-size: 15.5px; line-height: 24px; opacity: .88; margin-top: 4px; width: 225px; }
+.phone--home .hero .start { position: absolute; left: 21px; top: 164px; height: 45px; padding: 0 22px; border-radius: 23px; background: var(--ink); color: #fff;
+  font-size: 16px; font-weight: 500; box-shadow: 0 0 0 2px rgba(255, 255, 255, .85); }
+.phone--home .hero .girl { position: absolute; right: -12px; top: -6px; width: 200px; height: 250px; z-index: 0; }
+.phone--home .hero .copy, .phone--home .hero .start { z-index: 1; }
+.phone--home .sheet { left: 0; top: 405px; width: 426px; height: 520px; z-index: 1; }
+.phone--home .sheet svg.top { position: absolute; left: 0; top: 0; width: 426px; height: 520px; }
+.phone--home .sheet .handle { position: absolute; left: 50%; top: 4px; width: 23px; height: 7px; margin-left: -11.5px; border-radius: 4px; background: var(--ink); }
+.phone--home .sheet h3 { position: absolute; left: 22px; top: 21px; font-size: 20px; font-weight: 700; letter-spacing: -.1px; }
+.phone--home .sheet .see { position: absolute; right: 21px; top: 22px; font-size: 16px; color: var(--gray); }
+
+.activity { position: absolute; left: 22px; width: 383px; height: 168px; }
+.activity svg.shape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.activity .tile { position: absolute; left: 7px; top: 8px; width: 163px; height: 152px; border-radius: 36px; overflow: hidden;
+  }
+.activity .tile::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 3px #fff; pointer-events: none; }
+.activity .tile svg { width: 100%; height: 100%; }
+.activity h4 { position: absolute; left: 186px; top: 12px; font-size: 20px; font-weight: 500; letter-spacing: -.1px; }
+.activity .avatars { position: absolute; left: 186px; top: 42px; }
+.activity .join { margin-left: 8px; font-size: 16px; color: var(--gray); }
+.activity .num { position: absolute; left: 186px; top: 88px; font-size: 48px; line-height: 52px; font-weight: 800; letter-spacing: -.5px; }
+.activity .unit { position: absolute; left: 187px; top: 137px; font-size: 16px; line-height: 20px; color: var(--gray); }
+.activity .arrow-btn { position: absolute; right: -1px; top: 108px; width: 60px; height: 60px; }
+.activity--a { top: 57px; }
+.activity--b { top: 233px; }
+.phone--home .sheet .activity--a { top: 57px; }
+.phone--home .sheet .activity--b { top: 233px; }
+
+/* ================= 3. PLAN ================= */
+.phone--plan h1.title { left: 22px; top: 83px; font-size: 24px; font-weight: 700; letter-spacing: -.2px; line-height: 28px; }
+.phone--plan .menu { right: 20px; top: 67px; }
+.stats { left: 22px; top: 144px; width: 383px; height: 150px; display: flex; gap: 7px; }
+.stat { position: relative; flex: 1; height: 150px; text-align: left; }
+.stat svg.shape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.stat .ico { position: absolute; left: 0; top: 0; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; }
+.stat .go { position: absolute; right: 14px; top: 14px; }
+.stat .lbl { position: absolute; left: 17px; top: 58px; font-size: 15px; line-height: 23px; font-weight: 500; }
+.stat .big { position: absolute; left: 15px; top: 107px; font-size: 34px; line-height: 34px; font-weight: 800; letter-spacing: -.5px; white-space: nowrap; }
+.stat .big small { font-size: 15px; font-weight: 400; color: #555; letter-spacing: 0; margin-left: 3px; }
+.stat:active { transform: scale(.98); }
+
+.card { position: absolute; left: 22px; width: 383px; background: linear-gradient(180deg, #fff 0%, #fbfbfc 100%); border-radius: 38px;
+  box-shadow: 0 8px 24px rgba(120, 110, 150, .06); overflow: hidden; }
+.card .swoosh { position: absolute; inset: 0; opacity: .5; pointer-events: none; }
+.card .ring { position: absolute; width: 54px; height: 54px; border-radius: 50%; border: 1.5px solid var(--ink); background: #fff; display: grid; place-items: center; }
+.card h3 { position: absolute; font-size: 20px; font-weight: 500; letter-spacing: -.1px; white-space: nowrap; }
+.card--avg { top: 312px; height: 183px; }
+.card--avg .ring { left: 14px; top: 14px; }
+.card--avg h3 { left: 74px; top: 29px; }
+.card--avg .arrow-btn { position: absolute; right: 17px; top: 16px; width: 50px; height: 50px; box-shadow: 0 0 0 3px var(--lavender); }
+.card--avg .lbl { position: absolute; left: 15px; top: 96px; font-size: 15px; color: var(--gray); }
+.card--avg .val { position: absolute; right: 15px; top: 83px; font-size: 36px; font-weight: 800; letter-spacing: -.5px; line-height: 40px; }
+.slider { position: absolute; left: 15px; top: 132px; width: 353px; height: 34px; touch-action: none; cursor: ew-resize; }
+.slider .track { position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(90deg, #cabaef 0%, #efe3b0 55%, #fbd7dc 66%, #eca7f0 100%); }
+.slider .done { position: absolute; left: 0; top: -3px; bottom: -3px; border-radius: 18px 0 0 18px;
+  background: repeating-linear-gradient(135deg, rgba(60, 50, 70, .34) 0 1px, transparent 1px 6px); -webkit-mask: linear-gradient(#000 0 0); }
+.slider .done::before { content: ""; position: absolute; left: 0; right: 0; top: 9px; bottom: 9px; background: linear-gradient(90deg, #cabaef 0%, #efe3b0 100%); border-radius: 18px 0 0 18px; opacity: .0; }
+.slider .knob { position: absolute; top: -1px; width: 38px; height: 38px; margin-left: -19px; border-radius: 50%; background: #fff; border: 3px solid var(--orchid);
+  box-shadow: 0 4px 10px rgba(120, 80, 150, .25); }
+.slider:focus-visible { outline: 3px solid var(--orchid); outline-offset: 6px; border-radius: 18px; }
+
+.card--week { top: 512px; height: 290px; }
+.card--week .ring { left: 14px; top: 14px; }
+.card--week h3 { left: 74px; top: 17px; font-weight: 700; }
+.card--week .sub { position: absolute; left: 74px; top: 45px; font-size: 15px; color: var(--gray); }
+.card--week .more { position: absolute; right: 17px; top: 14px; width: 52px; height: 52px; border-radius: 50%; border: 2px solid #e6e6e8; background: #fff; display: grid; place-items: center; }
+.chart { position: absolute; left: 15px; top: 0; width: 353px; height: 290px; }
+.chart .grid { position: absolute; left: 0; right: 0; border-top: 1.4px dashed #d7d7dc; }
+.chart .bars { position: absolute; left: 0; bottom: 40px; display: flex; gap: 5px; align-items: flex-end; height: 160px; }
+.bar { position: relative; width: 46px; border-radius: 23px; border: 0; padding: 0; cursor: pointer; transition: height .35s cubic-bezier(.3, 1.3, .5, 1), background .2s; }
+.bar .face { position: absolute; inset: 0; border-radius: 23px; background-color: #e9ecee;
+  background-image: repeating-linear-gradient(135deg, rgba(90, 100, 100, .38) 0 1px, transparent 1px 5.5px);
+  box-shadow: 3px 3px 0 #0a010c, 0 0 0 2px #0a010c; }
+.bar[aria-pressed="true"] .face { background-color: #e692f5; background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, .75) 0 1.2px, transparent 1.2px 5.5px); }
+.bar .tip { position: absolute; left: 50%; bottom: calc(100% + 11px); transform: translateX(-50%) scale(.6); opacity: 0; transition: .2s; background: var(--ink); color: #fff; font-size: 12.5px; font-weight: 700;
+  padding: 5px 12px 6px; border-radius: 14px; white-space: nowrap; pointer-events: none; }
+.bar .tip::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -5px; border: 5px solid transparent; border-top-color: var(--ink); }
+.bar[aria-pressed="true"] .tip { opacity: 1; transform: translateX(-50%) scale(1); }
+.bar:focus-visible .face { outline: 3px solid var(--orchid); outline-offset: 3px; }
+.chart .days { position: absolute; left: 0; bottom: 15px; display: flex; gap: 5px; }
+.chart .days span { width: 46px; text-align: center; font-size: 14.5px; letter-spacing: .1px; color: #1d1920; }
+.phone--plan .nav { z-index: 4; }
+
+/* ---------- single-phone mode (?screen=welcome|home|plan) ---------- */
+body[data-solo] .phone:not(.solo) { display: none; }
+body[data-solo] .stage { width: 426px; height: 921px; }
+body[data-solo] .stage::before { display: none; }
+body[data-solo] .phone.solo { left: 0; top: 0; }
+/* on an actual phone the device frame is dropped and the screen fills the display */
+@media (max-width: 520px) {
+  body[data-solo] .phone.solo { border-radius: 0; box-shadow: none; }
+  body[data-solo] .phone.solo::after { display: none; }
+  body[data-solo] .viewport { background: var(--mist); }
+}
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

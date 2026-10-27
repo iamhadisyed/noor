@@ -1,0 +1,47 @@
+# Kindo UI prototype
+
+Interactive, pixel-measured prototype of the Kindo visual language, built from the approved reference
+(three screens: Welcome, Child Home, Parent Learning Plan). It is the visual spec for the Flutter apps.
+
+Open `design/prototype/index.html` in a browser (no build step, no network; fonts are bundled).
+
+- Side-by-side view of all three phones (scales to the window).
+- `?screen=welcome`, `?screen=home` or `?screen=plan` shows one screen; on a phone-sized viewport it drops the device frame and fills the display.
+- Interactive: tap a bar, drag the progress slider, tap the bottom navigation.
+- `preview.png` is a screenshot of the side-by-side view.
+
+## Design tokens
+
+| Token | Value | Use |
+|---|---|---|
+| lavender | `#CABAEF` | Welcome background, activity card, tiles |
+| lavender-soft | `#D7C6F5` | secondary tile |
+| lilac | `#EEADFE` | hero card |
+| orchid | `#E697F2` | active nav item, selected bar, slider end |
+| butter | `#FFF0AD` | highlight, yellow cards |
+| cream | `#FCE9B4` | image tile behind the book |
+| ink | `#120C15` | text, buttons, nav pill |
+| ink-2 | `#2A242E` | inactive nav circles |
+| mist | `#EEF2F5` | Child Home background |
+| gray | `#8B8A90` | secondary text |
+
+Typography: **Onest** for UI (closest to the reference's widths), **Lexend** for learning content such as phonics letters
+(as the spec requires for dyslexia-friendly reading), **Noto Nastaliq Urdu** for Urdu text. Weights used: 400, 500, 600, 700, 800.
+All three families are SIL OFL licensed.
+
+Shape language: 36-38px card radii, 50-62px circular buttons, a concave notch where a circular button overlaps a card,
+a 3px white device ring, 3px black "sticker" offset on bars, hatch-fill for progress.
+Phone canvas is 426 x 918 px; every position in `styles.css` is an absolute measurement from the reference.
+
+## Kindo adaptations
+
+- Copy is Kindo's: "Welcome to Kindo", "Alif se Ye Mastery Hub", Urdu Letters / Phonics cards with family avatars, parent-side Urdu Letters / English Words / Potty Alerts tiles, and weekly practice time.
+- The progress knob sits at the real value (78%) instead of the reference's fixed position.
+- Touch targets: circular buttons are 58-62px visually but get a 4px invisible extension, giving the spec's 64dp minimum.
+
+## Known gaps and decisions needed
+
+- **Illustrations are original placeholders.** The reference artwork is someone else's work and cannot be reused; the mascot, trophy girl, avatars and tile images here are simple drawings made for this prototype. Final character art should come from an illustrator.
+- **Contrast.** White title and subtitle on the lilac hero card (about 1.9:1) copy the reference but fail WCAG AA. Needs a decision (darker ink on the hero) before launch, especially for a parent-facing app.
+- **Sensory-safe palette.** The reference's saturated orchid and lilac are livelier than the spec's oatmeal/sage palette. A `sensory_mode` variant (desaturated tokens, no motion) should be defined; the CSS already respects `prefers-reduced-motion`.
+- Not yet designed in this style: AAC needs board, family-card game, tracing canvas, parent alert feed, subscription screen.
