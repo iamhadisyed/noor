@@ -70,17 +70,9 @@ class ChildController extends Controller
     public function destroy(Request $request, int $id): JsonResponse
     {
         $child = self::owned($request, $id);
-        $media = app(MediaStore::class);
-
-        foreach ($child->lessons()->with('tasks')->get() as $lesson) {
-            $lesson->tasks->each(fn ($t) => $media->forgetTask($t));
-        }
-        foreach ($child->familyMembers as $m) {
-            $media->forgetFamily($m);
-        }
 
         AuditLog::record($request->user(), 'child.deleted', $child, ['name_initial' => mb_substr($child->name, 0, 1)]);
-        $child->delete();
+        app(\App\Services\AccountEraser::class)->eraseChild($child);
 
         return response()->json(['ok' => true]);
     }

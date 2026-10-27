@@ -11,6 +11,7 @@ const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'kindo-e2e-'));
 fs.mkdirSync(OUT, { recursive: true });
 
 const codes = () => fs.readFileSync(LOG, 'utf8').match(/sign-in code: \d{6}/g) || [];
+const deleteCodes = () => fs.readFileSync(LOG, 'utf8').match(/Confirm deleting your Kindo account: \d{6}/g) || [];
 const lastCode = () => { const c = codes(); return c.length ? c[c.length - 1].slice(-6) : null; };
 
 async function launch(opts = {}) {
@@ -60,4 +61,4 @@ function picture(file) {
   const { execFileSync } = require('child_process');
   execFileSync('python3', ['-c', `from PIL import Image, ImageDraw\nim=Image.new('RGB',(900,700),'#f8c9f4'); d=ImageDraw.Draw(im); d.ellipse((250,150,650,550),fill='#f6c9a0'); im.save(r'${file}')`]);
 }
-module.exports = { codes, lastCode, BASE, OUT, TMP, launch, login, check, wav, picture };
+module.exports = { codes, deleteCodes, lastCode, BASE, OUT, TMP, launch, login, check, wav, picture };

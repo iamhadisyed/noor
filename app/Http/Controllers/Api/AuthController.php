@@ -27,7 +27,7 @@ class AuthController extends Controller
         $email = strtolower($request->validate(['email' => 'required|email:rfc|max:191'])['email']);
         $cooldown = (int) config('kindo.otp.cooldown_seconds');
 
-        $last = LoginCode::where('email', $email)->latest('id')->first();
+        $last = LoginCode::where('email', $email)->where('purpose', 'login')->latest('id')->first();
         if ($last && $last->created_at->gt(now()->subSeconds($cooldown))) {
             $wait = max(1, $cooldown - (int) $last->created_at->diffInSeconds(now()));
 
@@ -64,7 +64,7 @@ class AuthController extends Controller
         ]);
         $email = strtolower($data['email']);
 
-        $code = LoginCode::where('email', $email)->whereNull('consumed_at')->where('expires_at', '>', now())->latest('id')->first();
+        $code = LoginCode::where('email', $email)->where('purpose', 'login')->whereNull('consumed_at')->where('expires_at', '>', now())->latest('id')->first();
         if (! $code) {
             return response()->json(['message' => self::BAD_CODE], 422);
         }
