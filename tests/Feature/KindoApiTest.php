@@ -137,6 +137,17 @@ class KindoApiTest extends TestCase
         $this->assertStringStartsWith('%PDF', $res->getContent());
     }
 
+    public function test_urdu_label_renders_as_png_data_uri(): void
+    {
+        $uri = \App\Support\UrduText::imageDataUri('گلے لگاؤ');
+
+        $this->assertNotNull($uri);
+        $this->assertStringStartsWith('data:image/png;base64,', $uri);
+        $png = base64_decode(substr($uri, strlen('data:image/png;base64,')));
+        [$w, $h] = getimagesizefromstring($png);
+        $this->assertGreaterThan($h, $w); // a wide label, not an empty box
+    }
+
     public function test_session_sync_stores_mistakes(): void
     {
         Sanctum::actingAs($user = User::factory()->create());
