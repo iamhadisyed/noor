@@ -87,6 +87,10 @@ Per child and date range: practice time, accuracy, tracing steadiness by letter,
 Invite a second parent by email (same code sign-in); both receive alerts and either can reply. Invite a therapist or teacher by a 6-digit code with read-only access to one child (phase 3).
 
 ### 5.5 Privacy tools
+**Notification preferences (built):** each parent sets quiet hours (any window, including past midnight, in their own time zone) and can mute the gentler alert kinds (water, hungry, sleepy, hug). Urgent alerts (potty, pain, help) always buzz and cannot be muted. A held-back alert is still logged and shown in the app; it just does not buzz. In a household each parent has their own settings.
+
+**Consent record (built):** adding a family card requires the parent to confirm they may use that person's photo and voice; the time and who confirmed are stored, shown on the card and included in the data export.
+
 **Built:** `GET /me/export` (a zip with `data.json` and every picture and voice), and account deletion confirmed by an emailed code (`POST /me/delete-code`, then `DELETE /me`), in both the portal Settings and the API for the app. Deletion removes children, lessons, files, devices, sessions and flags; the audit log keeps only that it happened, with no email or name. A delete code cannot sign anyone in, and a sign-in code cannot delete. Administrators cannot delete themselves here. Still to do: a per-photo consent record.
 
 Export all data for a child, delete a child with everything attached (photos and voices included), and a visible consent record for family photos and voices.

@@ -30,6 +30,7 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 | Privacy tools | Download all my data (zip with pictures and voices) and delete my account with an emailed code, in the portal and the API; private media; terms record | ✅ (no per-photo consent record yet) |
 | Household sharing | Invite a second parent by email (max 3), accept after signing in, shared children, lessons, rewards and alerts, either can reply, shared plan, owner-only deletion; invitations and Family card in the portal | ✅ |
 | Backups | Encrypted nightly backup of every table and media file, checked after writing, kept for 7 days, restore command that refuses damaged or newer backups, health page status; drilled end to end. Off-server copies are up to the owner (`docs/BACKUPS.md`) | ✅ |
+| Notification preferences and consent | Quiet hours (own time zone, past midnight), muted gentle alerts, urgent alerts always on, per parent; consent confirmation recorded on every family card | ✅ |
 | Practice sync (§5.2 data side) | `POST children/{id}/sessions` stores a session + its mistakes | ✅ |
 | AI reports API (§4 Pro) | Generate (queued, Pro only) and fetch latest | ✅ |
 | Printable PECS PDF (§8.3) | Endpoint + Blade view; free = 4-card sample, Pro = chosen cards, A4/Letter. Urdu labels render joined and in the right order (Noto Naskh Arabic, drawn as images); verified against a Chromium reference. Style is Naskh, not Nastaliq | ✅ |
