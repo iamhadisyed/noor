@@ -12,6 +12,8 @@ return [
         'cooldown_seconds' => (int) env('KINDO_OTP_COOLDOWN', 60),
     ],
     'token_ttl_days' => 30,
+    // Alerts that always get through, even in quiet hours or when muted.
+    'urgent_needs' => ['potty', 'pain', 'help'],
     'household_max' => 3,   // people a parent can share their children with
     'admin_token_ttl_hours' => 12,
 

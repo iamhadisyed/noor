@@ -49,7 +49,7 @@ class FamilyMediaTest extends TestCase
     private function card(array $extra = []): \Illuminate\Testing\TestResponse
     {
         return $this->postJson("/api/v1/children/{$this->child['id']}/family", $extra + [
-            'relation_title' => 'Mama', 'display_name' => 'Ammi', 'photo' => UploadedFile::fake()->image('p.jpg', 1200, 900), 'audio' => $this->wav(),
+            'consent' => true, 'relation_title' => 'Mama', 'display_name' => 'Ammi', 'photo' => UploadedFile::fake()->image('p.jpg', 1200, 900), 'audio' => $this->wav(),
         ]);
     }
 
@@ -98,9 +98,9 @@ class FamilyMediaTest extends TestCase
         $this->as($free);
         $c = $this->postJson('/api/v1/children', ['name' => 'Zoya', 'date_of_birth' => '2020-01-01'])->json();
         foreach ([1, 2] as $i) {
-            $this->postJson("/api/v1/children/{$c['id']}/family", ['relation_title' => 'x', 'display_name' => "n{$i}", 'photo' => UploadedFile::fake()->image('p.jpg'), 'audio' => $this->wav()])->assertCreated();
+            $this->postJson("/api/v1/children/{$c['id']}/family", ['consent' => true, 'relation_title' => 'x', 'display_name' => "n{$i}", 'photo' => UploadedFile::fake()->image('p.jpg'), 'audio' => $this->wav()])->assertCreated();
         }
-        $this->postJson("/api/v1/children/{$c['id']}/family", ['relation_title' => 'x', 'display_name' => 'n3', 'photo' => UploadedFile::fake()->image('p.jpg'), 'audio' => $this->wav()])->assertStatus(402);
+        $this->postJson("/api/v1/children/{$c['id']}/family", ['consent' => true, 'relation_title' => 'x', 'display_name' => 'n3', 'photo' => UploadedFile::fake()->image('p.jpg'), 'audio' => $this->wav()])->assertStatus(402);
     }
 
     public function test_a_parent_can_rename_and_swap_files_and_old_ones_are_removed(): void
