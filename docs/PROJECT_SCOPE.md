@@ -2,8 +2,8 @@
 
 Status key: ✅ done and tested · 🟡 partly done / needs follow-up · ❌ not started · 📱 belongs to the mobile apps (not in this repo)
 
-Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Tests: 9 feature tests, all passing
-(tests use faked HTTP; nothing has been run against real Groq, Gemini or FCM yet)
+Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF, vanilla-JS web portal · Tests: 190+ PHP tests and a browser suite (12 walkthroughs), all passing
+(tests use faked HTTP; nothing has been run against real Groq, Gemini or FCM yet; the mobile apps are not in this repo)
 
 ---
 
@@ -53,26 +53,26 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 
 ## 3. In progress right now
 
-Nothing open. Last completed: Urdu in the PECS PDF. DomPDF cannot shape Arabic-script text, so `UrduShaper` joins the letters itself and `UrduText` draws each label to a PNG with GD/FreeType. True Nastaliq style is not possible this way (it needs a HarfBuzz-class shaper), so Naskh is used.
+Nothing open. Every phase of the portal plan (`docs/PORTAL_PRD.md` §9, phases 1 to 6) is built and merged; what remains is below.
 
-## 4. Not done — backend (can be built in this repo)
+## 4. Not done in this repo
 
 | Spec item | Gap |
 |---|---|
-| Syllabus & Camera importer (§5.2, Pro) | No syllabus endpoints at all; no image upload, no Groq/Gemini OCR; tables exist but unused |
-| Therapist/teacher portal (§5.3) | Done: see the Specialists row above. Not built: WhatsApp brag cards and printable reports for therapists |
-| WhatsApp brag cards (§5.3) | No milestone aggregation or shareable card generation |
-| First-Then routine engine (§5.1) | No data model or endpoints |
-| Desensitization Sound Lab (§5.1) | Nothing |
-| Tracing results storage (§5.2) | Tracing screens are designed and the snap-to-guide behaviour is proven in `design/`; the API has no per-letter tracing results or per-child assist settings, and letter spline data does not exist yet |
-| Free-tier "basic accuracy score" (§4) | No stats endpoint |
-| Subscriptions / billing (§4) | `subscription_tier` exists, but nothing sets it (no Play/App Store receipt or payment handling) |
-| Account basics | Sign-in is passwordless, so there is no password reset; email is verified at sign-in; profile update, data export and full account deletion are done (see the Privacy row above) |
-| CRUD gaps | Update/delete child, delete family member, custom AAC cards, report history list |
-| Needs analytics for parent | No potty-timing summary endpoint beyond the AI report; no alert-feed history, reply-time or "seen" endpoints, and acknowledging does not yet notify the child (see `design/README.md`) |
+| Syllabus & Camera importer (§5.2, Pro) | No endpoint that reads a photo of a syllabus and drafts a lesson (needs the Groq/Gemini keys to be useful; the lesson builder it would feed exists). The old `syllabus_*` tables are unused |
+| WhatsApp brag cards (§5.3) | No milestone aggregation or shareable card image |
+| First-Then routine engine (§5.1) | The `first_then` setting and a `routine_step` task type exist; there is no dedicated routine scheduler or visual card data |
+| Desensitization Sound Lab (§5.1) | Nothing (needs sound content) |
+| Tracing results storage (§5.2) | Per-session accuracy, mistakes and steadiness are stored and reported; there is no per-letter result table, per-child assist settings beyond magnet strength, or letter spline data (content) |
+| In-app purchases (§4) | Pro is sold by voucher code and admin grant; Google Play / App Store purchase and receipt validation are not built (need store accounts). The subscription ledger already has a `store` source |
+| Report PDF export | Reports export as CSV; a PDF report for the portal is not built |
+| Custom AAC cards | Stock cards only; parents cannot add their own AAC cards |
 | Tier gating of lesson content (§4) | Urdu letters Alif–Se, 50 CVC words etc. are content/client rules; not modelled server-side |
-| Seed content | No icon/audio assets, no Urdu letter or CVC word data |
-| Admin | No admin panel, no abuse/moderation controls |
+| Seed content | No icon artwork, animal pictures/sounds, Urdu letter spline or CVC word data (see §6) |
+| Portal Urdu / right-to-left | The portal is English only |
+| Portal screens for family cards | The API (create, edit, delete, consent, private media) is complete; parents manage cards from the app only |
+
+Everything the earlier version of this table listed as missing and is now done: admin console and moderation, account basics (export, delete), child and family-card edit/delete, needs analytics and reply tracking, free-tier accuracy numbers (reports), therapist and teacher access, billing by voucher, announcements, household sharing, notification preferences, consent record, private media, backups, sync API, games and rewards.
 
 ## 5. Not done — mobile apps (📱 outside this repo)
 
@@ -83,7 +83,10 @@ Kindo Junior and Kindo Parent apps in full (the visual style now exists as a pro
 - Groq and Gemini API keys (3 each) in `.env`
 - Firebase project id + service-account JSON at `storage/app/firebase-service-account.json`
 - Hosting (GoDaddy) deployment, domain, and cron jobs
-- Fonts / icons / audio assets and their licences
+- Fonts / icons / audio assets and their licences: animal pictures and the sound each animal makes (for the listening games), and icon artwork for the app
+- `KINDO_BACKUP_PASSWORD`, `SUPER_ADMIN_EMAILS`, SMTP `MAIL_*` settings, `APP_URL` and `APP_TIMEZONE` in `.env`
+- A lawyer's review of the terms in `config/legal.php`
+- Off-server copies of the nightly backups (`docs/BACKUPS.md`)
 - Decision (optional): true Nastaliq style in print needs a real text shaper (e.g. rendering labels in the mobile app and uploading them, or a Chromium/HarfBuzz-based PDF engine, which shared hosting rarely allows)
 
 ## 7. Working agreement
