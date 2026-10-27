@@ -75,6 +75,17 @@ class LessonsTest extends TestCase
         $this->assertSame('optional', $types['trace_letter']['audio']);
     }
 
+    public function test_meta_gives_clients_the_same_defaults_and_limits_as_the_server(): void
+    {
+        $m = $this->getJson('/api/v1/meta')->assertOk()->json();
+
+        $this->assertSame('slow', $m['support_defaults']['special']['pace']);
+        $this->assertSame(600, $m['limits']['image_max_side']);
+        $this->assertSame(150, $m['limits']['audio_max_kb']);
+        $this->assertSame(1, $m['limits']['children_free']);
+        $this->assertCount(6, $m['task_types']);
+    }
+
     public function test_a_draft_can_always_be_saved_but_publish_lists_exactly_what_is_missing(): void
     {
         $lesson = $this->lesson();

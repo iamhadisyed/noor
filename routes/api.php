@@ -49,6 +49,7 @@ Route::prefix('v1')->group(function () {
         Route::patch('children/{child}', [ChildController::class, 'update']);
         Route::delete('children/{child}', [ChildController::class, 'destroy']);
 
+        Route::get('meta', [LessonController::class, 'meta']);
         Route::get('task-types', [LessonController::class, 'taskTypes']);
         Route::get('lesson-templates', [LessonController::class, 'templates']);
         Route::get('children/{child}/lessons', [LessonController::class, 'index']);
