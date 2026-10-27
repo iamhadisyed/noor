@@ -9,7 +9,7 @@ Requires PHP 8.2+. Built on Laravel 12 (Laravel 11 is end-of-life and has open s
 ```bash
 composer install
 cp .env.example .env && php artisan key:generate
-# set DB_*, GROQ_API_KEYS="k1,k2,k3", GEMINI_API_KEYS="k1,k2,k3", FCM_PROJECT_ID
+# set DB_*, MAIL_* (SMTP), SUPER_ADMIN_EMAILS, GROQ_API_KEYS="k1,k2,k3", GEMINI_API_KEYS="k1,k2,k3", FCM_PROJECT_ID
 php artisan migrate --seed       # seeds stock AAC cards
 php artisan storage:link
 # place the Firebase service account at storage/app/firebase-service-account.json
@@ -27,7 +27,12 @@ Run `php artisan config:cache` in production; keys are read through `config/kind
 ## API (`/api/v1`, Sanctum bearer token)
 | Method | Path | Notes |
 |---|---|---|
-| POST | auth/register, auth/login | |
+| POST | auth/code | email a 6-digit sign-in code (neutral answer, 60 s cooldown) |
+| POST | auth/verify | exchange email + code for a bearer token; first use creates the account |
+| GET/PATCH | me | profile, role, plan |
+| GET/DELETE | me/sessions | list and revoke signed-in devices |
+| POST | auth/logout | |
+| GET | admin/* | super admin only (`SUPER_ADMIN_EMAILS`) |
 | POST | devices | register FCM token |
 | GET/POST | children | free: 1 profile, pro: 4 (402 beyond) |
 | POST | child/alert | logs need + high-priority FCM push to parent devices |

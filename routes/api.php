@@ -10,10 +10,20 @@ use App\Http\Controllers\Api\SessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    Route::post('auth/register', [AuthController::class, 'register']);
-    Route::post('auth/login', [AuthController::class, 'login']);
+    Route::post('auth/code', [AuthController::class, 'requestCode'])->middleware('throttle:otp-request');
+    Route::post('auth/verify', [AuthController::class, 'verify'])->middleware('throttle:otp-verify');
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('me', [AuthController::class, 'me']);
+        Route::patch('me', [AuthController::class, 'updateMe']);
+        Route::post('auth/logout', [AuthController::class, 'logout']);
+        Route::get('me/sessions', [AuthController::class, 'sessions']);
+        Route::delete('me/sessions/{id}', [AuthController::class, 'revokeSession']);
+
+        Route::middleware('role:super_admin')->prefix('admin')->group(function () {
+            Route::get('ping', fn () => response()->json(['ok' => true]));
+        });
+
         Route::post('devices', [AuthController::class, 'registerDevice']);
 
         Route::get('children', [ChildController::class, 'index']);
