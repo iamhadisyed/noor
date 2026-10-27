@@ -10,6 +10,7 @@ use App\Models\Lesson;
 use App\Models\LessonTask;
 use App\Models\RewardLedger;
 use App\Models\SyncChange;
+use App\Services\Household;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
@@ -29,30 +30,43 @@ class SyncObserver
         if (! $m instanceof Child) {
             return;
         }
-        foreach ($m->lessons()->pluck('id') as $id) { SyncChange::record($m->user_id, 'lesson', $id, 'delete'); }
-        foreach ($m->familyMembers()->pluck('id') as $id) { SyncChange::record($m->user_id, 'family_member', $id, 'delete'); }
-        foreach ($m->needsLogs()->pluck('id') as $id) { SyncChange::record($m->user_id, 'need', $id, 'delete'); }
+        $users = Household::userIdsFor($m);
+        foreach ($m->lessons()->pluck('id') as $id) { SyncChange::recordFor($users, 'lesson', $id, 'delete'); }
+        foreach ($m->familyMembers()->pluck('id') as $id) { SyncChange::recordFor($users, 'family_member', $id, 'delete'); }
+        foreach ($m->needsLogs()->pluck('id') as $id) { SyncChange::recordFor($users, 'need', $id, 'delete'); }
     }
 
     private function record(Model $m, string $op): void
     {
-        [$user, $entity, $id, $op] = match (true) {
-            $m instanceof Child => [$m->user_id, 'child', $m->id, $op],
-            $m instanceof Lesson => [$m->is_template ? null : $m->user_id, 'lesson', $m->id, $op],
-            $m instanceof LessonTask => [$m->lesson?->is_template ? null : $m->lesson?->user_id, 'lesson', $m->lesson_id, 'upsert'],
-            $m instanceof FamilyMember => [$m->child?->user_id, 'family_member', $m->id, $op],
-            $m instanceof ChildNeedsLog => [$m->child?->user_id, 'need', $m->id, $op],
-            $m instanceof RewardLedger => [$m->child?->user_id, 'child', $m->child_id, 'upsert'],
-            default => [null, '', 0, $op],
+        // Which child does this belong to? Everyone in that child's household gets the change.
+        $child = match (true) {
+            $m instanceof Child => $m,
+            $m instanceof Lesson => $m->is_template ? null : $m->child,
+            $m instanceof LessonTask => $m->lesson?->is_template ? null : $m->lesson?->child,
+            $m instanceof FamilyMember, $m instanceof ChildNeedsLog, $m instanceof RewardLedger => $m->child,
+            default => null,
         };
-        if (! $user) {
+        [$entity, $id, $op] = match (true) {
+            $m instanceof Child => ['child', $m->id, $op],
+            $m instanceof Lesson => ['lesson', $m->id, $op],
+            $m instanceof LessonTask => ['lesson', $m->lesson_id, 'upsert'],
+            $m instanceof FamilyMember => ['family_member', $m->id, $op],
+            $m instanceof ChildNeedsLog => ['need', $m->id, $op],
+            $m instanceof RewardLedger => ['child', $m->child_id, 'upsert'],
+            default => ['', 0, $op],
+        };
+        if (! $child || ! $child->user_id) {
             return;
         }
-        SyncChange::record($user, $entity, $id, $op);
+
+        $users = Household::userIdsFor($child);
+        SyncChange::recordFor($users, $entity, $id, $op);
 
         // One quiet "something changed" push per user every few seconds, however many rows moved.
-        if (Cache::add("sync:nudge:{$user}", 1, 5)) {
-            SyncNudgeJob::dispatch($user)->afterResponse();
+        foreach ($users as $user) {
+            if (Cache::add("sync:nudge:{$user}", 1, 5)) {
+                SyncNudgeJob::dispatch($user)->afterResponse();
+            }
         }
     }
 }

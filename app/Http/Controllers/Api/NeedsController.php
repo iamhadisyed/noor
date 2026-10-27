@@ -35,10 +35,13 @@ class NeedsController extends Controller
         ]);
 
         $phrase = self::PHRASES[strtolower($data['need_type'])] ?? 'needs ' . strtolower($data['need_type']);
-        $fcm->sendToUser($child->user_id, "{$child->name} {$phrase}", 'Tap to respond.', [
-            'type' => 'need_alert', 'log_id' => $log->id, 'child_id' => $child->id, 'need_type' => $data['need_type'],
-            'actions' => 'ack,call',
-        ]);
+        // Every parent in the household hears about it, and either can reply.
+        foreach (\App\Services\Household::userIdsFor($child) as $parentId) {
+            $fcm->sendToUser($parentId, "{$child->name} {$phrase}", 'Tap to respond.', [
+                'type' => 'need_alert', 'log_id' => $log->id, 'child_id' => $child->id, 'need_type' => $data['need_type'],
+                'actions' => 'ack,call',
+            ]);
+        }
 
         return response()->json(['id' => $log->id], 200);
     }
@@ -79,7 +82,7 @@ class NeedsController extends Controller
     public function cards(Request $request): JsonResponse
     {
         $user = $request->user();
-        $query = AacCard::where(fn ($q) => $q->whereNull('child_id')->orWhereIn('child_id', $user->children()->select('id')));
+        $query = AacCard::where(fn ($q) => $q->whereNull('child_id')->orWhereIn('child_id', $user->accessibleChildren()->select('id')));
         if (! $user->isPro()) {
             $query->where('is_pro', false);
         }
@@ -89,7 +92,7 @@ class NeedsController extends Controller
 
     private function ownedLog(Request $request, int $id): ChildNeedsLog
     {
-        return ChildNeedsLog::whereIn('child_id', $request->user()->children()->select('id'))->findOrFail($id);
+        return ChildNeedsLog::whereIn('child_id', $request->user()->accessibleChildren()->select('id'))->findOrFail($id);
     }
 
     public function present(ChildNeedsLog $l): array

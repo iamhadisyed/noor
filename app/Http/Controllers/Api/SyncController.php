@@ -47,6 +47,11 @@ class SyncController extends Controller
         $more = $rows->count() > self::PAGE;
         $rows = $rows->take(self::PAGE);
 
+        // The parent joined or left a household: what they can see changed wholesale, so start over.
+        if ($rows->contains(fn ($r) => $r->op === 'reset')) {
+            return response()->json($this->snapshot($request, $latest) + ['reset' => true]);
+        }
+
         // Keep only the last thing that happened to each item, in the order it last happened.
         $last = [];
         foreach ($rows as $r) {
@@ -70,7 +75,7 @@ class SyncController extends Controller
     private function snapshot(Request $request, int $latest): array
     {
         $user = $request->user();
-        $kids = $user->children()->get();
+        $kids = $user->accessibleChildren()->orderBy('id')->get();
         $ids = $kids->pluck('id');
         $changes = [];
 
@@ -86,14 +91,14 @@ class SyncController extends Controller
     private function change(Request $request, string $entity, int $id, string $op): ?array
     {
         $user = $request->user();
-        $ids = $user->children()->select('id');
+        $ids = $user->accessibleChildren()->select('id');
         $gone = ['entity' => $entity, 'id' => $id, 'op' => 'delete'];
         if ($op === 'delete') {
             return $gone;
         }
 
         $data = match ($entity) {
-            'child' => ($c = $user->children()->find($id)) ? $this->children->present($c) : null,
+            'child' => ($c = $user->accessibleChildren()->find($id)) ? $this->children->present($c) : null,
             'lesson' => ($l = Lesson::where('is_template', false)->whereIn('child_id', $ids)->find($id)) ? $this->lessons->present($l) : null,
             'family_member' => ($m = FamilyMember::whereIn('child_id', $ids)->find($id)) ? FamilyMemberController::present($m, $this->media) : null,
             'need' => ($n = ChildNeedsLog::whereIn('child_id', $ids)->find($id)) ? $this->needs->present($n) : null,
