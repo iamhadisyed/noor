@@ -29,30 +29,12 @@ class InsightsController extends Controller
         $child = ChildController::owned($request, $childId);
         [$from, $to, $tz] = $this->range($request);
 
-        $sessions = PracticeSession::where('child_id', $child->id)->whereBetween('created_at', [$from, $to])->get();
         $needs = ChildNeedsLog::where('child_id', $child->id)->whereBetween('created_at', [$from, $to])->get();
-        $mistakes = PracticeMistakeLog::whereIn('session_id', $sessions->pluck('id'))->get();
-
-        $attempts = $sessions->sum('total_attempts');
         $replies = $needs->whereNotNull('acknowledged_at')->map(fn ($n) => $n->created_at->diffInSeconds($n->acknowledged_at));
 
         return response()->json([
             'range' => ['from' => $from->toDateString(), 'to' => $to->toDateString(), 'tz' => $tz],
-            'practice' => [
-                'sessions' => $sessions->count(),
-                'minutes' => (int) round($sessions->sum('duration_seconds') / 60),
-                'attempts' => $attempts,
-                'accuracy_pct' => $attempts ? (int) round($sessions->sum('successful_attempts') / $attempts * 100) : null,
-                'by_language' => $sessions->groupBy('language')->map(fn ($g) => [
-                    'minutes' => (int) round($g->sum('duration_seconds') / 60),
-                    'accuracy_pct' => $g->sum('total_attempts') ? (int) round($g->sum('successful_attempts') / $g->sum('total_attempts') * 100) : null,
-                ]),
-                'mistake_types' => $mistakes->groupBy('mistake_type')->map->count(),
-                'hardest_targets' => $mistakes->groupBy('target_string')->map->count()->sortDesc()->take(5),
-                // the stored per-mistake stroke deviation; the average is the parent's "steadiness" figure
-                'avg_stroke_deviation' => $mistakes->whereNotNull('stroke_deviation_score')->avg('stroke_deviation_score') !== null
-                    ? round((float) $mistakes->whereNotNull('stroke_deviation_score')->avg('stroke_deviation_score'), 1) : null,
-            ],
+            'practice' => $this->practice($child, $from, $to),
             'needs' => [
                 'total' => $needs->count(),
                 'by_type' => $needs->groupBy('need_type')->map->count()->sortDesc(),
@@ -66,6 +48,29 @@ class InsightsController extends Controller
                 'drafts' => $child->lessons()->where('status', 'draft')->count(),
             ],
         ]);
+    }
+
+    /** Practice numbers for a child over a range. Also used for the therapist and teacher view, which never sees alerts. */
+    public function practice(Child $child, $from, $to): array
+    {
+        $sessions = PracticeSession::where('child_id', $child->id)->whereBetween('created_at', [$from, $to])->get();
+        $mistakes = PracticeMistakeLog::whereIn('session_id', $sessions->pluck('id'))->get();
+        $attempts = $sessions->sum('total_attempts');
+
+        return [
+            'sessions' => $sessions->count(),
+            'minutes' => (int) round($sessions->sum('duration_seconds') / 60),
+            'attempts' => $attempts,
+            'accuracy_pct' => $attempts ? (int) round($sessions->sum('successful_attempts') / $attempts * 100) : null,
+            'by_language' => $sessions->groupBy('language')->map(fn ($g) => [
+                'minutes' => (int) round($g->sum('duration_seconds') / 60),
+                'accuracy_pct' => $g->sum('total_attempts') ? (int) round($g->sum('successful_attempts') / $g->sum('total_attempts') * 100) : null,
+            ]),
+            'mistake_types' => $mistakes->groupBy('mistake_type')->map->count(),
+            'hardest_targets' => $mistakes->groupBy('target_string')->map->count()->sortDesc()->take(5),
+            'avg_stroke_deviation' => $mistakes->whereNotNull('stroke_deviation_score')->avg('stroke_deviation_score') !== null
+                ? round((float) $mistakes->whereNotNull('stroke_deviation_score')->avg('stroke_deviation_score'), 1) : null,
+        ];
     }
 
     /** One row per day, zeros included, so a chart never has gaps. */

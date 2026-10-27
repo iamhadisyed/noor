@@ -15,6 +15,7 @@ return [
     'backup' => ['password' => env('KINDO_BACKUP_PASSWORD'), 'keep' => (int) env('KINDO_BACKUP_KEEP', 7)],
     // Alerts that always get through, even in quiet hours or when muted.
     'urgent_needs' => ['potty', 'pain', 'help'],
+    'specialists_max' => 5,   // therapists and teachers per child
     'household_max' => 3,   // people a parent can share their children with
     'admin_token_ttl_hours' => 12,
 

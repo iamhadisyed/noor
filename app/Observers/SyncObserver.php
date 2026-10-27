@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Jobs\SyncNudgeJob;
+use App\Models\Assignment;
 use App\Models\Child;
 use App\Models\ChildNeedsLog;
 use App\Models\FamilyMember;
@@ -34,6 +35,7 @@ class SyncObserver
         foreach ($m->lessons()->pluck('id') as $id) { SyncChange::recordFor($users, 'lesson', $id, 'delete'); }
         foreach ($m->familyMembers()->pluck('id') as $id) { SyncChange::recordFor($users, 'family_member', $id, 'delete'); }
         foreach ($m->needsLogs()->pluck('id') as $id) { SyncChange::recordFor($users, 'need', $id, 'delete'); }
+        foreach (Assignment::where('child_id', $m->id)->pluck('id') as $id) { SyncChange::recordFor($users, 'assignment', $id, 'delete'); }
     }
 
     private function record(Model $m, string $op): void
@@ -43,7 +45,7 @@ class SyncObserver
             $m instanceof Child => $m,
             $m instanceof Lesson => $m->is_template ? null : $m->child,
             $m instanceof LessonTask => $m->lesson?->is_template ? null : $m->lesson?->child,
-            $m instanceof FamilyMember, $m instanceof ChildNeedsLog, $m instanceof RewardLedger => $m->child,
+            $m instanceof FamilyMember, $m instanceof ChildNeedsLog, $m instanceof RewardLedger, $m instanceof Assignment => $m->child,
             default => null,
         };
         [$entity, $id, $op] = match (true) {
@@ -53,6 +55,7 @@ class SyncObserver
             $m instanceof FamilyMember => ['family_member', $m->id, $op],
             $m instanceof ChildNeedsLog => ['need', $m->id, $op],
             $m instanceof RewardLedger => ['child', $m->child_id, 'upsert'],
+            $m instanceof Assignment => ['assignment', $m->id, $op],
             default => ['', 0, $op],
         };
         if (! $child || ! $child->user_id) {
