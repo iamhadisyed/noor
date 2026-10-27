@@ -29,3 +29,6 @@ Schedule::call(function () {
     \Illuminate\Support\Facades\DB::table('idempotency_keys')->where('created_at', '<', now()->subDays(2))->delete();
     \Illuminate\Support\Facades\DB::table('login_codes')->where('created_at', '<', now()->subDays(1))->delete();   // used or expired codes do not need keeping
 })->dailyAt('03:10')->name('prune-sync');
+
+// Pro expiry warnings (3 days ahead) and moving ended plans back to free.
+Schedule::command('kindo:billing-daily')->dailyAt('04:05')->name('billing-daily');

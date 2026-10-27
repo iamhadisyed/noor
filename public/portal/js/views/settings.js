@@ -18,7 +18,6 @@ export async function render() {
       s.current ? h('span', { class: 'chip sage' }, 'This device') : h('button', { class: 'btn soft sm', onclick: async () => { try { await api(`/me/sessions/${s.id}`, { method: 'DELETE' }); toast('That device was signed out.'); loadSessions(); } catch (e) { toast(errorText(e), 'err'); } } }, 'Sign out'))));
   };
   loadSessions();
-  const pro = u.plan === 'pro';
   return h('div', { class: 'page' }, h('div', { class: 'page-head' }, h('div', null, h('h1', null, 'Settings'), h('p', null, u.email))),
     h('div', { class: 'cols' }, h('div', { class: 'list', style: 'gap:24px' },
       h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:16px' }, 'Your profile'),
@@ -26,10 +25,7 @@ export async function render() {
         h('button', { class: 'btn primary', onclick: async () => { err.textContent = ''; try { state.user = await api('/me', { method: 'PATCH', body: { name: name.value.trim(), phone: phone.value.trim() || null } }); toast('Saved.'); } catch (e) { err.textContent = errorText(e); } } }, 'Save')),
       h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:6px' }, 'Signed-in devices'), h('p', { class: 'muted', style: 'margin-bottom:16px' }, 'Sign out any device you do not recognise.'), sessionsBox)),
     h('div', { class: 'list', style: 'gap:24px' },
-      u.role === 'super_admin' ? h('section', { class: 'card lav' }, h('h2', null, 'Super admin'), h('p', { style: 'color:var(--ink-2)' }, 'Admin sessions end after 12 hours. Every account change you make is written to the audit log.')) : h('section', { class: `card ${pro ? 'butter' : 'lav'}` }, h('h2', null, pro ? 'Kindo Pro' : 'Free plan'),
-        h('ul', { style: 'padding-left:20px;margin-top:10px;display:grid;gap:6px' },
-          h('li', null, pro ? `Up to ${m.limits.children_pro} children` : `${m.limits.children_free} child profile`), h('li', null, pro ? 'Unlimited lessons' : `${m.limits.lessons_per_child_free} lessons per child`), h('li', null, pro ? 'Weekly AI insight, unlimited family cards and printable cards' : 'Weekly insight, extra family cards and printing are in Pro')),
-        pro ? null : h('p', { class: 'hint', style: 'margin-top:12px;color:var(--ink-2)' }, 'Online upgrade is coming soon. Contact us to switch on Pro.')),
+      u.role === 'super_admin' ? h('section', { class: 'card lav' }, h('h2', null, 'Super admin'), h('p', { style: 'color:var(--ink-2)' }, 'Admin sessions end after 12 hours. Every account change you make is written to the audit log.')) : planCard(m),
       h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:12px' }, 'Account'), h('button', { class: 'btn soft block', onclick: signOut }, icon('logout', 20), 'Sign out'),
         h('p', { class: 'hint', style: 'margin-top:12px' }, h('a', { href: '#/terms' }, 'Terms and conditions'), u.terms_version ? ` (version ${u.terms_version})` : '')),
       u.role === 'super_admin' ? null : notificationsCard(), u.role === 'super_admin' ? null : familyCard((changed) => { if (changed) state.children = null; }), u.role === 'super_admin' ? null : privacyCard())));
@@ -117,5 +113,34 @@ function notificationsCard() {
         try { await api('/me/notifications', { method: 'PATCH', body: { quiet_hours: { enabled, start: start.value, end: end.value }, timezone: zone.value, muted_needs: [...muted] } }); toast('Saved.'); } catch (e) { err.textContent = errorText(e); }
       } }, 'Save'));
   })();
+  return box;
+}
+
+/** The plan, when it ends, and a place to enter a voucher code. */
+function planCard(m) {
+  const box = h('section', { class: 'card lav', 'data-card': 'plan' }, h('h2', null, 'Plan'), h('div', { class: 'spinner', role: 'status', 'aria-label': 'Loading' }));
+  const SRC = { voucher: 'Voucher', admin: 'Gift from Kindo', store: 'App store' };
+  const draw = async () => {
+    let b;
+    try { b = await api('/billing'); } catch (e) { box.replaceChildren(h('h2', null, 'Plan'), h('p', { class: 'msg-err' }, errorText(e))); return; }
+    const pro = b.plan === 'pro';
+    box.className = `card ${pro ? 'butter' : 'lav'}`;
+    const code = h('input', { class: 'input', id: 'vc', placeholder: 'ABCD-EFGH', maxlength: '16', autocomplete: 'off', autocapitalize: 'characters', 'aria-label': 'Voucher code', style: 'text-transform:uppercase;letter-spacing:2px' });
+    const err = h('div', { class: 'msg-err', role: 'alert' });
+    const lim = b.limits;
+    box.replaceChildren(h('h2', null, pro ? 'Kindo Pro' : 'Free plan'),
+      pro ? h('p', { style: 'margin-top:6px' }, b.via_household ? 'You share the Pro plan of the parent who invited you.' : b.expires_at ? `Pro until ${fmt.date(b.expires_at)} (${b.days_left} ${b.days_left === 1 ? 'day' : 'days'} left)` : 'Pro, with no end date') : null,
+      h('ul', { style: 'padding-left:20px;margin-top:10px;display:grid;gap:6px' },
+        h('li', null, pro ? `Up to ${lim.pro.children} children` : `${lim.free.children} child profile`), h('li', null, pro ? 'Unlimited lessons' : `${lim.free.lessons_per_child} lessons per child`),
+        h('li', null, pro ? 'Weekly AI insight, unlimited family cards and printable cards' : `Weekly insight, more than ${lim.free.family_cards} family cards and printing are in Pro`)),
+      b.via_household ? null : h('form', { style: 'margin-top:16px', novalidate: true, onsubmit: async (e) => {
+        e.preventDefault(); err.textContent = '';
+        if (!code.value.trim()) { err.textContent = 'Enter your voucher code.'; return; }
+        try { await api('/billing/redeem', { method: 'POST', body: { code: code.value } }); toast('Pro time added. Thank you!'); state.user = await api('/me'); draw(); } catch (er) { err.textContent = errorText(er); }
+      } }, h('div', { class: 'field' }, h('label', { for: 'vc' }, pro ? 'Add more time with a voucher code' : 'Have a voucher code?'), code), err, h('button', { class: 'btn primary', type: 'submit', 'data-act': 'redeem' }, 'Use code')),
+      b.history.length ? h('div', { style: 'margin-top:16px' }, h('b', null, 'Your Pro time'), h('div', { class: 'list', style: 'margin-top:8px' }, b.history.slice(0, 5).map((x) => h('div', { class: 'item', style: 'background:rgba(255,255,255,.55)' }, h('div', { class: 'grow' }, h('b', null, `${x.days} days`), h('span', null, `${SRC[x.source] || x.source} · until ${fmt.date(x.ends_at)}`)))))) : null,
+      pro || b.store_purchase ? null : h('p', { class: 'hint', style: 'margin-top:12px;color:var(--ink-2)' }, 'Buying inside the app is coming soon. Until then, ask us for a voucher code.'));
+  };
+  draw();
   return box;
 }

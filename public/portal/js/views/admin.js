@@ -5,7 +5,7 @@ import { state } from '../main.js';
 
 /** Super admin console. Everything here is aggregate or operational; no child names, pictures or voices. */
 export async function render(ctx, params, query, name) {
-  const view = { overview, usage, quality, content, games, alerts, ai, accounts, audit, health }[name] || overview;
+  const view = { overview, usage, quality, content, games, vouchers, alerts, ai, accounts, audit, health }[name] || overview;
   const page = h('div', { class: 'page' }, spinner());
   const out = await view(ctx, page);
   return out || page;
@@ -82,12 +82,12 @@ async function accounts(ctx, page) {
       h('td', null, (() => { const s = h('select', { class: 'select', style: 'min-height:40px;width:110px;font-size:14px', 'aria-label': `Plan for ${u.email}`, onchange: async (e) => { try { await api(`/admin/users/${u.id}`, { method: 'PATCH', body: { plan: e.target.value } }); toast('Plan updated.'); } catch (er) { toast(errorText(er), 'err'); load(); } } }, [['free', 'Free'], ['pro', 'Pro']].map(([v, l]) => h('option', { value: v }, l))); s.value = u.plan; return s; })()),
       h('td', null, u.children), h('td', null, fmt.ago(u.last_login_at)),
       h('td', null, h('span', { class: `chip ${u.status === 'active' ? 'sage' : 'warn'}` }, STATUS[u.status] || u.status), u.status_reason ? h('div', { class: 'hint' }, u.status_reason) : null),
-      h('td', null, admin || self ? null : u.status === 'active'
+      h('td', null, h('div', { class: 'row wrap' }, admin ? null : h('button', { class: 'btn soft sm', 'data-act': 'give-pro', onclick: () => givePro(u) }, 'Give Pro'), admin || self ? null : u.status === 'active'
         ? h('button', { class: 'btn danger sm', onclick: async () => {
             const reason = await reasonBox({ title: `Make ${u.email} inactive?`, body: 'They are signed out everywhere at once and cannot sign in until you make the account active again. Their lessons stay in place.', confirm: 'Make inactive', label: 'Reason (kept in the audit log)' });
             if (reason === null) return;
             try { await api(`/admin/users/${u.id}`, { method: 'PATCH', body: { status: 'inactive', reason } }); toast('Account is now inactive.'); load(); } catch (e) { toast(errorText(e), 'err'); } } }, 'Make inactive')
-        : h('button', { class: 'btn soft sm', onclick: async () => { try { await api(`/admin/users/${u.id}`, { method: 'PATCH', body: { status: 'active' } }); toast('Account is active again.'); load(); } catch (e) { toast(errorText(e), 'err'); } } }, 'Make active')));
+        : h('button', { class: 'btn soft sm', onclick: async () => { try { await api(`/admin/users/${u.id}`, { method: 'PATCH', body: { status: 'active' } }); toast('Account is active again.'); load(); } catch (e) { toast(errorText(e), 'err'); } } }, 'Make active'))));
   };
   const input = h('input', { class: 'input', type: 'search', 'aria-label': 'Search accounts', placeholder: 'Search by email or name', style: 'min-width:280px', oninput: debounce((e) => { search = e.target.value.trim(); pg = 1; load(); }, 350) });
   page.replaceChildren(head('Accounts', 'Search, make accounts inactive or active again, and change plans. Every change is audited.', input), body);
@@ -268,6 +268,55 @@ async function games(ctx, page) {
       h('div', { class: 'row wrap', style: 'justify-content:flex-end' }, h('span', { class: `chip ${i.complete ? 'sage' : 'warn'}` }, i.complete ? 'Ready' : !i.active ? 'Off' : 'Incomplete'),
         h('button', { class: 'btn soft sm', onclick: async () => { try { const f = new FormData(); f.append('active', i.active ? '0' : '1'); await api(`/admin/games/items/${i.id}`, { method: 'POST', form: f }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, i.active ? 'Turn off' : 'Turn on'),
         h('button', { class: 'icon-btn', 'aria-label': `Remove ${i.name_en}`, onclick: async () => { if (!(await confirmBox({ title: `Remove ${i.name_en}?`, body: 'Its picture and sound are deleted.', confirm: 'Remove', danger: true }))) return; try { await api(`/admin/games/items/${i.id}`, { method: 'DELETE' }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, icon('trash', 18))));
+  };
+  await draw();
+}
+
+/** Give a parent Pro time by hand. */
+function givePro(u) {
+  modal((box, close) => {
+    const days = h('input', { class: 'input', id: 'gp-days', type: 'number', min: 1, max: 3660, value: 30, inputmode: 'numeric', 'aria-label': 'Days of Pro' });
+    const note = h('input', { class: 'input', id: 'gp-note', maxlength: 120, placeholder: 'Why (optional)', 'aria-label': 'Reason' });
+    const err = h('div', { class: 'msg-err', role: 'alert' });
+    box.append(h('h2', null, `Give Pro to ${u.email}`), h('p', { class: 'muted' }, 'The days are added after any Pro time they already have. It is recorded in the audit log.'),
+      h('div', { class: 'grid2', style: 'margin-top:16px' }, h('div', { class: 'field' }, h('label', { for: 'gp-days' }, 'Days'), days), h('div', { class: 'field' }, h('label', { for: 'gp-note' }, 'Reason'), note)), err,
+      h('div', { class: 'actions' }, h('button', { class: 'btn soft', onclick: close }, 'Cancel'), h('button', { class: 'btn primary', 'data-act': 'confirm-give-pro', onclick: async () => {
+        try { await api(`/admin/users/${u.id}/grant`, { method: 'POST', body: { days: +days.value, note: note.value.trim() || null } }); close(); toast('Pro time added.'); } catch (e) { err.textContent = errorText(e); }
+      } }, 'Give Pro')));
+  });
+}
+
+/* ---------- vouchers: one-time codes for Pro time ---------- */
+async function vouchers(ctx, page) {
+  const body = h('div', null, spinner());
+  page.replaceChildren(head('Vouchers', 'One-time codes that add Pro time. Sell them (a bank or wallet payment), give them to a school, or use them as prizes.'), body);
+  let filter = 'unused', fresh = [];
+  const draw = async () => {
+    const r = await api(`/admin/vouchers?status=${filter === 'all' ? '' : filter}`);
+    const days = h('select', { class: 'select', id: 'vd', 'aria-label': 'Length' }, [[30, '1 month (30 days)'], [90, '3 months'], [180, '6 months'], [365, '1 year']].map(([v, l]) => h('option', { value: v }, l)));
+    const count = h('input', { class: 'input', id: 'vn', type: 'number', min: 1, max: 100, value: 1, inputmode: 'numeric', 'aria-label': 'How many codes' });
+    const note = h('input', { class: 'input', id: 'vt', maxlength: 120, placeholder: 'For example: Ali Traders, Eid offer', 'aria-label': 'Note' });
+    const err = h('div', { class: 'msg-err', role: 'alert' });
+    body.replaceChildren(
+      h('div', { class: 'kpis' }, kpi('Unused codes', r.counts.unused, 'ready to give out'), kpi('Used codes', r.counts.used, 'redeemed by parents')),
+      h('section', { class: 'card', style: 'margin-bottom:16px' }, h('h2', { style: 'margin-bottom:12px' }, 'Make codes'),
+        h('div', { class: 'grid2' }, h('div', { class: 'field' }, h('label', { for: 'vd' }, 'Length'), days), h('div', { class: 'field' }, h('label', { for: 'vn' }, 'How many (up to 100)'), count)),
+        h('div', { class: 'field' }, h('label', { for: 'vt' }, 'Note (for you)'), note), err,
+        h('button', { class: 'btn primary', 'data-act': 'make-vouchers', onclick: async () => {
+          err.textContent = '';
+          try { const res = await api('/admin/vouchers', { method: 'POST', body: { days: +days.value, count: +count.value, note: note.value.trim() || null } }); fresh = res.vouchers.map((v) => v.code); toast(`${fresh.length} code${fresh.length === 1 ? '' : 's'} made.`); draw(); } catch (e) { err.textContent = errorText(e); }
+        } }, icon('plus', 20), 'Make codes')),
+      fresh.length ? h('section', { class: 'card lav', style: 'margin-bottom:16px', 'data-fresh': '' }, h('h2', { style: 'margin-bottom:8px' }, 'New codes'),
+        h('pre', { style: 'font:600 16px/1.6 ui-monospace,monospace;letter-spacing:1px;white-space:pre-wrap;margin:0 0 12px' }, fresh.join('\n')),
+        h('button', { class: 'btn soft sm', onclick: async () => { try { await navigator.clipboard.writeText(fresh.join('\n')); toast('Copied.'); } catch { toast('Select the codes and copy them.', 'err'); } } }, icon('copy', 16), 'Copy all')) : null,
+      seg(filter, [['unused', 'Unused'], ['used', 'Used'], ['all', 'All']], (v) => { filter = v; draw(); }),
+      h('div', { class: 'card', style: 'margin-top:16px' }, h('div', { class: 'table-wrap' }, h('table', null,
+        h('thead', null, h('tr', null, ['Code', 'Time', 'Note', 'Status', 'Used by', ''].map((t) => h('th', null, t)))),
+        h('tbody', null, r.data.length ? r.data.map((v) => h('tr', { 'data-voucher': v.code },
+          h('td', null, h('b', { style: 'font-family:ui-monospace,monospace;letter-spacing:1px' }, v.code)), h('td', null, `${v.days} days`), h('td', null, v.note || '—'),
+          h('td', null, h('span', { class: `chip ${v.status === 'unused' ? 'sage' : v.status === 'used' ? 'ink' : 'warn'}` }, v.status)), h('td', null, v.used_by ? `${v.used_by} · ${fmt.ago(v.used_at)}` : '—'),
+          h('td', null, v.status === 'unused' ? h('button', { class: 'btn soft sm', onclick: async () => { if (!(await confirmBox({ title: `Cancel ${v.code}?`, body: 'It will stop working.', confirm: 'Cancel code', danger: true }))) return; try { await api(`/admin/vouchers/${v.id}`, { method: 'DELETE' }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, 'Cancel') : null)))
+          : h('tr', null, h('td', { colspan: 6, class: 'muted' }, 'No codes here yet.')))))));
   };
   await draw();
 }
