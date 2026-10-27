@@ -51,6 +51,7 @@ PROMPT;
             }
             $json = $this->callGroq($idx, $key, $userPrompt);
             if ($json !== null) {
+                $json['_provider'] = 'groq';
                 Cache::put($cacheKey, $json, now()->addDays(3));
                 return $json;
             }
@@ -62,6 +63,7 @@ PROMPT;
             }
             $json = $this->callGemini($idx, $key, $userPrompt);
             if ($json !== null) {
+                $json['_provider'] = 'gemini';
                 Cache::put($cacheKey, $json, now()->addDays(3));
                 return $json;
             }

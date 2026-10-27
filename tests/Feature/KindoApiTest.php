@@ -74,7 +74,7 @@ class KindoApiTest extends TestCase
 
         $result = app(AIServiceManager::class)->generateDiagnosticReport(['x' => 1]);
 
-        $this->assertSame(['phonetic_blindspots' => []], $result);
+        $this->assertSame(['phonetic_blindspots' => [], '_provider' => 'gemini'], $result);   // Groq was rate limited, so Gemini answered
         $this->assertTrue(Cache::has('cooldown_groq_0'));
         Http::assertSent(fn ($r) => str_contains($r->url(), 'generativelanguage') && $r->hasHeader('x-goog-api-key', 'm1') && ! str_contains($r->url(), 'key='));
     }

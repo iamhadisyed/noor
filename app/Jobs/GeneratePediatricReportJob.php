@@ -54,6 +54,7 @@ class GeneratePediatricReportJob implements ShouldQueue
             ['child_id' => $child->id, 'report_week_start' => now()->startOfWeek()->toDateString()],
             [
                 'language_dominance' => $result['language_dominance'] ?? null,
+                'provider' => $result['_provider'] ?? null,
                 'phonetic_blindspots' => $result['phonetic_blindspots'] ?? [],
                 'potty_timing_analysis' => ['summary' => $result['potty_routine_summary'] ?? '', 'tips' => $result['parent_tips'] ?? []],
                 'sensory_behavior_summary' => $result['sensory_behavior_analysis'] ?? '',

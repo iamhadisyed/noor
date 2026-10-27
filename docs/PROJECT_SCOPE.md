@@ -22,6 +22,7 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 | Family cards (§5.1) | List/create with photo (≤300 KB) and audio (≤150 KB) upload; free = 2 cards. Game and add-card screens designed (`design/`); game results not recorded server-side | 🟡 (no edit/delete, no game results) |
 | AAC cards (§5.1, §4) | Stock-card seeder (13 cards, EN + Urdu labels); free tier sees only non-Pro cards | 🟡 (no custom-card CRUD, no icon images shipped) |
 | Lessons, tasks, media, support profile (portal phase 2) | Lessons for standard and special tracks, six task types, per-type picture and sound rules enforced at publish, private re-encoded media with signed links, templates, per-child support profile, child delete removes all files | ✅ |
+| Parent insights and super admin reporting (portal phase 3) | Summary, daily series and CSV export per child; alert lifecycle sent, seen, on the way with who replied; admin overview, usage, quality, alerts, AI provider counts, health, user search and suspend, audit log. Admin responses carry no child names or media | ✅ |
 | Practice sync (§5.2 data side) | `POST children/{id}/sessions` stores a session + its mistakes | ✅ |
 | AI reports API (§4 Pro) | Generate (queued, Pro only) and fetch latest | ✅ |
 | Printable PECS PDF (§8.3) | Endpoint + Blade view; free = 4-card sample, Pro = chosen cards, A4/Letter. Urdu labels render joined and in the right order (Noto Naskh Arabic, drawn as images); verified against a Chromium reference. Style is Naskh, not Nastaliq | ✅ |

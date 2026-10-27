@@ -9,7 +9,7 @@ class AiDiagnosticReport extends Model
     public const UPDATED_AT = null;
 
     protected $fillable = [
-        'child_id', 'report_week_start', 'language_dominance', 'phonetic_blindspots', 'potty_timing_analysis',
+        'child_id', 'report_week_start', 'language_dominance', 'provider', 'phonetic_blindspots', 'potty_timing_analysis',
         'sensory_behavior_summary', 'actionable_parent_exercises', 'dietary_chaining_tips',
     ];
 

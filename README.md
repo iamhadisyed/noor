@@ -45,6 +45,10 @@ Run `php artisan config:cache` in production; keys are read through `config/kind
 | POST | lessons/{id}/publish · unpublish · duplicate | publish returns 422 with the exact missing pictures and sounds |
 | POST/PATCH/DELETE | lessons/{id}/tasks · tasks/{id} · reorder | |
 | POST/DELETE | tasks/{id}/media | `kind=image` (re-encoded to a 600 px JPEG) or `kind=audio` (≤150 KB, checked by content); stored privately, served by short-lived signed links |
+| GET | children/{id}/insights/summary · daily · export.csv | parent reports: practice, accuracy, alerts, reply time, lessons (query `days`, `tz`) |
+| GET/POST | needs/{id} · seen · acknowledge | alert status sent → seen → on_the_way, who replied, reply time |
+| GET | admin/overview · usage · quality · alerts · ai-reports · health · audit | super admin reporting: aggregates only, no child names or media |
+| GET/PATCH | admin/users | search accounts; suspend, restore, change plan (audited) |
 | GET | aac-cards · pecs.pdf | free tier: 4 core cards |
 | GET/POST | children/{id}/family | free: 2 cards; photo ≤300 KB, audio ≤150 KB |
 | POST | children/{id}/sessions | offline sync of practice results + mistakes |
