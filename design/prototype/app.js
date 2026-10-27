@@ -21,13 +21,15 @@
   const PITCH = 63.7;
   $$('.nav').forEach((nav) => {
     const items = $$('button', nav), pill = $('.pill', nav);
+    const pillL = pill.cloneNode(); pillL.classList.add('pill-l'); nav.insertBefore(pillL, pill);
     const layout = () => {
       const active = items.findIndex((b) => b.getAttribute('aria-current') === 'page');
       items.forEach((b, i) => { b.style.left = `${i * PITCH}px`; });
       const first = active + 1;
-      if (first >= items.length) { pill.style.width = 0; return; }
       pill.style.left = `${first * PITCH}px`;
-      pill.style.width = `${(items.length - first - 1) * PITCH + 69}px`;
+      pill.style.width = first >= items.length ? 0 : `${(items.length - first - 1) * PITCH + 69}px`;
+      pillL.style.left = '0px';
+      pillL.style.width = active <= 0 ? 0 : `${(active - 1) * PITCH + 69}px`;
     };
     items.forEach((b) => b.addEventListener('click', () => {
       items.forEach((x) => x.removeAttribute('aria-current'));
