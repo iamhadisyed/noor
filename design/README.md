@@ -10,6 +10,18 @@ Open `design/prototype/index.html` in a browser (no build step, no network; font
 - Interactive: tap a bar, drag the progress slider, tap the bottom navigation.
 - `preview.png` is a screenshot of the side-by-side view.
 
+## Needs board (`design/prototype/needs.html`)
+
+Three states of the AAC board, same visual language:
+
+1. **Board** (child): "What do you need?" with Urdu subtitle, category chips (All / Needs / Food / Feelings / Play), 2-column cards with illustration tile, English and Nastaliq label, and a round speaker button in the card notch. Free tier shows the four core cards unlocked; Hug and Pain are Pro (soft fill, PRO pill, lock button). Tap sends the alert and speaks the card; a toast with a 4-second **Undo** follows. Tapping a locked card gives a gentle wobble and "Ask a grown-up to unlock this card", never a buzzer.
+2. **Alert sent**: shows the card, a check badge, "Mama is on the way" in English and Urdu, who was notified, a Sent / Seen / On the way stepper in the hatch-slider style, and "I'm okay now" / "Send again".
+3. **Feelings tab** (Pro account): six emotion cards in the same grid.
+
+`?screen=board|sent|feel` shows one screen. Card hit areas are extended to 64dp, Potty has a slow, low-amplitude pulse (disabled under `prefers-reduced-motion`), and success is sage green, not red or neon.
+
+Open decisions: Potty stays one-touch as in the spec, protected only by Undo and the server rate limit (30 alerts/min); say if you want a confirm step. The speaker button both speaks and notifies; a "speak only" mode for practice would need its own control.
+
 ## Design tokens
 
 | Token | Value | Use |
@@ -44,4 +56,4 @@ Phone canvas is 426 x 918 px; every position in `styles.css` is an absolute meas
 - **Illustrations are original placeholders.** The reference artwork is someone else's work and cannot be reused; the mascot, trophy girl, avatars and tile images here are simple drawings made for this prototype. Final character art should come from an illustrator.
 - **Contrast.** White title and subtitle on the lilac hero card (about 1.9:1) copy the reference but fail WCAG AA. Needs a decision (darker ink on the hero) before launch, especially for a parent-facing app.
 - **Sensory-safe palette.** The reference's saturated orchid and lilac are livelier than the spec's oatmeal/sage palette. A `sensory_mode` variant (desaturated tokens, no motion) should be defined; the CSS already respects `prefers-reduced-motion`.
-- Not yet designed in this style: AAC needs board, family-card game, tracing canvas, parent alert feed, subscription screen.
+- Not yet designed in this style: family-card game, tracing canvas, parent alert feed, subscription screen.
