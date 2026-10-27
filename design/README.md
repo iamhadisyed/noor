@@ -55,6 +55,22 @@ Notes for the build: photos of children's relatives are personal data, so the ap
 - Game rounds are not recorded: `practice_sessions` has only `urdu` / `english`, so family-recognition results need a game type (or their own table) before the AI report can use them.
 - The Pro meter needs the card count and limit returned by the API rather than computed on the device.
 
+## Tracing canvas (`design/prototype/tracing.html`)
+
+This one is a working prototype of the interaction, not only a picture: the stroke engine runs in the page, so it can be tried with a mouse or finger.
+
+1. **Trace (child)**: the letter Be (ب) on a guide band with a glowing numbered start, direction chevrons, an animated hand, a magnet-zone halo, a progress bar and a phonics hint ("ب سے بلی, Be for Billi, the cat"). Touch near the start and follow the guide. The drawn line **snaps to the guide** while the finger stays within the magnetic threshold; drifting outside it just pauses progress with "Stay near the glow" and never fails. The raw finger trail is shown faintly so the smoothing is visible. On finishing, a "Beautiful!" badge shows a steadiness score (mean deviation from the guide, the value `practice_mistake_logs.stroke_deviation_score` is meant to hold) and "Place the dot" unlocks.
+2. **Dot lab (child)**: the body of the letter is drawn first and the nuqta is a separate step, as in the spec. Drag one, two or three dots to the ring above or below the body: 1 below = Be (ب), 3 below = Pe (پ), 2 above = Te (ت), 3 above = Se (ث). Drops magnetise within a 52px radius; a wrong number gives a gentle "Let's try one more time!". Found letters collect in a strip.
+3. **Tracing assist (parent)**: "Magnetic strength" from 15 to 40px (Light, Medium, Strong presets) with a live **shaky hand test** showing the finger path against what is drawn, plus toggles for the animated hand, the magnet zone, haptics, and dots as a separate step. Changing strength changes the trace screen immediately (zone width and tolerance).
+
+`?screen=trace|dots|assist` shows one screen.
+
+Known limits of the prototype: the guide is a hand-drawn Be, not an extracted Nastaliq outline (the real engine needs per-letter spline data from the font, and joined forms for the Pro ligature assembly); sound and haptics are not played here; the forward-only window lets a very fast scribble along the guide complete a stroke, which the app should limit by speed or by requiring continuous contact.
+
+### Backend gaps this design exposes
+- Practice sessions can store a stroke deviation per mistake but have no place for per-letter tracing results (steadiness, attempts, assist strength used). A per-child `tracing_settings` (threshold 15-40, hint, haptics, dots step) is needed so the parent's choice reaches the child device.
+- Letter content (guide splines, base strokes and dot positions) needs a data format and a seed for the free set (Alif to Se) versus the Pro alphabet.
+
 ## Design tokens
 
 | Token | Value | Use |
@@ -89,4 +105,4 @@ Phone canvas is 426 x 918 px; every position in `styles.css` is an absolute meas
 - **Illustrations are original placeholders.** The reference artwork is someone else's work and cannot be reused; the mascot, trophy girl, avatars and tile images here are simple drawings made for this prototype. Final character art should come from an illustrator.
 - **Contrast.** White title and subtitle on the lilac hero card (about 1.9:1) copy the reference but fail WCAG AA. Needs a decision (darker ink on the hero) before launch, especially for a parent-facing app.
 - **Sensory-safe palette.** The reference's saturated orchid and lilac are livelier than the spec's oatmeal/sage palette. A `sensory_mode` variant (desaturated tokens, no motion) should be defined; the CSS already respects `prefers-reduced-motion`.
-- Not yet designed in this style: tracing canvas, subscription screen.
+- Not yet designed in this style: subscription screen.

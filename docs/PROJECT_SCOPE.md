@@ -24,7 +24,7 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 | Practice sync (§5.2 data side) | `POST children/{id}/sessions` stores a session + its mistakes | ✅ |
 | AI reports API (§4 Pro) | Generate (queued, Pro only) and fetch latest | ✅ |
 | Printable PECS PDF (§8.3) | Endpoint + Blade view; free = 4-card sample, Pro = chosen cards, A4/Letter. Urdu labels render joined and in the right order (Noto Naskh Arabic, drawn as images); verified against a Chromium reference. Style is Naskh, not Nastaliq | ✅ |
-| UI design system (§3) | Interactive prototype of the Kindo visual language (Welcome, Child Home, Parent Plan, Needs board with sent and Feelings states, Parent alert feed with detail and lock-screen push, Family card game with celebration and parent add-card flow) in `design/prototype`, measured from the approved reference. Original placeholder art; not yet in Flutter | 🟡 design reference only |
+| UI design system (§3) | Interactive prototype of the Kindo visual language (Welcome, Child Home, Parent Plan, Needs board with sent and Feelings states, Parent alert feed with detail and lock-screen push, Family card game with celebration and parent add-card flow, Tracing canvas with working snap-to-guide engine, dot lab and parent assist settings) in `design/prototype`, measured from the approved reference. Original placeholder art; not yet in Flutter | 🟡 design reference only |
 | Hosting (§6.1) | Database queue, cPanel cron lines and `schedule:run` documented in README | ✅ |
 
 ## 2. Deliberate deviations from the spec
@@ -51,6 +51,7 @@ Nothing open. Last completed: Urdu in the PECS PDF. DomPDF cannot shape Arabic-s
 | WhatsApp brag cards (§5.3) | No milestone aggregation or shareable card generation |
 | First-Then routine engine (§5.1) | No data model or endpoints |
 | Desensitization Sound Lab (§5.1) | Nothing |
+| Tracing results storage (§5.2) | Tracing screens are designed and the snap-to-guide behaviour is proven in `design/`; the API has no per-letter tracing results or per-child assist settings, and letter spline data does not exist yet |
 | Free-tier "basic accuracy score" (§4) | No stats endpoint |
 | Subscriptions / billing (§4) | `subscription_tier` exists, but nothing sets it (no Play/App Store receipt or payment handling) |
 | Account basics | No password reset, email verification, profile update/delete |
