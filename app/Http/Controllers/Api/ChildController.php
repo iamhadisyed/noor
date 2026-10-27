@@ -8,7 +8,6 @@ use App\Models\Child;
 use App\Services\MediaStore;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ChildController extends Controller
 {
@@ -77,7 +76,7 @@ class ChildController extends Controller
             $lesson->tasks->each(fn ($t) => $media->forgetTask($t));
         }
         foreach ($child->familyMembers as $m) {
-            Storage::disk('public')->delete([$m->photo_path, $m->audio_prompt_path]);
+            $media->forgetFamily($m);
         }
 
         AuditLog::record($request->user(), 'child.deleted', $child, ['name_initial' => mb_substr($child->name, 0, 1)]);

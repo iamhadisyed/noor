@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\FamilyMember;
 use App\Models\LessonTask;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -22,7 +23,18 @@ class MediaStore
 
     public function storeImage(LessonTask $task, UploadedFile $file): void
     {
-        $src = @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
+        $jpeg = $this->encodeJpeg($file->getRealPath());
+
+        $this->forget($task->image_path);
+        $path = $this->path($task, 'jpg');
+        Storage::disk(self::DISK)->put($path, $jpeg);
+        $task->update(['image_path' => $path]);
+    }
+
+    /** Re-encode any picture to a JPEG of at most 600 px. This strips metadata and anything hidden in the file. */
+    public function encodeJpeg(string $file): string
+    {
+        $src = @imagecreatefromstring((string) file_get_contents($file));
         if (! $src) {
             throw new \InvalidArgumentException('That file is not a picture we can read.');
         }
@@ -37,26 +49,78 @@ class MediaStore
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
         ob_start();
         imagejpeg($dst, null, 82);
-        $jpeg = (string) ob_get_clean();
 
-        $this->forget($task->image_path);
-        $path = $this->path($task, 'jpg');
-        Storage::disk(self::DISK)->put($path, $jpeg);
-        $task->update(['image_path' => $path]);
+        return (string) ob_get_clean();
+    }
+
+    /** @return array{0: string, 1: string, 2: string} stored mime, extension */
+    public function audioKind(string $file): array
+    {
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($file);
+        if (! in_array($mime, self::AUDIO_MIMES, true)) {
+            throw new \InvalidArgumentException('That file is not a sound we can play.');
+        }
+        $ext = ['audio/mpeg' => 'mp3', 'audio/mp4' => 'm4a', 'video/mp4' => 'm4a', 'audio/x-m4a' => 'm4a', 'audio/aac' => 'aac', 'audio/ogg' => 'ogg', 'audio/webm' => 'webm', 'video/webm' => 'webm'][$mime] ?? 'wav';
+
+        return [['video/webm' => 'audio/webm', 'video/mp4' => 'audio/mp4'][$mime] ?? $mime, $ext];
     }
 
     public function storeAudio(LessonTask $task, UploadedFile $file): void
     {
-        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($file->getRealPath());
-        if (! in_array($mime, self::AUDIO_MIMES, true)) {
-            throw new \InvalidArgumentException('That file is not a sound we can play.');
-        }
+        [$mime, $ext] = $this->audioKind($file->getRealPath());
 
         $this->forget($task->audio_path);
-        $ext = ['audio/mpeg' => 'mp3', 'audio/mp4' => 'm4a', 'video/mp4' => 'm4a', 'audio/x-m4a' => 'm4a', 'audio/aac' => 'aac', 'audio/ogg' => 'ogg', 'audio/webm' => 'webm', 'video/webm' => 'webm'][$mime] ?? 'wav';
         $path = $this->path($task, $ext);
         Storage::disk(self::DISK)->put($path, file_get_contents($file->getRealPath()));
-        $task->update(['audio_path' => $path, 'audio_mime' => ['video/webm' => 'audio/webm', 'video/mp4' => 'audio/mp4'][$mime] ?? $mime]);
+        $task->update(['audio_path' => $path, 'audio_mime' => $mime]);
+    }
+
+    // ---------- family cards: the same private storage and signed links as lesson media ----------
+
+    public function storeFamilyPhoto(FamilyMember $m, UploadedFile $file): void
+    {
+        $jpeg = $this->encodeJpeg($file->getRealPath());
+        $this->forgetFamilyFile($m->photo_path);
+        $path = $this->familyPath($m, 'jpg');
+        Storage::disk(self::DISK)->put($path, $jpeg);
+        $m->photo_path = $path;
+    }
+
+    public function storeFamilyAudio(FamilyMember $m, UploadedFile $file): void
+    {
+        [$mime, $ext] = $this->audioKind($file->getRealPath());
+        $this->forgetFamilyFile($m->audio_prompt_path);
+        $path = $this->familyPath($m, $ext);
+        Storage::disk(self::DISK)->put($path, file_get_contents($file->getRealPath()));
+        $m->audio_prompt_path = $path;
+        $m->audio_mime = $mime;
+    }
+
+    public function forgetFamily(FamilyMember $m): void
+    {
+        $this->forgetFamilyFile($m->photo_path);
+        $this->forgetFamilyFile($m->audio_prompt_path);
+    }
+
+    /** Also clears the old public copy that cards made before the move may still have. */
+    private function forgetFamilyFile(?string $path): void
+    {
+        if ($path) {
+            Storage::disk(self::DISK)->delete($path);
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    public function familyUrl(FamilyMember $m, string $kind): ?string
+    {
+        $has = $kind === 'photo' ? $m->photo_path : $m->audio_prompt_path;
+
+        return $has ? URL::temporarySignedRoute('media.family', now()->addMinutes(15), ['member' => $m->id, 'kind' => $kind]) : null;
+    }
+
+    private function familyPath(FamilyMember $m, string $ext): string
+    {
+        return "family/{$m->child_id}/" . Str::uuid() . '.' . $ext;
     }
 
     public function remove(LessonTask $task, string $kind): void

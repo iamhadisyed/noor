@@ -51,5 +51,8 @@ Last write wins, field by field as sent. Rules that never bend, whichever device
 - A lesson held for moderator review cannot be published until the review is done.
 - After a conflict the app simply syncs; the server's version is the truth.
 
-## 5. What is not in the feed yet
-Practice sessions (uploaded by the child app with `POST children/{id}/sessions`), reports, and family-card media (still on the public disk until phase 5). Reports are fetched on demand.
+## 5. Family cards
+`family_member` changes carry `photo_url` and `audio_url` (signed, 15 minutes), never storage paths. Photos are re-encoded to a JPEG of at most 600 px and voices are checked by content (150 KB max). Create with `POST children/{id}/family` (multipart: `relation_title`, `display_name`, `photo`, `audio`); change names or swap a file with `POST family/{id}` (or `PATCH` for names only); remove with `DELETE family/{id}`. A bad replacement file never costs the parent the existing one.
+
+## 6. What is not in the feed yet
+Practice sessions (uploaded by the child app with `POST children/{id}/sessions`) and reports. Reports are fetched on demand.

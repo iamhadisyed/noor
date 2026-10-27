@@ -52,6 +52,16 @@ class SyncTest extends TestCase
         return $this->postJson("/api/v1/lessons/{$lessonId}/tasks", ['type' => 'trace_letter', 'title' => $title, 'target' => 'ا'])->assertCreated()->json();
     }
 
+    private function wav(): \Illuminate\Http\UploadedFile
+    {
+        $data = str_repeat("\x00\x00", 2000);
+        $hdr = 'RIFF' . pack('V', 36 + strlen($data)) . 'WAVEfmt ' . pack('VvvVVvv', 16, 1, 1, 8000, 16000, 2, 16) . 'data' . pack('V', strlen($data));
+        $path = tempnam(sys_get_temp_dir(), 'snd') . '.wav';
+        file_put_contents($path, $hdr . $data);
+
+        return new \Illuminate\Http\UploadedFile($path, 'hello.wav', 'audio/wav', null, true);
+    }
+
     private function sync(?int $cursor = null)
     {
         return $this->getJson('/api/v1/sync' . ($cursor === null ? '' : "?cursor={$cursor}"))->assertOk();
@@ -142,7 +152,7 @@ class SyncTest extends TestCase
         $c = $this->child();
         $l = $this->lesson($c['id']);
         $f = $this->postJson("/api/v1/children/{$c['id']}/family", ['relation_title' => 'Mama', 'display_name' => 'Mama',
-            'photo' => \Illuminate\Http\UploadedFile::fake()->image('p.jpg', 100, 100), 'audio' => \Illuminate\Http\UploadedFile::fake()->create('a.webm', 10, 'audio/webm')])->assertCreated();
+            'photo' => \Illuminate\Http\UploadedFile::fake()->image('p.jpg', 100, 100), 'audio' => $this->wav()])->assertCreated();
         $log = ChildNeedsLog::create(['child_id' => $c['id'], 'need_type' => 'water']);
         $cursor = $this->sync()->json('cursor');
 

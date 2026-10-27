@@ -159,6 +159,7 @@ async function content(ctx, page) {
         h('td', null, f.excerpt || f.note || '—'),
         h('td', null, h('div', { class: 'row wrap' },
           f.lesson_id ? h('button', { class: 'btn soft sm', onclick: () => openLesson(f.lesson_id) }, icon('eye', 16), 'Open') : null,
+          f.family_member_id ? h('button', { class: 'btn soft sm', onclick: () => openFamily(f.family_member_id) }, icon('eye', 16), 'Open') : null,
           h('button', { class: 'btn soft sm', 'data-act': 'dismiss', onclick: () => decide(f, 'dismiss') }, 'Looks fine'),
           h('button', { class: 'btn danger sm', 'data-act': 'remove', onclick: () => decide(f, 'remove') }, 'Remove'),
           f.owner.status === 'active' ? h('button', { class: 'btn danger sm', 'data-act': 'deactivate_owner', onclick: () => decide(f, 'deactivate_owner') }, 'Remove and deactivate') : null))))))));
@@ -192,6 +193,16 @@ async function content(ctx, page) {
           try { await api(`/admin/content/lessons/${id}/flag`, { method: 'POST', body: { note } }); close(); toast('Flagged.'); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, icon('flag', 18), 'Flag for review'),
           h('button', { class: 'btn soft', onclick: close }, 'Close'))));
     });
+  }
+
+  /** A flagged family card: the name, the photo, and the voice. */
+  async function openFamily(id) {
+    let m;
+    try { m = await api(`/admin/content/family/${id}`); } catch (e) { return toast(errorText(e), 'err'); }
+    modal((box, close) => box.append(h('div', null, h('div', { class: 'row between' }, h('div', null, h('h2', null, `${m.relation_title}: ${m.display_name}`), h('p', { class: 'muted' }, `${m.owner?.email || ''} · child ${m.child_name || '—'} · family card`)), h('button', { class: 'icon-btn', 'aria-label': 'Close', onclick: close }, icon('x', 20))),
+      h('div', { class: 'review-task' }, m.photo_url ? h('img', { src: m.photo_url, alt: `Photo of ${m.display_name}` }) : h('div', { class: 'noimg' }, 'No photo'),
+        h('div', null, m.audio_url ? h('audio', { controls: true, preload: 'none', src: m.audio_url, 'aria-label': `Voice for ${m.display_name}` }) : h('div', { class: 'hint' }, 'No voice'))),
+      h('div', { class: 'actions' }, h('button', { class: 'btn soft', onclick: close }, 'Close')))));
   }
 
   async function browseTab() {

@@ -23,6 +23,7 @@ Route::prefix('v1')->group(function () {
 
     // Pictures and sounds: the signed, short-lived link is the credential (works in <img> and <audio>).
     Route::get('media/{task}/{kind}', [MediaController::class, 'show'])->name('media.show')->middleware('signed');
+    Route::get('media/family/{member}/{kind}', [MediaController::class, 'family'])->name('media.family')->middleware('signed');
 
     Route::middleware(['auth:sanctum', 'idempotent'])->group(function () {
         Route::get('sync', [SyncController::class, 'index']);
@@ -50,6 +51,7 @@ Route::prefix('v1')->group(function () {
             Route::post('content/flags/{id}/resolve', [ContentReviewController::class, 'resolve']);
             Route::get('content/lessons', [ContentReviewController::class, 'lessonsIndex']);
             Route::get('content/lessons/{id}', [ContentReviewController::class, 'lessonShow']);
+            Route::get('content/family/{id}', [ContentReviewController::class, 'familyShow']);
             Route::post('content/lessons/{id}/flag', [ContentReviewController::class, 'flagLesson']);
             Route::get('content/terms', [ContentReviewController::class, 'terms']);
             Route::post('content/terms', [ContentReviewController::class, 'addTerm']);
@@ -94,6 +96,9 @@ Route::prefix('v1')->group(function () {
 
         Route::get('children/{child}/family', [FamilyMemberController::class, 'index']);
         Route::post('children/{child}/family', [FamilyMemberController::class, 'store']);
+        Route::post('family/{id}', [FamilyMemberController::class, 'update'])->middleware('throttle:60,1');   // POST so a phone can send files with the change
+        Route::patch('family/{id}', [FamilyMemberController::class, 'update']);
+        Route::delete('family/{id}', [FamilyMemberController::class, 'destroy']);
         Route::post('children/{child}/sessions', [SessionController::class, 'store']);
 
         Route::get('children/{child}/insights/summary', [InsightsController::class, 'summary']);

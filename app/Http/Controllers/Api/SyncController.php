@@ -7,6 +7,7 @@ use App\Models\ChildNeedsLog;
 use App\Models\FamilyMember;
 use App\Models\Lesson;
 use App\Models\SyncChange;
+use App\Services\MediaStore;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -27,7 +28,7 @@ class SyncController extends Controller
     private const PAGE = 300;
     private const NEEDS_DAYS = 30;
 
-    public function __construct(private ChildController $children, private LessonController $lessons, private NeedsController $needs) {}
+    public function __construct(private ChildController $children, private LessonController $lessons, private NeedsController $needs, private MediaStore $media) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -75,7 +76,7 @@ class SyncController extends Controller
 
         foreach ($kids as $c) { $changes[] = ['entity' => 'child', 'id' => $c->id, 'op' => 'upsert', 'data' => $this->children->present($c)]; }
         foreach (Lesson::where('is_template', false)->whereIn('child_id', $ids)->orderBy('id')->get() as $l) { $changes[] = ['entity' => 'lesson', 'id' => $l->id, 'op' => 'upsert', 'data' => $this->lessons->present($l)]; }
-        foreach (FamilyMember::whereIn('child_id', $ids)->orderBy('id')->get() as $m) { $changes[] = ['entity' => 'family_member', 'id' => $m->id, 'op' => 'upsert', 'data' => $m->toArray()]; }
+        foreach (FamilyMember::whereIn('child_id', $ids)->orderBy('id')->get() as $m) { $changes[] = ['entity' => 'family_member', 'id' => $m->id, 'op' => 'upsert', 'data' => FamilyMemberController::present($m, $this->media)]; }
         foreach (ChildNeedsLog::whereIn('child_id', $ids)->where('created_at', '>=', now()->subDays(self::NEEDS_DAYS))->orderBy('id')->get() as $n) { $changes[] = ['entity' => 'need', 'id' => $n->id, 'op' => 'upsert', 'data' => $this->needs->present($n)]; }
 
         return ['snapshot' => true, 'cursor' => $latest, 'has_more' => false, 'changes' => $changes];
@@ -94,7 +95,7 @@ class SyncController extends Controller
         $data = match ($entity) {
             'child' => ($c = $user->children()->find($id)) ? $this->children->present($c) : null,
             'lesson' => ($l = Lesson::where('is_template', false)->whereIn('child_id', $ids)->find($id)) ? $this->lessons->present($l) : null,
-            'family_member' => ($m = FamilyMember::whereIn('child_id', $ids)->find($id)) ? $m->toArray() : null,
+            'family_member' => ($m = FamilyMember::whereIn('child_id', $ids)->find($id)) ? FamilyMemberController::present($m, $this->media) : null,
             'need' => ($n = ChildNeedsLog::whereIn('child_id', $ids)->find($id)) ? $this->needs->present($n) : null,
             default => null,
         };
