@@ -33,6 +33,7 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 | Backups | Encrypted nightly backup of every table and media file, checked after writing, kept for 7 days, restore command that refuses damaged or newer backups, health page status; drilled end to end. Off-server copies are up to the owner (`docs/BACKUPS.md`) | ✅ |
 | Notification preferences and consent | Quiet hours (own time zone, past midnight), muted gentle alerts, urgent alerts always on, per parent; consent confirmation recorded on every family card | ✅ |
 | Billing | Voucher codes (batches, one-time, expiry, cancel), Pro time that stacks, admin grants, plan history, expiry warning email and automatic return to free, Plan card in Settings, Vouchers page for the owner. In-app store purchases and receipt validation are not built (need store accounts) | ✅ vouchers; ❌ store purchases |
+| Therapists and teachers | 6-digit single-use code per child (24 h), read-only progress view that excludes alerts, media and family, exercises set by the specialist with a push to the household, parent can see last look and end access at once; Specialists page for parents, Shared with me page for specialists | ✅ |
 | Practice sync (§5.2 data side) | `POST children/{id}/sessions` stores a session + its mistakes | ✅ |
 | AI reports API (§4 Pro) | Generate (queued, Pro only) and fetch latest | ✅ |
 | Printable PECS PDF (§8.3) | Endpoint + Blade view; free = 4-card sample, Pro = chosen cards, A4/Letter. Urdu labels render joined and in the right order (Noto Naskh Arabic, drawn as images); verified against a Chromium reference. Style is Naskh, not Nastaliq | ✅ |
@@ -59,7 +60,7 @@ Nothing open. Last completed: Urdu in the PECS PDF. DomPDF cannot shape Arabic-s
 | Spec item | Gap |
 |---|---|
 | Syllabus & Camera importer (§5.2, Pro) | No syllabus endpoints at all; no image upload, no Groq/Gemini OCR; tables exist but unused |
-| Therapist/teacher portal (§5.3) | No 6-digit access code, no read-only view, no assigned exercises |
+| Therapist/teacher portal (§5.3) | Done: see the Specialists row above. Not built: WhatsApp brag cards and printable reports for therapists |
 | WhatsApp brag cards (§5.3) | No milestone aggregation or shareable card generation |
 | First-Then routine engine (§5.1) | No data model or endpoints |
 | Desensitization Sound Lab (§5.1) | Nothing |

@@ -18,7 +18,7 @@ Response:
     { "entity": "need",   "id": 90, "op": "delete" } ] }
 ```
 
-- **Entities:** `child`, `lesson`, `family_member`, `need` (alerts from the last 30 days on a first call).
+- **Entities:** `child`, `lesson`, `family_member`, `assignment` (an exercise set by a therapist or teacher; the specialist API is under `specialist/...`), `need` (alerts from the last 30 days on a first call).
 - A **lesson is always sent whole**, with its tasks and fresh picture and sound links. A change to a single task arrives as its lesson.
 - `op: "delete"` means remove it locally. Archived lessons arrive as an upsert with `status: "archived"`; hide them.
 - Apply changes **in order**, save the new `cursor` after applying, and repeat while `has_more` is true.

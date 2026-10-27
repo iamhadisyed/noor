@@ -28,6 +28,8 @@ const routes = [
   { path: '/children', view: lazy('./views/children.js'), role: 'parent', nav: 'children' },
   { path: '/lessons', view: lazy('./views/lessons.js'), role: 'parent', nav: 'lessons' },
   { path: '/lessons/:id', view: lazy('./views/lesson-editor.js'), role: 'parent', nav: 'lessons' },
+  { path: '/specialists', view: lazy('./views/specialists.js'), role: 'parent', nav: 'specialists' },
+  { path: '/shared', view: lazy('./views/shared.js'), role: 'parent', nav: 'shared' },
   { path: '/rewards', view: lazy('./views/rewards.js'), role: 'parent', nav: 'rewards' },
   { path: '/reports', view: lazy('./views/reports.js'), role: 'parent', nav: 'reports' },
   { path: '/alerts', view: lazy('./views/alerts.js'), role: 'parent', nav: 'alerts' },
@@ -46,7 +48,7 @@ const routes = [
   { path: '/admin/health', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-health', name: 'health' },
 ];
 const NAV = {
-  parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['rewards', '#/rewards', 'star', 'Rewards'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['settings', '#/settings', 'gear', 'Settings']],
+  parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['rewards', '#/rewards', 'star', 'Rewards'], ['specialists', '#/specialists', 'shield', 'Specialists'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['settings', '#/settings', 'gear', 'Settings']],
   super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-games', '#/admin/games', 'star', 'Game library'], ['a-news', '#/admin/announcements', 'bell', 'Announcements'], ['a-vouchers', '#/admin/vouchers', 'list', 'Vouchers'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
 };
 
@@ -113,9 +115,10 @@ function place(active, content) {
 }
 function shell(active, content) {
   const role = state.user?.role || 'parent';
-  const items = NAV[role];
+  const items = NAV[role].slice();
+  if (role === 'parent' && state.user?.shared_children > 0) items.splice(items.length - 1, 0, ['shared', '#/shared', 'users', 'Shared with me']);   // you are also someone's therapist or teacher
   const link = (n, cls) => h('a', { href: n[1], 'aria-current': n[0] === active ? 'page' : null }, icon(n[2], 22), cls === 'bottom' ? h('span', null, n[3]) : n[3]);
-  const bottom = (role === 'parent' ? items.filter((n) => !['reports', 'children'].includes(n[0])) : items.filter((n) => ['a-overview', 'a-content', 'a-accounts', 'a-quality', 'settings'].includes(n[0])));
+  const bottom = (role === 'parent' ? items.filter((n) => !['reports', 'children', 'specialists', 'shared'].includes(n[0])) : items.filter((n) => ['a-overview', 'a-content', 'a-accounts', 'a-quality', 'settings'].includes(n[0])));
   return h('div', { class: 'shell' },
     h('a', { class: 'skip', href: '#content', onclick: (e) => { e.preventDefault(); document.getElementById('content')?.focus(); } }, 'Skip to content'),
     h('aside', { class: 'side' },
