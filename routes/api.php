@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\InsightsController;
 use App\Http\Controllers\Api\ChildController;
 use App\Http\Controllers\Api\FamilyMemberController;
 use App\Http\Controllers\Api\LessonController;
@@ -28,6 +30,15 @@ Route::prefix('v1')->group(function () {
 
         Route::middleware('role:super_admin')->prefix('admin')->group(function () {
             Route::get('ping', fn () => response()->json(['ok' => true]));
+            Route::get('overview', [AdminController::class, 'overview']);
+            Route::get('usage', [AdminController::class, 'usage']);
+            Route::get('quality', [AdminController::class, 'quality']);
+            Route::get('alerts', [AdminController::class, 'alerts']);
+            Route::get('ai-reports', [AdminController::class, 'aiReports']);
+            Route::get('health', [AdminController::class, 'health']);
+            Route::get('users', [AdminController::class, 'users']);
+            Route::patch('users/{id}', [AdminController::class, 'updateUser']);
+            Route::get('audit', [AdminController::class, 'audit']);
         });
 
         Route::post('devices', [AuthController::class, 'registerDevice']);
@@ -59,6 +70,8 @@ Route::prefix('v1')->group(function () {
 
         Route::post('child/alert', [NeedsController::class, 'alert'])->middleware('throttle:30,1');
         Route::get('children/{child}/needs', [NeedsController::class, 'feed']);
+        Route::get('needs/{log}', [NeedsController::class, 'show']);
+        Route::post('needs/{log}/seen', [NeedsController::class, 'seen']);
         Route::post('needs/{log}/acknowledge', [NeedsController::class, 'acknowledge']);
         Route::get('aac-cards', [NeedsController::class, 'cards']);
         Route::get('pecs.pdf', [PecsController::class, 'download']);
@@ -67,6 +80,9 @@ Route::prefix('v1')->group(function () {
         Route::post('children/{child}/family', [FamilyMemberController::class, 'store']);
         Route::post('children/{child}/sessions', [SessionController::class, 'store']);
 
+        Route::get('children/{child}/insights/summary', [InsightsController::class, 'summary']);
+        Route::get('children/{child}/insights/daily', [InsightsController::class, 'daily']);
+        Route::get('children/{child}/insights/export.csv', [InsightsController::class, 'exportCsv']);
         Route::post('children/{child}/reports', [ReportController::class, 'generate']);
         Route::get('children/{child}/reports/latest', [ReportController::class, 'latest']);
     });

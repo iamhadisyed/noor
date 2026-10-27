@@ -15,3 +15,6 @@ Schedule::call(function () {
         ->pluck('id')
         ->each(fn ($id) => \App\Jobs\GeneratePediatricReportJob::dispatch($id));
 })->weeklyOn(0, '20:00')->name('weekly-pediatric-reports');
+
+// Heartbeat so the admin health panel can tell the cron scheduler is alive.
+Schedule::call(fn () => \Illuminate\Support\Facades\Cache::put('scheduler:last_run', now()->toIso8601String(), 3600))->everyMinute()->name('scheduler-heartbeat');
