@@ -1,6 +1,7 @@
 import { api, ApiError, auth } from '../api.js';
 import { h, icon, toast, errorText } from '../ui.js';
 import { state, go, homeFor } from '../main.js';
+import { termsBody } from './terms.js';
 
 export function render(ctx, params, query, name) {
   return name === 'welcome' ? welcome() : signIn();
@@ -27,9 +28,32 @@ function signIn() {
       try { await api('/auth/code', { method: 'POST', body: { email } }); stepCode(60); }
       catch (e2) { if (e2 instanceof ApiError && e2.status === 429) stepCode(e2.data.retry_after || 60); else { err.textContent = errorText(e2); btn.disabled = false; btn.textContent = 'Email me a code'; } }
     } },
-      h('div', { class: 'field' }, h('label', { for: 'em' }, 'Email'), input, h('span', { class: 'hint' }, 'We will send a 6-digit code. No password needed.')), err, btn);
+      h('div', { class: 'field' }, h('label', { for: 'em' }, 'Email'), input, h('span', { class: 'hint' }, 'We will send a 6-digit code. No password needed.')), err, btn,
+      h('p', { class: 'hint' }, 'By continuing you will be asked to accept our ', h('a', { href: '#/terms' }, 'terms and conditions'), '.'));
     box.replaceChildren(h('h1', null, 'Sign in'), h('p', { class: 'muted' }, 'Parents and administrators sign in here, with the same email as the Kindo app.'), form);
     input.focus();
+  };
+
+  const finish = (res) => {
+    auth.token = res.token; state.user = res.user; state.children = null;
+    go(res.is_new && res.user.role !== 'super_admin' ? '#/welcome' : homeFor());
+  };
+
+  /** New accounts read and accept the terms before anything is created. The code is still valid. */
+  const stepTerms = async (codeValue) => {
+    const err = h('div', { class: 'msg-err', role: 'alert' });
+    const check = h('input', { type: 'checkbox', id: 'tac', onchange: () => { go_.disabled = !check.checked; } });
+    const go_ = h('button', { class: 'btn primary block', type: 'button', disabled: true, onclick: async () => {
+      go_.disabled = true; err.textContent = '';
+      try { finish(await api('/auth/verify', { method: 'POST', body: { email, code: codeValue, device_name: 'web', accept_terms: true } })); }
+      catch (e) { err.textContent = errorText(e) + ' You may need a new code.'; go_.disabled = false; }
+    } }, 'Create my account');
+    box.replaceChildren(h('h1', null, 'Before you start'), h('p', { class: 'muted' }, 'Please read and accept these terms to create your account.'), h('div', { class: 'spinner', role: 'status', 'aria-label': 'Loading' }));
+    let body;
+    try { body = await termsBody(); } catch (e) { err.textContent = errorText(e); box.append(err); return; }
+    box.replaceChildren(h('h1', null, 'Before you start'), h('p', { class: 'muted' }, 'Please read and accept these terms to create your account.'), body.el,
+      h('label', { class: 'check', for: 'tac' }, check, ' I am the parent or guardian of every child I add, and I accept the terms and the privacy notice.'), err, go_,
+      h('button', { class: 'btn soft sm', type: 'button', style: 'justify-self:start', onclick: stepEmail }, 'Cancel'));
   };
 
   const stepCode = (wait) => {
@@ -41,10 +65,9 @@ function signIn() {
       if (code().length !== 6) return;
       inputs.forEach((i) => (i.disabled = true)); err.textContent = '';
       try {
-        const res = await api('/auth/verify', { method: 'POST', body: { email, code: code(), device_name: 'web' } });
-        auth.token = res.token; state.user = res.user; state.children = null;
-        go(res.is_new ? '#/welcome' : homeFor());
+        finish(await api('/auth/verify', { method: 'POST', body: { email, code: code(), device_name: 'web' } }));
       } catch (e) {
+        if (e.data?.terms_required) return stepTerms(code());
         inputs.forEach((i) => { i.disabled = false; i.value = ''; i.classList.add('err'); });
         err.textContent = e.status === 403 ? 'This account is unavailable. Contact support.' : e.status === 429 ? 'Too many tries. Wait a minute and try again.' : errorText(e);
         inputs[0].focus();

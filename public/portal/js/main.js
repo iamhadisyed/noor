@@ -8,6 +8,7 @@ export const state = { user: null, children: null, childId: null };
 const lazy = (f) => () => import(f);
 const routes = [
   { path: '/login', view: lazy('./views/login.js'), public: true },
+  { path: '/terms', view: lazy('./views/terms.js'), public: true },
   { path: '/welcome', view: lazy('./views/login.js'), name: 'welcome' },
   { path: '/', view: lazy('./views/dashboard.js'), role: 'parent', nav: 'home' },
   { path: '/children', view: lazy('./views/children.js'), role: 'parent', nav: 'children' },
@@ -18,6 +19,7 @@ const routes = [
   { path: '/settings', view: lazy('./views/settings.js'), nav: 'settings' },
   { path: '/admin', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-overview', name: 'overview' },
   { path: '/admin/usage', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-usage', name: 'usage' },
+  { path: '/admin/content', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-content', name: 'content' },
   { path: '/admin/quality', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-quality', name: 'quality' },
   { path: '/admin/alerts', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-alerts', name: 'alerts' },
   { path: '/admin/ai', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-ai', name: 'ai' },
@@ -27,7 +29,7 @@ const routes = [
 ];
 const NAV = {
   parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['settings', '#/settings', 'gear', 'Settings']],
-  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
+  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
 };
 
 export const go = (hash) => { if (location.hash === hash) route(); else location.hash = hash; };
@@ -45,7 +47,7 @@ function match(hash) {
   return null;
 }
 
-let navId = 0, cleanup = null;
+let navId = 0, cleanup = null, termsAsked = false;
 async function route() {
   const my = ++navId;
   if (cleanup) { try { cleanup(); } catch { /* view gone */ } cleanup = null; }
@@ -61,6 +63,7 @@ async function route() {
     if (my !== navId) return;
   }
   if (m.route.role && state.user && state.user.role !== m.route.role) return go(homeFor());
+  if (state.user?.terms_required && !termsAsked) { termsAsked = true; import('./views/terms.js').then((t) => t.askAgain((me) => { state.user = me; })); }
 
   clear(root).append(m.route.public ? spinner() : shell(m.route.nav, spinner()));
   const mod = await m.route.view();
@@ -93,7 +96,7 @@ function shell(active, content) {
   const role = state.user?.role || 'parent';
   const items = NAV[role];
   const link = (n, cls) => h('a', { href: n[1], 'aria-current': n[0] === active ? 'page' : null }, icon(n[2], 22), cls === 'bottom' ? h('span', null, n[3]) : n[3]);
-  const bottom = (role === 'parent' ? items.filter((n) => n[0] !== 'reports') : items.filter((n) => ['a-overview', 'a-quality', 'a-accounts', 'a-health', 'settings'].includes(n[0])));
+  const bottom = (role === 'parent' ? items.filter((n) => n[0] !== 'reports') : items.filter((n) => ['a-overview', 'a-content', 'a-accounts', 'a-quality', 'settings'].includes(n[0])));
   return h('div', { class: 'shell' },
     h('a', { class: 'skip', href: '#content', onclick: (e) => { e.preventDefault(); document.getElementById('content')?.focus(); } }, 'Skip to content'),
     h('aside', { class: 'side' },

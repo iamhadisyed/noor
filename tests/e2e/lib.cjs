@@ -37,6 +37,12 @@ async function login(page, email) {
   await page.locator('.codes input').first().click();
   await page.keyboard.type(code, { delay: 30 });
   await page.waitForTimeout(900);
+  if (await page.$('#tac')) {   // a new account has to read and accept the terms first
+    page.sawTerms = true;
+    await page.check('#tac');
+    await page.click('text=Create my account');
+    await page.waitForTimeout(900);
+  }
 }
 
 function check(label, ok, detail = '') {
@@ -54,4 +60,4 @@ function picture(file) {
   const { execFileSync } = require('child_process');
   execFileSync('python3', ['-c', `from PIL import Image, ImageDraw\nim=Image.new('RGB',(900,700),'#f8c9f4'); d=ImageDraw.Draw(im); d.ellipse((250,150,650,550),fill='#f6c9a0'); im.save(r'${file}')`]);
 }
-module.exports = { BASE, OUT, TMP, launch, login, check, wav, picture };
+module.exports = { codes, lastCode, BASE, OUT, TMP, launch, login, check, wav, picture };

@@ -151,7 +151,7 @@ class AdminController extends Controller
             'data' => collect($page->items())->map(fn ($u) => [
                 'id' => $u->id, 'email' => $u->email, 'name' => $u->name, 'role' => $u->role, 'status' => $u->status,
                 'plan' => $u->isPro() ? 'pro' : 'free', 'verified' => (bool) $u->email_verified_at, 'children' => $u->children_count,
-                'last_login_at' => $u->last_login_at, 'created_at' => $u->created_at,
+                'last_login_at' => $u->last_login_at, 'created_at' => $u->created_at, 'status_reason' => $u->status_reason, 'terms_version' => $u->terms_version,
             ])->all(),
             'meta' => ['page' => $page->currentPage(), 'last_page' => $page->lastPage(), 'total' => $page->total()],
         ]);
@@ -160,19 +160,22 @@ class AdminController extends Controller
     public function updateUser(Request $request, int $id): JsonResponse
     {
         $user = User::findOrFail($id);
-        $data = $request->validate(['status' => 'sometimes|in:active,suspended', 'plan' => 'sometimes|in:free,pro', 'subscription_expires_at' => 'sometimes|nullable|date|after:now']);
+        $data = $request->validate(['status' => 'sometimes|in:active,inactive,suspended', 'reason' => 'nullable|string|max:300', 'plan' => 'sometimes|in:free,pro', 'subscription_expires_at' => 'sometimes|nullable|date|after:now']);
 
-        if (($user->isSuperAdmin() || $user->id === $request->user()->id) && ($data['status'] ?? null) === 'suspended') {
-            return response()->json(['message' => 'An administrator cannot be suspended here.'], 422);
+        if (($user->isSuperAdmin() || $user->id === $request->user()->id) && isset($data['status']) && $data['status'] !== 'active') {
+            return response()->json(['message' => 'An administrator cannot be made inactive here.'], 422);
         }
 
         $changes = [];
-        if (isset($data['status'])) { $changes['status'] = $data['status']; }
+        if (isset($data['status'])) {
+            $changes['status'] = $data['status'];
+            $changes['status_reason'] = $data['status'] === 'active' ? null : ($data['reason'] ?? null);
+        }
         if (isset($data['plan'])) { $changes['subscription_tier'] = $data['plan']; }
         if (array_key_exists('subscription_expires_at', $data)) { $changes['subscription_expires_at'] = $data['subscription_expires_at']; }
         $user->update($changes);
 
-        if (($changes['status'] ?? null) === 'suspended') {
+        if (isset($changes['status']) && $changes['status'] !== 'active') {
             $user->tokens()->delete();
         }
         AuditLog::record($request->user(), 'admin.user_updated', $user, $changes);

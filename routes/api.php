@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\InsightsController;
 use App\Http\Controllers\Api\ChildController;
+use App\Http\Controllers\Api\ContentReviewController;
 use App\Http\Controllers\Api\FamilyMemberController;
 use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\MediaController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\SessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    Route::get('legal/terms', [AuthController::class, 'terms']);
     Route::post('auth/code', [AuthController::class, 'requestCode'])->middleware('throttle:otp-request');
     Route::post('auth/verify', [AuthController::class, 'verify'])->middleware('throttle:otp-verify');
 
@@ -24,6 +26,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::patch('me', [AuthController::class, 'updateMe']);
+        Route::post('me/terms', [AuthController::class, 'acceptTerms']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::get('me/sessions', [AuthController::class, 'sessions']);
         Route::delete('me/sessions/{id}', [AuthController::class, 'revokeSession']);
@@ -39,6 +42,15 @@ Route::prefix('v1')->group(function () {
             Route::get('users', [AdminController::class, 'users']);
             Route::patch('users/{id}', [AdminController::class, 'updateUser']);
             Route::get('audit', [AdminController::class, 'audit']);
+
+            Route::get('content/flags', [ContentReviewController::class, 'flags']);
+            Route::post('content/flags/{id}/resolve', [ContentReviewController::class, 'resolve']);
+            Route::get('content/lessons', [ContentReviewController::class, 'lessonsIndex']);
+            Route::get('content/lessons/{id}', [ContentReviewController::class, 'lessonShow']);
+            Route::post('content/lessons/{id}/flag', [ContentReviewController::class, 'flagLesson']);
+            Route::get('content/terms', [ContentReviewController::class, 'terms']);
+            Route::post('content/terms', [ContentReviewController::class, 'addTerm']);
+            Route::delete('content/terms/{id}', [ContentReviewController::class, 'removeTerm']);
         });
 
         Route::post('devices', [AuthController::class, 'registerDevice']);

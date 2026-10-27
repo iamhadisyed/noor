@@ -65,4 +65,6 @@ Parents and the super admin sign in at `https://YOUR-DOMAIN/portal/` with an ema
 - `APP_URL` as the public https address (used in signed picture and sound links)
 - `KINDO_OTP_COOLDOWN` seconds between codes (default 60)
 
+Content review: the super admin's **Content review** page lists flagged lessons, lets them open any lesson (pictures and sounds included, audited), manage blocked words, and make accounts inactive from **Accounts**. The terms text lives in `config/legal.php` (draft: have it reviewed, and raise `version` to ask parents to accept again); the starter blocked-word list is `config/moderation.php`.
+
 Browser tests: `tests/e2e/run.sh` (see `tests/e2e/README.md`).

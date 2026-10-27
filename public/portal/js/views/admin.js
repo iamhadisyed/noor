@@ -1,11 +1,11 @@
 import { api } from '../api.js';
-import { h, icon, fmt, toast, errorText, debounce, spinner, confirmBox } from '../ui.js';
+import { h, icon, fmt, toast, errorText, debounce, spinner, confirmBox, modal } from '../ui.js';
 import { bars, hbars } from '../charts.js';
 import { state } from '../main.js';
 
 /** Super admin console. Everything here is aggregate or operational; no child names, pictures or voices. */
 export async function render(ctx, params, query, name) {
-  const view = { overview, usage, quality, alerts, ai, accounts, audit, health }[name] || overview;
+  const view = { overview, usage, quality, content, alerts, ai, accounts, audit, health }[name] || overview;
   const page = h('div', { class: 'page' }, spinner());
   const out = await view(ctx, page);
   return out || page;
@@ -80,13 +80,17 @@ async function accounts(ctx, page) {
     return h('tr', { 'data-email': u.email },
       h('td', null, h('b', null, u.email), h('div', { class: 'hint' }, u.name)), h('td', null, admin ? h('span', { class: 'chip ink' }, 'Super admin') : 'Parent'),
       h('td', null, (() => { const s = h('select', { class: 'select', style: 'min-height:40px;width:110px;font-size:14px', 'aria-label': `Plan for ${u.email}`, onchange: async (e) => { try { await api(`/admin/users/${u.id}`, { method: 'PATCH', body: { plan: e.target.value } }); toast('Plan updated.'); } catch (er) { toast(errorText(er), 'err'); load(); } } }, [['free', 'Free'], ['pro', 'Pro']].map(([v, l]) => h('option', { value: v }, l))); s.value = u.plan; return s; })()),
-      h('td', null, u.children), h('td', null, fmt.ago(u.last_login_at)), h('td', null, h('span', { class: `chip ${u.status === 'active' ? 'sage' : 'warn'}` }, u.status === 'active' ? 'Active' : 'Suspended')),
+      h('td', null, u.children), h('td', null, fmt.ago(u.last_login_at)),
+      h('td', null, h('span', { class: `chip ${u.status === 'active' ? 'sage' : 'warn'}` }, STATUS[u.status] || u.status), u.status_reason ? h('div', { class: 'hint' }, u.status_reason) : null),
       h('td', null, admin || self ? null : u.status === 'active'
-        ? h('button', { class: 'btn danger sm', onclick: async () => { if (!(await confirmBox({ title: `Suspend ${u.email}?`, body: 'They are signed out everywhere at once and cannot sign in until you restore them.', confirm: 'Suspend', danger: true }))) return; try { await api(`/admin/users/${u.id}`, { method: 'PATCH', body: { status: 'suspended' } }); toast('Account suspended.'); load(); } catch (e) { toast(errorText(e), 'err'); } } }, 'Suspend')
-        : h('button', { class: 'btn soft sm', onclick: async () => { try { await api(`/admin/users/${u.id}`, { method: 'PATCH', body: { status: 'active' } }); toast('Account restored.'); load(); } catch (e) { toast(errorText(e), 'err'); } } }, 'Restore')));
+        ? h('button', { class: 'btn danger sm', onclick: async () => {
+            const reason = await reasonBox({ title: `Make ${u.email} inactive?`, body: 'They are signed out everywhere at once and cannot sign in until you make the account active again. Their lessons stay in place.', confirm: 'Make inactive', label: 'Reason (kept in the audit log)' });
+            if (reason === null) return;
+            try { await api(`/admin/users/${u.id}`, { method: 'PATCH', body: { status: 'inactive', reason } }); toast('Account is now inactive.'); load(); } catch (e) { toast(errorText(e), 'err'); } } }, 'Make inactive')
+        : h('button', { class: 'btn soft sm', onclick: async () => { try { await api(`/admin/users/${u.id}`, { method: 'PATCH', body: { status: 'active' } }); toast('Account is active again.'); load(); } catch (e) { toast(errorText(e), 'err'); } } }, 'Make active')));
   };
   const input = h('input', { class: 'input', type: 'search', 'aria-label': 'Search accounts', placeholder: 'Search by email or name', style: 'min-width:280px', oninput: debounce((e) => { search = e.target.value.trim(); pg = 1; load(); }, 350) });
-  page.replaceChildren(head('Accounts', 'Search, suspend or restore, and change plans. Every change is audited.', input), body);
+  page.replaceChildren(head('Accounts', 'Search, make accounts inactive or active again, and change plans. Every change is audited.', input), body);
   await load();
 }
 
@@ -116,4 +120,106 @@ async function health(ctx, page) {
       row('Email', s.mail.driver !== 'log', s.mail.driver === 'log' ? 'Mail driver is "log": codes are not being emailed. Set MAIL_* in .env.' : `Sending with ${s.mail.driver}`),
       row('Stored media', true, `${s.storage.media_files} pictures and sounds`),
       row('Server', true, `PHP ${s.php}`))));
+}
+
+const STATUS = { active: 'Active', inactive: 'Inactive', suspended: 'Inactive' };
+
+/** Ask for a short written reason. Resolves with the text ('' if left empty) or null if cancelled. */
+function reasonBox({ title, body, confirm, label, danger = true }) {
+  return new Promise((resolve) => modal((box, close) => {
+    const ta = h('textarea', { class: 'textarea', id: 'why', maxlength: '300', 'aria-label': label });
+    box.append(h('h2', null, title), h('p', { class: 'muted' }, body), h('div', { class: 'field', style: 'margin-top:16px' }, h('label', { for: 'why' }, label), ta),
+      h('div', { class: 'actions' }, h('button', { class: 'btn soft', onclick: () => { close(); resolve(null); } }, 'Cancel'), h('button', { class: `btn ${danger ? 'danger' : 'primary'}`, onclick: () => { close(); resolve(ta.value.trim()); } }, confirm)));
+  }));
+}
+
+/* ---------- content review: what parents post for children ---------- */
+async function content(ctx, page) {
+  let tab = 'queue';
+  const body = h('div', null);
+  const draw = async () => {
+    body.replaceChildren(spinner());
+    const flagsOpen = (await api('/admin/content/flags?status=open')).meta.open;
+    const tabs = h('div', { class: 'tabs', role: 'tablist' }, [['queue', `Review queue${flagsOpen ? ` (${flagsOpen})` : ''}`], ['browse', 'All lessons'], ['words', 'Blocked words']].map(([k, l]) =>
+      h('button', { role: 'tab', 'aria-selected': String(tab === k), onclick: () => { tab = k; draw(); } }, l)));
+    const inner = await ({ queue: queueTab, browse: browseTab, words: wordsTab }[tab])();
+    body.replaceChildren(tabs, inner);
+  };
+  page.replaceChildren(head('Content review', 'Lessons, pictures and sounds that parents make for children. Opening a lesson is recorded in the audit log.'), body);
+  await draw();
+
+  async function queueTab() {
+    const r = await api('/admin/content/flags?status=open');
+    if (!r.data.length) return h('div', { class: 'card' }, h('h2', null, 'Nothing to review'), h('p', { class: 'muted' }, 'New flags appear here when the word filter finds something or you flag a lesson yourself.'));
+    return h('div', { class: 'card' }, h('div', { class: 'table-wrap' }, h('table', null,
+      h('thead', null, h('tr', null, ['When', 'Parent', 'Why flagged', 'Text', ''].map((t) => h('th', null, t)))),
+      h('tbody', null, r.data.map((f) => h('tr', { 'data-flag': f.id },
+        h('td', null, fmt.ago(f.created_at)), h('td', null, f.owner.email || `#${f.owner.id}`, f.owner.status && f.owner.status !== 'active' ? h('div', { class: 'hint' }, STATUS[f.owner.status]) : null),
+        h('td', null, f.reason === 'bad_word' ? h('span', { class: 'chip bad' }, `Word: ${f.term}`) : h('span', { class: 'chip' }, 'Flagged by admin')),
+        h('td', null, f.excerpt || f.note || '—'),
+        h('td', null, h('div', { class: 'row wrap' },
+          f.lesson_id ? h('button', { class: 'btn soft sm', onclick: () => openLesson(f.lesson_id) }, icon('eye', 16), 'Open') : null,
+          h('button', { class: 'btn soft sm', 'data-act': 'dismiss', onclick: () => decide(f, 'dismiss') }, 'Looks fine'),
+          h('button', { class: 'btn danger sm', 'data-act': 'remove', onclick: () => decide(f, 'remove') }, 'Remove'),
+          f.owner.status === 'active' ? h('button', { class: 'btn danger sm', 'data-act': 'deactivate_owner', onclick: () => decide(f, 'deactivate_owner') }, 'Remove and deactivate') : null))))))));
+  }
+
+  async function decide(f, action) {
+    const T = { dismiss: ['Looks fine?', 'The flag is closed and the lesson can be published again. The same text will not be flagged twice.', 'Looks fine', false],
+      remove: ['Remove this content?', f.family_member_id ? 'The family card and its files are deleted.' : 'The lesson is archived and hidden from the child.', 'Remove', true],
+      deactivate_owner: ['Remove it and make the parent inactive?', 'The content is removed, and the parent is signed out and cannot sign in until you make the account active again.', 'Remove and deactivate', true] }[action];
+    const note = await reasonBox({ title: T[0], body: T[1], confirm: T[2], label: 'Note (kept in the audit log)', danger: T[3] });
+    if (note === null) return;
+    try { await api(`/admin/content/flags/${f.id}/resolve`, { method: 'POST', body: { action, note } }); toast('Done.'); draw(); } catch (e) { toast(errorText(e), 'err'); }
+  }
+
+  /** Everything in the lesson: text, pictures you can see and sounds you can play. */
+  async function openLesson(id) {
+    let l;
+    try { l = await api(`/admin/content/lessons/${id}`); } catch (e) { return toast(errorText(e), 'err'); }
+    modal((box, close) => {
+      box.classList.add('wide');
+      box.append(h('div', null, h('div', { class: 'row between' }, h('div', null, h('h2', null, l.title), h('p', { class: 'muted' }, `${l.owner?.email || ''} · child ${l.child_name || '—'} · ${l.status}`)), h('button', { class: 'icon-btn', 'aria-label': 'Close', onclick: close }, icon('x', 20))),
+        l.description ? h('p', null, l.description) : null,
+        l.flags.filter((f) => f.status === 'open').map((f) => h('div', { class: 'chip bad', style: 'margin:4px 8px 4px 0' }, f.reason === 'bad_word' ? `Flagged word: ${f.term}` : 'Flagged by admin')),
+        l.tasks.map((t) => h('div', { class: 'review-task' },
+          t.image_url ? h('img', { src: t.image_url, alt: t.image_alt || `Picture for ${t.title}`, loading: 'lazy' }) : h('div', { class: 'noimg' }, 'No picture'),
+          h('div', null, h('b', null, `${t.position}. ${t.title}`), h('div', { class: 'hint' }, t.type.replace(/_/g, ' '), t.target ? ` · ${t.target}` : ''), t.instruction ? h('p', null, t.instruction) : null,
+            t.audio_url ? h('audio', { controls: true, preload: 'none', src: t.audio_url, 'aria-label': `Sound for ${t.title}` }) : h('div', { class: 'hint' }, 'No sound')))),
+        h('div', { class: 'actions' }, l.flags.some((f) => f.status === 'open') ? null : h('button', { class: 'btn danger', onclick: async () => {
+          const note = await reasonBox({ title: 'Flag this lesson?', body: 'It is taken off the child’s device until you review it.', confirm: 'Flag for review', label: 'Note' });
+          if (note === null) return;
+          try { await api(`/admin/content/lessons/${id}/flag`, { method: 'POST', body: { note } }); close(); toast('Flagged.'); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, icon('flag', 18), 'Flag for review'),
+          h('button', { class: 'btn soft', onclick: close }, 'Close'))));
+    });
+  }
+
+  async function browseTab() {
+    let search = '', flagged = false, pg = 1;
+    const list = h('div', null, spinner());
+    const load = async () => {
+      const r = await api(`/admin/content/lessons?search=${encodeURIComponent(search)}&flagged=${flagged ? 1 : 0}&page=${pg}`);
+      list.replaceChildren(h('div', { class: 'card' }, h('div', { class: 'table-wrap' }, h('table', null,
+        h('thead', null, h('tr', null, ['Lesson', 'Parent', 'Child', 'Tasks', 'Status', ''].map((t) => h('th', null, t)))),
+        h('tbody', null, r.data.length ? r.data.map((l) => h('tr', null, h('td', null, h('b', null, l.title)), h('td', null, l.owner_email), h('td', null, l.child || '—'), h('td', null, l.tasks),
+          h('td', null, h('span', { class: `chip ${l.open_flags ? 'bad' : l.status === 'published' ? 'sage' : ''}` }, l.open_flags ? 'Flagged' : l.status)),
+          h('td', null, h('button', { class: 'btn soft sm', onclick: () => openLesson(l.id) }, icon('eye', 16), 'Open')))) : h('tr', null, h('td', { colspan: 6, class: 'muted' }, 'No lessons match.'))))),
+        h('div', { class: 'pager' }, h('span', { class: 'muted' }, `${r.meta.total} lessons · page ${r.meta.page} of ${r.meta.last_page}`), h('button', { class: 'btn soft sm', disabled: pg <= 1, onclick: () => { pg -= 1; load(); } }, 'Previous'), h('button', { class: 'btn soft sm', disabled: pg >= r.meta.last_page, onclick: () => { pg += 1; load(); } }, 'Next'))));
+    };
+    const input = h('input', { class: 'input', type: 'search', 'aria-label': 'Search lessons', placeholder: 'Search by lesson title or parent email', style: 'max-width:420px', oninput: debounce((e) => { search = e.target.value.trim(); pg = 1; load(); }, 350) });
+    const only = h('label', { class: 'check' }, h('input', { type: 'checkbox', onchange: (e) => { flagged = e.target.checked; pg = 1; load(); } }), ' Flagged only');
+    const wrap = h('div', null, h('div', { class: 'row wrap', style: 'margin-bottom:16px;align-items:center' }, input, only), list);
+    await load();
+    return wrap;
+  }
+
+  async function wordsTab() {
+    const r = await api('/admin/content/terms');
+    const input = h('input', { class: 'input', 'aria-label': 'Word or phrase to block', placeholder: 'Add a word or short phrase', maxlength: '60', style: 'max-width:340px' });
+    const add = async (e) => { e.preventDefault(); if (!input.value.trim()) return; try { await api('/admin/content/terms', { method: 'POST', body: { term: input.value } }); toast('Added.'); draw(); } catch (er) { toast(errorText(er), 'err'); } };
+    return h('div', { class: 'card' }, h('h2', null, 'Blocked words'),
+      h('p', { class: 'muted', style: 'margin:6px 0 16px' }, `${r.built_in_count} words are built in. Add your own (any language, including Urdu script). Matching is whole word and sees through tricks like f.u.c.k. A match never blocks saving: it flags the lesson for you and keeps it off the child’s device until you decide.`),
+      h('form', { class: 'row wrap', onsubmit: add, style: 'margin-bottom:16px' }, input, h('button', { class: 'btn primary', type: 'submit' }, 'Add word')),
+      r.custom.length ? h('div', { class: 'row wrap' }, r.custom.map((t) => h('span', { class: 'chip' }, t.term, h('button', { class: 'icon-btn', style: 'width:24px;height:24px;min-height:0', 'aria-label': `Remove ${t.term}`, onclick: async () => { try { await api(`/admin/content/terms/${t.id}`, { method: 'DELETE' }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, icon('x', 14))))) : h('p', { class: 'hint' }, 'No custom words yet.'));
+  }
 }

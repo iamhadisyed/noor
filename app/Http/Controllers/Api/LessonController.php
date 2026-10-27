@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Lesson;
 use App\Models\LessonTask;
+use App\Services\ContentFilter;
 use App\Services\LessonRules;
 use App\Services\MediaStore;
 use Illuminate\Http\JsonResponse;
@@ -56,6 +57,7 @@ class LessonController extends Controller
 
         $data = $request->validate($this->rules());
         $lesson = $child->lessons()->create($data + ['user_id' => $request->user()->id, 'track' => $data['track'] ?? $child->track]);
+        app(ContentFilter::class)->scanLesson($lesson);
 
         return response()->json($this->present($lesson), 201);
     }
@@ -69,6 +71,7 @@ class LessonController extends Controller
     {
         $lesson = self::owned($request, $id);
         $lesson->update($request->validate($this->rules(true)));
+        app(ContentFilter::class)->scanLesson($lesson);
         $this->revalidate($lesson);
 
         return response()->json($this->present($lesson->fresh()));
@@ -132,6 +135,7 @@ class LessonController extends Controller
 
             return $copy;
         });
+        app(ContentFilter::class)->scanWholeLesson($copy);
 
         return response()->json($this->present($copy), 201);
     }
