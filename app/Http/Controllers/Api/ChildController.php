@@ -92,7 +92,7 @@ class ChildController extends Controller
         return $request->user()->children()->findOrFail($childId);
     }
 
-    private function present(Child $c): array
+    public function present(Child $c): array
     {
         $defaults = $c->track === 'special' ? self::SUPPORT_SPECIAL : self::SUPPORT_STANDARD;
 

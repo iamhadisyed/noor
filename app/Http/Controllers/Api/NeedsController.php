@@ -92,7 +92,7 @@ class NeedsController extends Controller
         return ChildNeedsLog::whereIn('child_id', $request->user()->children()->select('id'))->findOrFail($id);
     }
 
-    private function present(ChildNeedsLog $l): array
+    public function present(ChildNeedsLog $l): array
     {
         $status = $l->acknowledged ? 'on_the_way' : ($l->seen_at ? 'seen' : 'sent');
 

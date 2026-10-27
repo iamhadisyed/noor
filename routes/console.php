@@ -18,3 +18,13 @@ Schedule::call(function () {
 
 // Heartbeat so the admin health panel can tell the cron scheduler is alive.
 Schedule::call(fn () => \Illuminate\Support\Facades\Cache::put('scheduler:last_run', now()->toIso8601String(), 3600))->everyMinute()->name('scheduler-heartbeat');
+
+// Keep the change feed and retry keys small. A phone that was offline longer than 30 days simply re-downloads everything.
+Schedule::call(function () {
+    $old = \App\Models\SyncChange::where('created_at', '<', now()->subDays(30));
+    if ($max = $old->max('id')) {
+        \Illuminate\Support\Facades\Cache::forever('sync:floor', max((int) \Illuminate\Support\Facades\Cache::get('sync:floor', 0), (int) $max));
+        $old->delete();
+    }
+    \Illuminate\Support\Facades\DB::table('idempotency_keys')->where('created_at', '<', now()->subDays(2))->delete();
+})->dailyAt('03:10')->name('prune-sync');
