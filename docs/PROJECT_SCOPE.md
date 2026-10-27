@@ -24,7 +24,7 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 | Practice sync (§5.2 data side) | `POST children/{id}/sessions` stores a session + its mistakes | ✅ |
 | AI reports API (§4 Pro) | Generate (queued, Pro only) and fetch latest | ✅ |
 | Printable PECS PDF (§8.3) | Endpoint + Blade view; free = 4-card sample, Pro = chosen cards, A4/Letter. Urdu labels render joined and in the right order (Noto Naskh Arabic, drawn as images); verified against a Chromium reference. Style is Naskh, not Nastaliq | ✅ |
-| UI design system (§3) | Interactive prototype of the Kindo visual language (Welcome, Child Home, Parent Plan, Needs board with sent and Feelings states) in `design/prototype`, measured from the approved reference. Original placeholder art; not yet in Flutter | 🟡 design reference only |
+| UI design system (§3) | Interactive prototype of the Kindo visual language (Welcome, Child Home, Parent Plan, Needs board with sent and Feelings states, Parent alert feed with detail and lock-screen push) in `design/prototype`, measured from the approved reference. Original placeholder art; not yet in Flutter | 🟡 design reference only |
 | Hosting (§6.1) | Database queue, cPanel cron lines and `schedule:run` documented in README | ✅ |
 
 ## 2. Deliberate deviations from the spec
@@ -55,7 +55,7 @@ Nothing open. Last completed: Urdu in the PECS PDF. DomPDF cannot shape Arabic-s
 | Subscriptions / billing (§4) | `subscription_tier` exists, but nothing sets it (no Play/App Store receipt or payment handling) |
 | Account basics | No password reset, email verification, profile update/delete |
 | CRUD gaps | Update/delete child, delete family member, custom AAC cards, report history list |
-| Needs analytics for parent | No potty-timing summary endpoint beyond the AI report |
+| Needs analytics for parent | No potty-timing summary endpoint beyond the AI report; no alert-feed history, reply-time or "seen" endpoints, and acknowledging does not yet notify the child (see `design/README.md`) |
 | Tier gating of lesson content (§4) | Urdu letters Alif–Se, 50 CVC words etc. are content/client rules; not modelled server-side |
 | Seed content | No icon/audio assets, no Urdu letter or CVC word data |
 | Admin | No admin panel, no abuse/moderation controls |

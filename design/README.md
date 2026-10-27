@@ -22,6 +22,24 @@ Three states of the AAC board, same visual language:
 
 Open decisions: Potty stays one-touch as in the spec, protected only by Undo and the server rate limit (30 alerts/min); say if you want a confirm step. The speaker button both speaks and notifies; a "speak only" mode for practice would need its own control.
 
+## Parent alert feed (`design/prototype/alerts.html`)
+
+Three connected states of the parent app's alert experience:
+
+1. **Feed**: header with the child and a day summary, a live **hero card** for the unanswered alert ("Ayan needs the potty", NEW badge, "I'm on it" and call buttons), then a "Today" sheet of answered alerts with the responder and reply time.
+2. **Alert detail**: the need, who was notified, a Sent / Seen / On the way stepper, "I'm on my way", Call / Message, and a Pro teaser for the potty-timing pattern from the AI report.
+3. **Lock-screen push**: the urgent notification with inline "I'm on it" and "Call Papa" actions, and the quieter earlier notification below it.
+
+Replying from any of the three updates the other two (shared state): the hero turns calm lavender, the detail screen shows "You're on your way", the notification flips to REPLIED, a new row joins the feed, and an Undo toast appears. `?screen=feed|detail|lock` shows one screen.
+
+Deviation from the first prototype: the hero title and subtitle use dark ink instead of white, because a time-critical alert must be readable (white on lilac is about 1.9:1).
+
+### Backend gaps this design exposes
+- The FCM payload currently says "Ayan needs: Potty / Tap to acknowledge"; the design's copy is "Ayan needs the potty / Tap to respond", with Android and iOS notification actions ("I'm on it", "Call").
+- `POST needs/{id}/acknowledge` exists, but it does not yet notify the child app ("Mama is on the way") or record which parent replied.
+- No "Seen" event: opening the alert should mark it seen for the stepper.
+- Feed endpoints for per-day history, reply times and the "avg reply" figure do not exist yet, and the pattern teaser needs the Pro report data.
+
 ## Design tokens
 
 | Token | Value | Use |
@@ -56,4 +74,4 @@ Phone canvas is 426 x 918 px; every position in `styles.css` is an absolute meas
 - **Illustrations are original placeholders.** The reference artwork is someone else's work and cannot be reused; the mascot, trophy girl, avatars and tile images here are simple drawings made for this prototype. Final character art should come from an illustrator.
 - **Contrast.** White title and subtitle on the lilac hero card (about 1.9:1) copy the reference but fail WCAG AA. Needs a decision (darker ink on the hero) before launch, especially for a parent-facing app.
 - **Sensory-safe palette.** The reference's saturated orchid and lilac are livelier than the spec's oatmeal/sage palette. A `sensory_mode` variant (desaturated tokens, no motion) should be defined; the CSS already respects `prefers-reduced-motion`.
-- Not yet designed in this style: family-card game, tracing canvas, parent alert feed, subscription screen.
+- Not yet designed in this style: family-card game, tracing canvas, subscription screen.
