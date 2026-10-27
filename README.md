@@ -67,4 +67,6 @@ Parents and the super admin sign in at `https://YOUR-DOMAIN/portal/` with an ema
 
 Content review: the super admin's **Content review** page lists flagged lessons, lets them open any lesson (pictures and sounds included, audited), manage blocked words, and make accounts inactive from **Accounts**. The terms text lives in `config/legal.php` (draft: have it reviewed, and raise `version` to ask parents to accept again); the starter blocked-word list is `config/moderation.php`.
 
+Family-card photos and voices are private (signed links only). On an installation that already has cards, run once after deploying: `php artisan kindo:privatize-media` (moves old public files to private storage, safe to repeat).
+
 Browser tests: `tests/e2e/run.sh` (see `tests/e2e/README.md`).

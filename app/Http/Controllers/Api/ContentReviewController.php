@@ -12,7 +12,6 @@ use App\Services\ContentFilter;
 use App\Services\MediaStore;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * The super admin's view of what parents post for children. This is deliberately the one place where
@@ -73,6 +72,19 @@ class ContentReviewController extends Controller
             'owner' => $owner ? ['id' => $owner->id, 'email' => $owner->email, 'status' => $owner->status] : null,
             'child_name' => $lesson->child?->name,
             'flags' => $lesson->flags()->latest('id')->get()->map(fn ($f) => $this->presentFlag($f))->all(),
+        ]);
+    }
+
+    /** A family card with its photo and voice, for a flagged item. Audited like any other view. */
+    public function familyShow(Request $request, int $id): JsonResponse
+    {
+        $m = FamilyMember::with('child:id,name,user_id')->findOrFail($id);
+        $owner = \App\Models\User::find($m->child?->user_id);
+        AuditLog::record($request->user(), 'admin.content_viewed', $m, ['owner_id' => $owner?->id]);
+
+        return response()->json(FamilyMemberController::present($m, $this->media) + [
+            'owner' => $owner ? ['id' => $owner->id, 'email' => $owner->email, 'status' => $owner->status] : null,
+            'child_name' => $m->child?->name,
         ]);
     }
 
@@ -143,11 +155,7 @@ class ContentReviewController extends Controller
     private function removeContent(ContentFlag $flag): void
     {
         if ($flag->family_member_id && ($m = FamilyMember::find($flag->family_member_id))) {
-            foreach ([$m->photo_path, $m->audio_prompt_path] as $path) {
-                if ($path) {
-                    Storage::disk('public')->delete($path);
-                }
-            }
+            $this->media->forgetFamily($m);
             $m->delete();
         } elseif ($flag->lesson_id && ($lesson = Lesson::find($flag->lesson_id))) {
             $lesson->update(['status' => 'archived']);   // archived, not erased, so the decision can be reviewed

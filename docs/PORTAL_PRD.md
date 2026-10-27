@@ -109,7 +109,7 @@ Support access to a parent's data is **not** impersonation. It is a time-limited
 ## 7. Recommended features that were not in the brief
 
 **P0, required before real families use it**
-1. Private media: family and lesson images and sounds are stored on a private disk and served through short-lived signed links, never public URLs (the current family card upload uses the public disk and must change).
+1. Private media: family and lesson images and sounds are stored on a private disk and served through short-lived signed links, never public URLs. **Done**, including family cards (`php artisan kindo:privatize-media` moves older files).
 2. Audit log, account suspension, and neutral error messages on sign-in.
 3. Consent and privacy: parental consent text, data export, full delete, retention rules. Children's data triggers COPPA, GDPR-K and local rules.
 4. Backups of the database and media, and a restore test.
@@ -168,7 +168,7 @@ Most families will use the app, so the app is the main client and the portal mus
 - **Accounts can be made inactive** by the super admin with a written reason. Inactive means signed out everywhere at once and unable to sign in until made active again.
 - **Terms and conditions** must be read and accepted before a new account is created (the sign-in code stays valid while the parent reads). Acceptance and version are stored; bumping `config/legal.php` `version` asks every parent again. The text in `config/legal.php` is a draft and needs legal review.
 
-Not yet covered: family-card photos and voices are still on the public disk, so the admin cannot open them from the console until phase 5 moves them to private storage; the filter reads text only (pictures and sounds are reviewed by a person); parents are not emailed when content is removed.
+Not yet covered: the filter reads text only (pictures and sounds are reviewed by a person); parents are not emailed when content is removed.
 
 ## 11. Decisions made while building phase 2
 
