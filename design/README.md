@@ -40,6 +40,21 @@ Deviation from the first prototype: the hero title and subtitle use dark ink ins
 - No "Seen" event: opening the alert should mark it seen for the stepper.
 - Feed endpoints for per-day history, reply times and the "avg reply" figure do not exist yet, and the pattern teaser needs the Pro report data.
 
+## Family card game "Apno Ki Pehchan" (`design/prototype/family.html`)
+
+1. **Game (child)**: "Who is this?" with an Urdu line, a tilted photo card with a play button and the recorded 3-second voice clip, three large name choices (English and Urdu), and "Hear it again". A wrong pick gives a gentle wobble and "Let's try one more time!"; a right pick marks the choice with a check, dims the others and advances the round dashes. No red, no buzzer.
+2. **Celebration**: "That's Mama!" (English and Urdu), a check badge, soft confetti that drifts slowly (off under `prefers-reduced-motion`), a star, the replayable voice clip, round progress, and "Next face".
+3. **Add a family card (parent)**: photo preview with Retake, a relation picker that fills the shown name and its Urdu form, a 3-second voice recorder with countdown, a live free-tier meter ("1 of 2 free cards used", Pro unlocks unlimited), and Save.
+
+`?screen=game|win|add` shows one screen. Voice playback and recording are visual only in the prototype.
+
+Notes for the build: photos of children's relatives are personal data, so the app needs a clear parental consent line and a delete control; the photo is cropped client-side to 600 x 600 and the clip kept under 150 KB, matching the API limits.
+
+### Backend gaps this design exposes
+- Family cards can be listed and created, but not renamed, replaced or deleted; the screen needs update and delete.
+- Game rounds are not recorded: `practice_sessions` has only `urdu` / `english`, so family-recognition results need a game type (or their own table) before the AI report can use them.
+- The Pro meter needs the card count and limit returned by the API rather than computed on the device.
+
 ## Design tokens
 
 | Token | Value | Use |
@@ -74,4 +89,4 @@ Phone canvas is 426 x 918 px; every position in `styles.css` is an absolute meas
 - **Illustrations are original placeholders.** The reference artwork is someone else's work and cannot be reused; the mascot, trophy girl, avatars and tile images here are simple drawings made for this prototype. Final character art should come from an illustrator.
 - **Contrast.** White title and subtitle on the lilac hero card (about 1.9:1) copy the reference but fail WCAG AA. Needs a decision (darker ink on the hero) before launch, especially for a parent-facing app.
 - **Sensory-safe palette.** The reference's saturated orchid and lilac are livelier than the spec's oatmeal/sage palette. A `sensory_mode` variant (desaturated tokens, no motion) should be defined; the CSS already respects `prefers-reduced-motion`.
-- Not yet designed in this style: family-card game, tracing canvas, subscription screen.
+- Not yet designed in this style: tracing canvas, subscription screen.

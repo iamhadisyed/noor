@@ -19,12 +19,12 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 | Need/potty alert API (§9.1 server side) | `POST child/alert` logs the need and pushes to all parent devices; live feed; acknowledge | ✅ |
 | Auth | Register, login, bearer tokens (Sanctum), device-token registration | ✅ |
 | Child profiles (§4 multi-profile) | List/create; free = 1 profile, Pro = 4 (HTTP 402 beyond limit) | ✅ |
-| Family cards (§5.1) | List/create with photo (≤300 KB) and audio (≤150 KB) upload; free = 2 cards | 🟡 (no edit/delete) |
+| Family cards (§5.1) | List/create with photo (≤300 KB) and audio (≤150 KB) upload; free = 2 cards. Game and add-card screens designed (`design/`); game results not recorded server-side | 🟡 (no edit/delete, no game results) |
 | AAC cards (§5.1, §4) | Stock-card seeder (13 cards, EN + Urdu labels); free tier sees only non-Pro cards | 🟡 (no custom-card CRUD, no icon images shipped) |
 | Practice sync (§5.2 data side) | `POST children/{id}/sessions` stores a session + its mistakes | ✅ |
 | AI reports API (§4 Pro) | Generate (queued, Pro only) and fetch latest | ✅ |
 | Printable PECS PDF (§8.3) | Endpoint + Blade view; free = 4-card sample, Pro = chosen cards, A4/Letter. Urdu labels render joined and in the right order (Noto Naskh Arabic, drawn as images); verified against a Chromium reference. Style is Naskh, not Nastaliq | ✅ |
-| UI design system (§3) | Interactive prototype of the Kindo visual language (Welcome, Child Home, Parent Plan, Needs board with sent and Feelings states, Parent alert feed with detail and lock-screen push) in `design/prototype`, measured from the approved reference. Original placeholder art; not yet in Flutter | 🟡 design reference only |
+| UI design system (§3) | Interactive prototype of the Kindo visual language (Welcome, Child Home, Parent Plan, Needs board with sent and Feelings states, Parent alert feed with detail and lock-screen push, Family card game with celebration and parent add-card flow) in `design/prototype`, measured from the approved reference. Original placeholder art; not yet in Flutter | 🟡 design reference only |
 | Hosting (§6.1) | Database queue, cPanel cron lines and `schedule:run` documented in README | ✅ |
 
 ## 2. Deliberate deviations from the spec
