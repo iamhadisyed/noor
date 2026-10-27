@@ -18,7 +18,7 @@ class MediaStore
     public const MAX_IMAGE_SIDE = 600;
     public const MAX_IMAGE_UPLOAD_KB = 2048;
     public const MAX_AUDIO_KB = 150;
-    public const AUDIO_MIMES = ['audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/ogg', 'audio/webm', 'video/webm', 'audio/wav', 'audio/x-wav', 'audio/wave'];
+    public const AUDIO_MIMES = ['audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/ogg', 'audio/webm', 'video/webm', 'video/mp4', 'audio/wav', 'audio/x-wav', 'audio/wave'];
 
     public function storeImage(LessonTask $task, UploadedFile $file): void
     {
@@ -53,10 +53,10 @@ class MediaStore
         }
 
         $this->forget($task->audio_path);
-        $ext = ['audio/mpeg' => 'mp3', 'audio/mp4' => 'm4a', 'audio/x-m4a' => 'm4a', 'audio/aac' => 'aac', 'audio/ogg' => 'ogg', 'audio/webm' => 'webm', 'video/webm' => 'webm'][$mime] ?? 'wav';
+        $ext = ['audio/mpeg' => 'mp3', 'audio/mp4' => 'm4a', 'video/mp4' => 'm4a', 'audio/x-m4a' => 'm4a', 'audio/aac' => 'aac', 'audio/ogg' => 'ogg', 'audio/webm' => 'webm', 'video/webm' => 'webm'][$mime] ?? 'wav';
         $path = $this->path($task, $ext);
         Storage::disk(self::DISK)->put($path, file_get_contents($file->getRealPath()));
-        $task->update(['audio_path' => $path, 'audio_mime' => $mime === 'video/webm' ? 'audio/webm' : $mime]);
+        $task->update(['audio_path' => $path, 'audio_mime' => ['video/webm' => 'audio/webm', 'video/mp4' => 'audio/mp4'][$mime] ?? $mime]);
     }
 
     public function remove(LessonTask $task, string $kind): void

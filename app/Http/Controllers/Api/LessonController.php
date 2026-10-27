@@ -171,6 +171,17 @@ class LessonController extends Controller
         return response()->json($this->present($lesson), 201);
     }
 
+    /** Everything a client needs to show the same rules and defaults as the server. */
+    public function meta(): JsonResponse
+    {
+        return response()->json([
+            'task_types' => LessonRules::types(),
+            'support_defaults' => ['standard' => ChildController::SUPPORT_STANDARD, 'special' => ChildController::SUPPORT_SPECIAL],
+            'neurotypes' => ['neurotypical', 'autism_spectrum', 'speech_delay', 'adhd', 'down_syndrome'],
+            'limits' => ['image_max_side' => MediaStore::MAX_IMAGE_SIDE, 'audio_max_kb' => MediaStore::MAX_AUDIO_KB, 'lessons_per_child_free' => (int) config('kindo.free_limits.lessons_per_child'), 'children_free' => (int) config('kindo.free_limits.children'), 'children_pro' => (int) config('kindo.free_limits.pro_children')],
+        ]);
+    }
+
     public function taskTypes(): JsonResponse
     {
         return response()->json(LessonRules::types());

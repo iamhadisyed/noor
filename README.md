@@ -57,3 +57,12 @@ Run `php artisan config:cache` in production; keys are read through `config/kind
 Scope note: this repo contains the backend only. The Flutter/native apps from the spec are not included.
 
 Urdu in the PECS PDF: DomPDF cannot shape Arabic script, so `App\Support\UrduShaper` joins letters and `UrduText` draws each label with GD/FreeType (needs the `gd` extension with FreeType) using Noto Naskh Arabic from `resources/fonts` (SIL OFL licence included).
+
+## Web portal (`/portal`)
+Parents and the super admin sign in at `https://YOUR-DOMAIN/portal/` with an email and a 6-digit code; it uses the same `/api/v1` as the app. Set in `.env`:
+- `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS` (SMTP from cPanel or a mail service) so codes can be sent
+- `SUPER_ADMIN_EMAILS=you@example.com` (comma separated)
+- `APP_URL` as the public https address (used in signed picture and sound links)
+- `KINDO_OTP_COOLDOWN` seconds between codes (default 60)
+
+Browser tests: `tests/e2e/run.sh` (see `tests/e2e/README.md`).

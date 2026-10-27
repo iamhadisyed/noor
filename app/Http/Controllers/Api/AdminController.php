@@ -24,6 +24,12 @@ use Illuminate\Support\Facades\Schema;
  */
 class AdminController extends Controller
 {
+    /** Tasks that belong to a parent's live or draft lessons (never the starter templates or archived lessons). */
+    private function realTasks()
+    {
+        return LessonTask::whereHas('lesson', fn ($q) => $q->where('is_template', false)->where('status', '!=', 'archived'));
+    }
+
     public function overview(): JsonResponse
     {
         $week = now()->subDays(7);
@@ -41,7 +47,7 @@ class AdminController extends Controller
             'lessons' => [
                 'published' => Lesson::where('is_template', false)->where('status', 'published')->count(),
                 'drafts' => Lesson::where('is_template', false)->where('status', 'draft')->count(),
-                'tasks' => LessonTask::count(),
+                'tasks' => $this->realTasks()->count(),
             ],
             'alerts_7d' => [
                 'total' => $needs->count(), 'answered' => $needs->where('acknowledged', true)->count(),
@@ -80,13 +86,13 @@ class AdminController extends Controller
     {
         $lessons = Lesson::where('is_template', false)->where('status', 'draft')->with('tasks', 'child')->get();
         $blocked = $lessons->filter(fn ($l) => ! \App\Services\LessonRules::readiness($l)['ready'])->count();
-        $missingSound = LessonTask::all()->filter(fn ($t) => \App\Services\LessonRules::needsAudio($t) && ! $t->audio_path)->count();
+        $missingSound = $this->realTasks()->get()->filter(fn ($t) => \App\Services\LessonRules::needsAudio($t) && ! $t->audio_path)->count();
 
         $needs = ChildNeedsLog::where('created_at', '>=', now()->subDays(30))->get();
         $bucket = fn ($n) => ! $n->acknowledged_at ? 'unanswered' : (($s = $n->created_at->diffInSeconds($n->acknowledged_at)) < 60 ? 'under_1m' : ($s < 300 ? '1_to_5m' : ($s < 900 ? '5_to_15m' : 'over_15m')));
 
         return response()->json([
-            'tasks_by_type' => LessonTask::select('type', DB::raw('count(*) as n'))->groupBy('type')->pluck('n', 'type'),
+            'tasks_by_type' => $this->realTasks()->select('type', DB::raw('count(*) as n'))->groupBy('type')->pluck('n', 'type'),
             'draft_lessons_blocked' => $blocked, 'draft_lessons' => $lessons->count(), 'tasks_missing_required_sound' => $missingSound,
             'reply_time_30d' => collect(['under_1m', '1_to_5m', '5_to_15m', 'over_15m', 'unanswered'])->mapWithKeys(fn ($b) => [$b => $needs->filter(fn ($n) => $bucket($n) === $b)->count()]),
         ]);
@@ -128,7 +134,7 @@ class AdminController extends Controller
             'queue' => ['pending' => Schema::hasTable('jobs') ? DB::table('jobs')->count() : null, 'failed' => Schema::hasTable('failed_jobs') ? DB::table('failed_jobs')->count() : null],
             'scheduler' => ['last_run' => $last, 'alive' => $last ? CarbonImmutable::parse($last)->gt(now()->subMinutes(5)) : false],
             'mail' => ['driver' => config('mail.default')],
-            'storage' => ['media_files' => LessonTask::whereNotNull('image_path')->count() + LessonTask::whereNotNull('audio_path')->count()],
+            'storage' => ['media_files' => $this->realTasks()->whereNotNull('image_path')->count() + $this->realTasks()->whereNotNull('audio_path')->count()],
             'php' => PHP_VERSION, 'time' => now()->toIso8601String(),
         ]);
     }

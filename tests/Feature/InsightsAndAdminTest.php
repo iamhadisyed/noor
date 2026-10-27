@@ -202,6 +202,21 @@ class InsightsAndAdminTest extends TestCase
         $r->assertJsonPath('tasks_missing_required_sound', 1)->assertJsonPath('draft_lessons', 1)->assertJsonPath('draft_lessons_blocked', 1)->assertJsonPath('tasks_by_type.spell_word', 1);
     }
 
+    public function test_starter_templates_and_archived_lessons_never_count_as_parent_content(): void
+    {
+        $this->seed(\Database\Seeders\LessonTemplateSeeder::class);
+        [$p, $c] = $this->parentWithChild();
+        $gone = Lesson::create(['user_id' => $p->id, 'child_id' => $c->id, 'title' => 'Old', 'status' => 'archived']);
+        $gone->tasks()->create(['position' => 1, 'type' => 'spell_word', 'title' => 'x', 'target' => 'x']);
+        $live = Lesson::create(['user_id' => $p->id, 'child_id' => $c->id, 'title' => 'Live', 'status' => 'draft']);
+        $live->tasks()->create(['position' => 1, 'type' => 'spell_word', 'title' => 'Cat', 'target' => 'cat']);
+
+        $this->as($this->admin());
+        $this->getJson('/api/v1/admin/overview')->assertJsonPath('lessons.tasks', 1);
+        $q = $this->getJson('/api/v1/admin/quality');
+        $q->assertJsonPath('tasks_missing_required_sound', 1)->assertJsonPath('tasks_by_type.spell_word', 1)->assertJsonPath('draft_lessons', 1);
+    }
+
     public function test_ai_report_provider_is_recorded_and_counted(): void
     {
         config(['kindo.groq_keys' => ['g1'], 'kindo.gemini_keys' => []]);

@@ -142,7 +142,7 @@ Support access to a parent's data is **not** impersonation. It is a time-limited
 | 1 | Email code sign-in, roles, sessions, audit log, this spec | **Done.** Tests pass; super admin from the setting can sign in |
 | 2 | Support profile, lessons and tasks, media upload with the sound rule, templates | **Done.** Publishing is blocked with the exact missing items; tests cover both tracks |
 | 3 | Reports and alerts endpoints for parents, admin reporting endpoints | **Done.** Numbers match seeded data in tests |
-| 4 | Web portal (parent and admin screens) in the Kindo visual style | Walkthrough on desktop and phone width; parity matrix signed off |
+| 4 | Web portal (parent and admin screens) in the Kindo visual style | **Done.** Served at `/portal`; browser tests walk the parent journey, reports, admin console, XSS and phone widths. The Flutter parent app is not built yet; it will call the same API |
 | 5 | Household, privacy tools, private media, backups, notification preferences | P0 list closed |
 | 6 | Therapist access, billing, announcements, content review | P1 list closed |
 
