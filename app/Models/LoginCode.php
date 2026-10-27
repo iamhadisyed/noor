@@ -8,7 +8,7 @@ class LoginCode extends Model
 {
     public const UPDATED_AT = null;
 
-    protected $fillable = ['email', 'code_hash', 'attempts', 'expires_at', 'consumed_at', 'ip'];
+    protected $fillable = ['email', 'purpose', 'code_hash', 'attempts', 'expires_at', 'consumed_at', 'ip'];
 
     protected $casts = ['expires_at' => 'datetime', 'consumed_at' => 'datetime'];
 
