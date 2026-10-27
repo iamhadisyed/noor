@@ -156,6 +156,16 @@ Please confirm:
 3. Which email provider will send the codes on the GoDaddy host (cPanel SMTP or a service such as Postmark or SES)?
 4. Are therapists and teachers needed for launch or after?
 
+## 10b. Decisions confirmed by the owner
+
+- **Email**: codes are sent over SMTP (cPanel mailbox or any SMTP service); no third-party mail API.
+- **Super admin may see all parent-posted content**, any time, not only flagged items, because it is children's content. Every lesson the admin opens, and every decision, is written to the audit log.
+- **Bad words are watched**: parent-written text (lesson, task and family-card text) is checked against a built-in list plus words the admin adds. A match never blocks saving; it opens a flag, keeps the lesson off the child's device (publish is refused, a published lesson returns to draft) and waits for the admin to dismiss it, remove the content, or remove it and make the parent inactive.
+- **Accounts can be made inactive** by the super admin with a written reason. Inactive means signed out everywhere at once and unable to sign in until made active again.
+- **Terms and conditions** must be read and accepted before a new account is created (the sign-in code stays valid while the parent reads). Acceptance and version are stored; bumping `config/legal.php` `version` asks every parent again. The text in `config/legal.php` is a draft and needs legal review.
+
+Not yet covered: family-card photos and voices are still on the public disk, so the admin cannot open them from the console until phase 5 moves them to private storage; the filter reads text only (pictures and sounds are reviewed by a person); parents are not emailed when content is removed.
+
 ## 11. Decisions made while building phase 2
 
 - The free plan allows 3 lessons per child (`kindo.free_limits.lessons_per_child`); Pro is unlimited. This number is an assumption: change it in one place.

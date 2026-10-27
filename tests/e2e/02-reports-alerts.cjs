@@ -22,7 +22,7 @@ const { BASE, launch, login, check } = require('./lib.cjs');
   check('report adds up practice and accuracy', /24\s?min/.test(tiles[0]) && /73\s?%/.test(tiles[1]), tiles.slice(0, 2).join(' | '));
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('text=Export CSV')]);
   check('CSV export downloads', /report\.csv$/.test(dl.suggestedFilename()));
-  await page.click('nav.nav >> text=Settings'); await page.waitForSelector('.item');
+  await page.click('nav.nav >> text=Settings'); await page.waitForSelector('text=This device');
   check('this device is listed as a session', /This device/.test(await page.textContent('#content')));
   await page.goto(BASE + '/portal/#/admin'); await page.waitForTimeout(700);
   check('a parent is kept out of the admin console', (await page.evaluate(() => location.hash)) === '#/');
