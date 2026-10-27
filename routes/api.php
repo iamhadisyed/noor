@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\GameLibraryController;
+use App\Http\Controllers\Api\HouseholdController;
 use App\Http\Controllers\Api\InsightsController;
 use App\Http\Controllers\Api\ChildController;
 use App\Http\Controllers\Api\ContentReviewController;
@@ -68,6 +69,13 @@ Route::prefix('v1')->group(function () {
             Route::post('content/terms', [ContentReviewController::class, 'addTerm']);
             Route::delete('content/terms/{id}', [ContentReviewController::class, 'removeTerm']);
         });
+
+        Route::get('household', [HouseholdController::class, 'show']);
+        Route::post('household/invite', [HouseholdController::class, 'invite'])->middleware('throttle:10,60');
+        Route::delete('household/members/{id}', [HouseholdController::class, 'remove']);
+        Route::delete('household/joined/{id}', [HouseholdController::class, 'leave']);
+        Route::post('household/invitations/{id}/accept', [HouseholdController::class, 'accept']);
+        Route::post('household/invitations/{id}/decline', [HouseholdController::class, 'decline']);
 
         Route::post('devices', [AuthController::class, 'registerDevice']);
 

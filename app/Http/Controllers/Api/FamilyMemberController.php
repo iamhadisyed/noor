@@ -25,7 +25,7 @@ class FamilyMemberController extends Controller
 
     private function owned(Request $request, int $id): FamilyMember
     {
-        return FamilyMember::whereIn('child_id', $request->user()->children()->select('id'))->findOrFail($id);
+        return FamilyMember::whereIn('child_id', $request->user()->accessibleChildren()->select('id'))->findOrFail($id);
     }
 
     public function index(Request $request, int $childId): JsonResponse
@@ -39,7 +39,7 @@ class FamilyMemberController extends Controller
     {
         $child = ChildController::owned($request, $childId);
 
-        if (! $request->user()->isPro() && $child->familyMembers()->count() >= config('kindo.free_limits.family_members')) {
+        if (! $request->user()->hasProAccess() && $child->familyMembers()->count() >= config('kindo.free_limits.family_members')) {
             return response()->json(['message' => 'Free plan allows 2 family cards.', 'upgrade' => true], 402);
         }
 

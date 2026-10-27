@@ -20,7 +20,7 @@ class LessonController extends Controller
     /** A lesson the signed-in parent owns, or 404. */
     public static function owned(Request $request, int $id): Lesson
     {
-        return Lesson::where('is_template', false)->whereIn('child_id', $request->user()->children()->select('id'))->findOrFail($id);
+        return Lesson::where('is_template', false)->whereIn('child_id', $request->user()->accessibleChildren()->select('id'))->findOrFail($id);
     }
 
     public function present(Lesson $lesson): array
@@ -206,7 +206,7 @@ class LessonController extends Controller
     private function limit(Request $request, $child): ?JsonResponse
     {
         $max = (int) config('kindo.free_limits.lessons_per_child');
-        if (! $request->user()->isPro() && $child->lessons()->where('is_template', false)->where('status', '!=', 'archived')->count() >= $max) {
+        if (! $request->user()->hasProAccess() && $child->lessons()->where('is_template', false)->where('status', '!=', 'archived')->count() >= $max) {
             return response()->json(['message' => "The free plan allows {$max} lessons per child.", 'upgrade' => true], 402);
         }
 

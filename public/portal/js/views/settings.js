@@ -2,6 +2,7 @@ import { api, auth } from '../api.js';
 import { h, icon, fmt, toast, errorText, confirmBox, modal } from '../ui.js';
 import { state, signOut, go } from '../main.js';
 import { meta } from './children.js';
+import { familyCard } from './household.js';
 
 export async function render() {
   const m = await meta();
@@ -31,7 +32,7 @@ export async function render() {
         pro ? null : h('p', { class: 'hint', style: 'margin-top:12px;color:var(--ink-2)' }, 'Online upgrade is coming soon. Contact us to switch on Pro.')),
       h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:12px' }, 'Account'), h('button', { class: 'btn soft block', onclick: signOut }, icon('logout', 20), 'Sign out'),
         h('p', { class: 'hint', style: 'margin-top:12px' }, h('a', { href: '#/terms' }, 'Terms and conditions'), u.terms_version ? ` (version ${u.terms_version})` : '')),
-      u.role === 'super_admin' ? null : privacyCard())));
+      u.role === 'super_admin' ? null : familyCard((changed) => { if (changed) state.children = null; }), u.role === 'super_admin' ? null : privacyCard())));
 }
 
 /** The parent's rights: a full copy of their data, and complete deletion confirmed by an emailed code. */

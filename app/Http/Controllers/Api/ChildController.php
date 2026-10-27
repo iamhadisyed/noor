@@ -17,7 +17,7 @@ class ChildController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        return response()->json($request->user()->children()->get()->map(fn ($c) => $this->present($c))->all());
+        return response()->json($request->user()->accessibleChildren()->orderBy('id')->get()->map(fn ($c) => $this->present($c))->all());
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -70,6 +70,9 @@ class ChildController extends Controller
     public function destroy(Request $request, int $id): JsonResponse
     {
         $child = self::owned($request, $id);
+        if ($child->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Only the parent who added this child can delete their profile.'], 403);
+        }
 
         AuditLog::record($request->user(), 'child.deleted', $child, ['name_initial' => mb_substr($child->name, 0, 1)]);
         app(\App\Services\AccountEraser::class)->eraseChild($child);
@@ -80,7 +83,7 @@ class ChildController extends Controller
     /** Resolve a child owned by the authenticated parent or 404. */
     public static function owned(Request $request, int $childId): Child
     {
-        return $request->user()->children()->findOrFail($childId);
+        return $request->user()->accessibleChildren()->findOrFail($childId);
     }
 
     public function present(Child $c): array

@@ -12,6 +12,7 @@ return [
         'cooldown_seconds' => (int) env('KINDO_OTP_COOLDOWN', 60),
     ],
     'token_ttl_days' => 30,
+    'household_max' => 3,   // people a parent can share their children with
     'admin_token_ttl_hours' => 12,
 
     'groq_model' => env('GROQ_MODEL', 'llama-3.1-8b-instant'),

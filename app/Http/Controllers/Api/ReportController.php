@@ -13,7 +13,7 @@ class ReportController extends Controller
     {
         $child = ChildController::owned($request, $childId);
 
-        if (! $request->user()->isPro()) {
+        if (! $request->user()->hasProAccess()) {
             return response()->json(['message' => 'AI diagnostics require Kindo Pro.', 'upgrade' => true], 402);
         }
 

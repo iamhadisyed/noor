@@ -166,7 +166,7 @@ class GameController extends Controller
     /** The app reports how it went. Spends the minutes and moves the level up or down. Safe to send twice. */
     public function finish(Request $request, int $id): JsonResponse
     {
-        $session = GameSession::whereIn('child_id', $request->user()->children()->select('id'))->findOrFail($id);
+        $session = GameSession::whereIn('child_id', $request->user()->accessibleChildren()->select('id'))->findOrFail($id);
         $child = Child::findOrFail($session->child_id);
         $data = $request->validate(['rounds_played' => 'required|integer|min:0|max:' . config('games.rounds_max'), 'correct' => 'required|integer|min:0|lte:rounds_played', 'seconds_played' => 'required|integer|min:0|max:86400']);
 

@@ -82,6 +82,8 @@ Lessons inherit the child's profile and can override it for a single lesson.
 Per child and date range: practice time, accuracy, tracing steadiness by letter, family-card game results, needs alerts (count, time of day, average reply time), and the weekly AI report (Pro). Export as PDF or CSV. Parents see only their own household.
 
 ### 5.4 Household and sharing
+**Built (household):** a parent invites a partner or grandparent by email (up to 3 people); the invited person signs in with that email and accepts. Both then see the same children, lessons, rewards and reports, both are alerted and either can reply (the reply shows who answered), and the co-parent shares the owner's plan. Only the owner can delete a child, invite or remove people, or delete the account. Joining or leaving makes the other phone start over in sync. Therapist and teacher access (6-digit code, read-only) is still to do.
+
 Invite a second parent by email (same code sign-in); both receive alerts and either can reply. Invite a therapist or teacher by a 6-digit code with read-only access to one child (phase 3).
 
 ### 5.5 Privacy tools

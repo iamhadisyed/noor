@@ -22,7 +22,8 @@ Response:
 - A **lesson is always sent whole**, with its tasks and fresh picture and sound links. A change to a single task arrives as its lesson.
 - `op: "delete"` means remove it locally. Archived lessons arrive as an upsert with `status: "archived"`; hide them.
 - Apply changes **in order**, save the new `cursor` after applying, and repeat while `has_more` is true.
-- If `reset` is true, your cursor was older than what the server keeps (30 days): throw away local data and use the snapshot in the same response.
+- If `reset` is true, your cursor was older than what the server keeps (30 days), **or the parent joined or left a household** (the set of children changed): throw away local data and use the snapshot in the same response.
+- In a household every parent gets every change to the shared children, whoever made it.
 - Picture and sound links expire after 15 minutes. **Download media when you sync** and keep the files; do not store the links.
 - Only the signed-in parent's own data is ever returned.
 
