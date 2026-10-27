@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\NeedsController;
+use App\Http\Controllers\Api\NotificationPrefsController;
 use App\Http\Controllers\Api\PecsController;
 use App\Http\Controllers\Api\PrivacyController;
 use App\Http\Controllers\Api\ReportController;
@@ -38,6 +39,8 @@ Route::prefix('v1')->group(function () {
         Route::patch('me', [AuthController::class, 'updateMe']);
         Route::get('announcements', [AnnouncementController::class, 'mine']);
         Route::post('announcements/{id}/dismiss', [AnnouncementController::class, 'dismiss']);
+        Route::get('me/notifications', [NotificationPrefsController::class, 'show']);
+        Route::patch('me/notifications', [NotificationPrefsController::class, 'update']);
         Route::post('me/terms', [AuthController::class, 'acceptTerms']);
         Route::get('me/export', [PrivacyController::class, 'export'])->middleware('throttle:3,60');
         Route::post('me/delete-code', [PrivacyController::class, 'requestDeleteCode'])->middleware('throttle:5,60');

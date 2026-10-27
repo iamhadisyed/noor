@@ -32,7 +32,7 @@ export async function render() {
         pro ? null : h('p', { class: 'hint', style: 'margin-top:12px;color:var(--ink-2)' }, 'Online upgrade is coming soon. Contact us to switch on Pro.')),
       h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:12px' }, 'Account'), h('button', { class: 'btn soft block', onclick: signOut }, icon('logout', 20), 'Sign out'),
         h('p', { class: 'hint', style: 'margin-top:12px' }, h('a', { href: '#/terms' }, 'Terms and conditions'), u.terms_version ? ` (version ${u.terms_version})` : '')),
-      u.role === 'super_admin' ? null : familyCard((changed) => { if (changed) state.children = null; }), u.role === 'super_admin' ? null : privacyCard())));
+      u.role === 'super_admin' ? null : notificationsCard(), u.role === 'super_admin' ? null : familyCard((changed) => { if (changed) state.children = null; }), u.role === 'super_admin' ? null : privacyCard())));
 }
 
 /** The parent's rights: a full copy of their data, and complete deletion confirmed by an emailed code. */
@@ -84,4 +84,38 @@ function deleteFlow() {
     };
     step1();
   });
+}
+
+const NEED_LABEL = { water: 'Wants water', food: 'Hungry', sleep: 'Sleepy', hug: 'Needs a hug', potty: 'Needs the potty', pain: 'In pain', help: 'Needs help' };
+
+/** Quiet hours and muted alert kinds. Urgent alerts always get through. */
+function notificationsCard() {
+  const box = h('section', { class: 'card', 'data-card': 'notifications' }, h('h2', null, 'Notifications'), h('div', { class: 'spinner', role: 'status', 'aria-label': 'Loading' }));
+  (async () => {
+    let p;
+    try { p = await api('/me/notifications'); } catch (e) { box.replaceChildren(h('h2', null, 'Notifications'), h('p', { class: 'msg-err' }, errorText(e))); return; }
+    const browserZone = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return null; } })();
+    const zones = (() => { try { return Intl.supportedValuesOf('timeZone'); } catch { return [p.timezone]; } })();
+    if (!zones.includes(p.timezone)) zones.unshift(p.timezone);
+    let enabled = !!p.quiet_hours.enabled;
+    const start = h('input', { class: 'input', type: 'time', id: 'qh-start', value: p.quiet_hours.start, 'aria-label': 'Quiet hours start' });
+    const end = h('input', { class: 'input', type: 'time', id: 'qh-end', value: p.quiet_hours.end, 'aria-label': 'Quiet hours end' });
+    const zone = h('select', { class: 'select', id: 'qh-zone', 'aria-label': 'Your time zone' }, zones.map((z) => h('option', { value: z }, z)));
+    zone.value = p.timezone;
+    const sw = h('button', { class: 'switch', role: 'switch', 'aria-label': 'Quiet hours', 'aria-checked': String(enabled), onclick: () => { enabled = !enabled; sw.setAttribute('aria-checked', String(enabled)); } });
+    const muted = new Set(p.muted_needs);
+    const err = h('div', { class: 'msg-err', role: 'alert' });
+    box.replaceChildren(h('h2', { style: 'margin-bottom:6px' }, 'Notifications'),
+      h('p', { class: 'muted', style: 'margin-bottom:16px' }, `${p.urgent.map((n) => NEED_LABEL[n] || n).join(', ')} always reach you, day or night. Quieter alerts can wait for the morning; they still appear in the app.`),
+      h('div', { class: 'item' }, h('div', { class: 'grow' }, h('b', null, 'Quiet hours'), h('span', null, 'No buzzing for quieter alerts')), sw),
+      h('div', { class: 'grid2', style: 'margin:12px 0' }, h('div', { class: 'field' }, h('label', { for: 'qh-start' }, 'From'), start), h('div', { class: 'field' }, h('label', { for: 'qh-end' }, 'Until'), end)),
+      h('div', { class: 'field' }, h('label', { for: 'qh-zone' }, 'Your time zone'), zone, browserZone && browserZone !== p.timezone ? h('button', { class: 'btn soft sm', type: 'button', style: 'margin-top:8px', onclick: () => { if (![...zone.options].some((o) => o.value === browserZone)) return; zone.value = browserZone; } }, `Use ${browserZone}`) : null),
+      h('div', { class: 'field' }, h('label', null, 'Do not buzz me for'), h('div', { class: 'list' }, p.mutable.map((n) => h('label', { class: 'check', 'data-need': n }, h('input', { type: 'checkbox', checked: muted.has(n), onchange: (e) => { e.target.checked ? muted.add(n) : muted.delete(n); } }), ` ${NEED_LABEL[n] || n}`)))),
+      err,
+      h('button', { class: 'btn primary', 'data-act': 'save-notifications', onclick: async () => {
+        err.textContent = '';
+        try { await api('/me/notifications', { method: 'PATCH', body: { quiet_hours: { enabled, start: start.value, end: end.value }, timezone: zone.value, muted_needs: [...muted] } }); toast('Saved.'); } catch (e) { err.textContent = errorText(e); }
+      } }, 'Save'));
+  })();
+  return box;
 }

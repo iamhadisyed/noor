@@ -29,3 +29,6 @@ Schedule::call(function () {
     \Illuminate\Support\Facades\DB::table('idempotency_keys')->where('created_at', '<', now()->subDays(2))->delete();
     \Illuminate\Support\Facades\DB::table('login_codes')->where('created_at', '<', now()->subDays(1))->delete();   // used or expired codes do not need keeping
 })->dailyAt('03:10')->name('prune-sync');
+
+// Nightly backup. Without KINDO_BACKUP_PASSWORD it does nothing and the admin health page shows no recent backup.
+Schedule::command('kindo:backup')->dailyAt('02:30')->when(fn () => (bool) config('kindo.backup.password'))->name('nightly-backup')->onFailure(fn () => \Illuminate\Support\Facades\Log::error('Nightly backup failed'));

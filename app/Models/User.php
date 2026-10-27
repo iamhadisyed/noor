@@ -15,7 +15,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'phone', 'password', 'subscription_tier', 'subscription_expires_at', 'role', 'status', 'status_reason', 'last_login_at', 'terms_accepted_at', 'terms_version'];
+    protected $fillable = ['name', 'email', 'phone', 'password', 'subscription_tier', 'subscription_expires_at', 'role', 'status', 'status_reason', 'last_login_at', 'terms_accepted_at', 'terms_version', 'notification_prefs'];
 
     protected $attributes = ['role' => 'parent', 'status' => 'active'];
 
@@ -28,6 +28,7 @@ class User extends Authenticatable
             'subscription_expires_at' => 'datetime',
             'last_login_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
+            'notification_prefs' => 'array',
             'password' => 'hashed',
         ];
     }

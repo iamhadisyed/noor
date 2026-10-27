@@ -87,6 +87,10 @@ Per child and date range: practice time, accuracy, tracing steadiness by letter,
 Invite a second parent by email (same code sign-in); both receive alerts and either can reply. Invite a therapist or teacher by a 6-digit code with read-only access to one child (phase 3).
 
 ### 5.5 Privacy tools
+**Notification preferences (built):** each parent sets quiet hours (any window, including past midnight, in their own time zone) and can mute the gentler alert kinds (water, hungry, sleepy, hug). Urgent alerts (potty, pain, help) always buzz and cannot be muted. A held-back alert is still logged and shown in the app; it just does not buzz. In a household each parent has their own settings.
+
+**Consent record (built):** adding a family card requires the parent to confirm they may use that person's photo and voice; the time and who confirmed are stored, shown on the card and included in the data export.
+
 **Built:** `GET /me/export` (a zip with `data.json` and every picture and voice), and account deletion confirmed by an emailed code (`POST /me/delete-code`, then `DELETE /me`), in both the portal Settings and the API for the app. Deletion removes children, lessons, files, devices, sessions and flags; the audit log keeps only that it happened, with no email or name. A delete code cannot sign anyone in, and a sign-in code cannot delete. Administrators cannot delete themselves here. Still to do: a per-photo consent record.
 
 Export all data for a child, delete a child with everything attached (photos and voices included), and a visible consent record for family photos and voices.
@@ -116,7 +120,7 @@ Support access to a parent's data is **not** impersonation. It is a time-limited
 1. Private media: family and lesson images and sounds are stored on a private disk and served through short-lived signed links, never public URLs. **Done**, including family cards (`php artisan kindo:privatize-media` moves older files).
 2. Audit log, account suspension, and neutral error messages on sign-in.
 3. Consent and privacy: parental consent text, data export, full delete, retention rules. Children's data triggers COPPA, GDPR-K and local rules.
-4. Backups of the database and media, and a restore test.
+4. Backups of the database and media, and a restore test. **Done:** encrypted nightly backups with a check, a restore command, and the admin health page; see `docs/BACKUPS.md` (copying them off the server is still the owner's job).
 5. Per-user and per-IP rate limits; upload size and type checks; virus-safe file handling (re-encode images, transcode audio).
 
 **P1, strongly recommended**

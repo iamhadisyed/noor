@@ -134,6 +134,7 @@ class AdminController extends Controller
             'queue' => ['pending' => Schema::hasTable('jobs') ? DB::table('jobs')->count() : null, 'failed' => Schema::hasTable('failed_jobs') ? DB::table('failed_jobs')->count() : null],
             'scheduler' => ['last_run' => $last, 'alive' => $last ? CarbonImmutable::parse($last)->gt(now()->subMinutes(5)) : false],
             'mail' => ['driver' => config('mail.default')],
+            'backups' => app(\App\Services\BackupService::class)->status(),
             'storage' => ['media_files' => $this->realTasks()->whereNotNull('image_path')->count() + $this->realTasks()->whereNotNull('audio_path')->count()],
             'php' => PHP_VERSION, 'time' => now()->toIso8601String(),
         ]);

@@ -118,6 +118,7 @@ async function health(ctx, page) {
       row('Scheduler (cron)', s.scheduler.alive, s.scheduler.last_run ? `Last ran ${fmt.ago(s.scheduler.last_run)}` : 'Has not run. Check the cPanel cron job.'),
       row('Queue', (s.queue.failed ?? 0) === 0, `${s.queue.pending ?? 0} waiting · ${s.queue.failed ?? 0} failed`),
       row('Email', s.mail.driver !== 'log', s.mail.driver === 'log' ? 'Mail driver is "log": codes are not being emailed. Set MAIL_* in .env.' : `Sending with ${s.mail.driver}`),
+      row('Backups', s.backups.fresh, !s.backups.configured && !s.backups.last_at ? 'No backups yet. Set KINDO_BACKUP_PASSWORD in .env and add the cron job.' : s.backups.last_at ? `Last backup ${fmt.ago(s.backups.last_at)} · ${s.backups.count} kept${s.backups.fresh ? '' : ' · overdue: check the cron job'}` : 'No backups yet. The first runs tonight.'),
       row('Stored media', true, `${s.storage.media_files} pictures and sounds`),
       row('Server', true, `PHP ${s.php}`))));
 }

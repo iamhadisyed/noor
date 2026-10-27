@@ -36,7 +36,9 @@ class NeedsController extends Controller
 
         $phrase = self::PHRASES[strtolower($data['need_type'])] ?? 'needs ' . strtolower($data['need_type']);
         // Every parent in the household hears about it, and either can reply.
-        foreach (\App\Services\Household::userIdsFor($child) as $parentId) {
+        // (Urgent needs always buzz; others respect each parent's quiet hours and muted kinds. The alert is in the app either way.)
+        $parents = \App\Models\User::whereIn('id', \App\Services\Household::userIdsFor($child))->get();
+        foreach ($parents->filter(fn ($p) => \App\Services\NotificationPolicy::shouldPush($p, $data['need_type']))->pluck('id') as $parentId) {
             $fcm->sendToUser($parentId, "{$child->name} {$phrase}", 'Tap to respond.', [
                 'type' => 'need_alert', 'log_id' => $log->id, 'child_id' => $child->id, 'need_type' => $data['need_type'],
                 'actions' => 'ack,call',

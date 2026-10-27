@@ -60,7 +60,7 @@ class PrivacyTest extends TestCase
         $t = $this->postJson("/api/v1/lessons/{$l['id']}/tasks", ['type' => 'trace_letter', 'title' => 'Alif', 'target' => 'ا'])->json();
         $this->post("/api/v1/tasks/{$t['id']}/media", ['kind' => 'image', 'file' => UploadedFile::fake()->image('a.jpg', 300, 300)], ['Accept' => 'application/json'])->assertOk();
         $this->post("/api/v1/tasks/{$t['id']}/media", ['kind' => 'audio', 'file' => $this->wav()], ['Accept' => 'application/json'])->assertOk();
-        $f = $this->postJson("/api/v1/children/{$c['id']}/family", ['relation_title' => 'Mama', 'display_name' => 'Ammi', 'photo' => UploadedFile::fake()->image('p.jpg', 300, 300), 'audio' => $this->wav()])->assertCreated()->json();
+        $f = $this->postJson("/api/v1/children/{$c['id']}/family", ['consent' => true, 'relation_title' => 'Mama', 'display_name' => 'Ammi', 'photo' => UploadedFile::fake()->image('p.jpg', 300, 300), 'audio' => $this->wav()])->assertCreated()->json();
         ChildNeedsLog::create(['child_id' => $c['id'], 'need_type' => 'water']);
 
         return [$c, $l, $t, $f];
