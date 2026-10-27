@@ -34,6 +34,7 @@ const routes = [
   { path: '/settings', view: lazy('./views/settings.js'), nav: 'settings' },
   { path: '/admin', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-overview', name: 'overview' },
   { path: '/admin/usage', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-usage', name: 'usage' },
+  { path: '/admin/vouchers', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-vouchers', name: 'vouchers' },
   { path: '/admin/announcements', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-news', name: 'announcements' },
   { path: '/admin/games', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-games', name: 'games' },
   { path: '/admin/content', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-content', name: 'content' },
@@ -46,7 +47,7 @@ const routes = [
 ];
 const NAV = {
   parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['rewards', '#/rewards', 'star', 'Rewards'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['settings', '#/settings', 'gear', 'Settings']],
-  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-games', '#/admin/games', 'star', 'Game library'], ['a-news', '#/admin/announcements', 'bell', 'Announcements'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
+  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-games', '#/admin/games', 'star', 'Game library'], ['a-news', '#/admin/announcements', 'bell', 'Announcements'], ['a-vouchers', '#/admin/vouchers', 'list', 'Vouchers'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
 };
 
 export const go = (hash) => { if (location.hash === hash) route(); else location.hash = hash; };

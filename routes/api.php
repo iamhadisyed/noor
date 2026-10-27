@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AdminBillingController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GameController;
@@ -41,6 +43,8 @@ Route::prefix('v1')->group(function () {
         Route::post('announcements/{id}/dismiss', [AnnouncementController::class, 'dismiss']);
         Route::get('me/notifications', [NotificationPrefsController::class, 'show']);
         Route::patch('me/notifications', [NotificationPrefsController::class, 'update']);
+        Route::get('billing', [BillingController::class, 'show']);
+        Route::post('billing/redeem', [BillingController::class, 'redeem'])->middleware('throttle:10,60');
         Route::post('me/terms', [AuthController::class, 'acceptTerms']);
         Route::get('me/export', [PrivacyController::class, 'export'])->middleware('throttle:3,60');
         Route::post('me/delete-code', [PrivacyController::class, 'requestDeleteCode'])->middleware('throttle:5,60');
@@ -69,6 +73,10 @@ Route::prefix('v1')->group(function () {
             Route::post('games/items', [GameLibraryController::class, 'store']);
             Route::post('games/items/{id}', [GameLibraryController::class, 'update'])->middleware('throttle:60,1');
             Route::delete('games/items/{id}', [GameLibraryController::class, 'destroy']);
+            Route::get('vouchers', [AdminBillingController::class, 'vouchers']);
+            Route::post('vouchers', [AdminBillingController::class, 'createVouchers']);
+            Route::delete('vouchers/{id}', [AdminBillingController::class, 'revoke']);
+            Route::post('users/{id}/grant', [AdminBillingController::class, 'grant']);
             Route::get('announcements', [AnnouncementController::class, 'index']);
             Route::post('announcements', [AnnouncementController::class, 'store']);
             Route::patch('announcements/{id}', [AnnouncementController::class, 'update']);
