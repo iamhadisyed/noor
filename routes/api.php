@@ -3,6 +3,9 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChildController;
 use App\Http\Controllers\Api\FamilyMemberController;
+use App\Http\Controllers\Api\LessonController;
+use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\NeedsController;
 use App\Http\Controllers\Api\PecsController;
 use App\Http\Controllers\Api\ReportController;
@@ -12,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::post('auth/code', [AuthController::class, 'requestCode'])->middleware('throttle:otp-request');
     Route::post('auth/verify', [AuthController::class, 'verify'])->middleware('throttle:otp-verify');
+
+    // Pictures and sounds: the signed, short-lived link is the credential (works in <img> and <audio>).
+    Route::get('media/{task}/{kind}', [MediaController::class, 'show'])->name('media.show')->middleware('signed');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
@@ -28,6 +34,28 @@ Route::prefix('v1')->group(function () {
 
         Route::get('children', [ChildController::class, 'index']);
         Route::post('children', [ChildController::class, 'store']);
+        Route::get('children/{child}', [ChildController::class, 'show']);
+        Route::patch('children/{child}', [ChildController::class, 'update']);
+        Route::delete('children/{child}', [ChildController::class, 'destroy']);
+
+        Route::get('task-types', [LessonController::class, 'taskTypes']);
+        Route::get('lesson-templates', [LessonController::class, 'templates']);
+        Route::get('children/{child}/lessons', [LessonController::class, 'index']);
+        Route::post('children/{child}/lessons', [LessonController::class, 'store']);
+        Route::post('children/{child}/lessons/from-template/{template}', [LessonController::class, 'fromTemplate']);
+        Route::get('lessons/{lesson}', [LessonController::class, 'show']);
+        Route::patch('lessons/{lesson}', [LessonController::class, 'update']);
+        Route::delete('lessons/{lesson}', [LessonController::class, 'destroy']);
+        Route::get('lessons/{lesson}/readiness', [LessonController::class, 'readiness']);
+        Route::post('lessons/{lesson}/publish', [LessonController::class, 'publish']);
+        Route::post('lessons/{lesson}/unpublish', [LessonController::class, 'unpublish']);
+        Route::post('lessons/{lesson}/duplicate', [LessonController::class, 'duplicate']);
+        Route::post('lessons/{lesson}/tasks', [TaskController::class, 'store']);
+        Route::post('lessons/{lesson}/tasks/reorder', [TaskController::class, 'reorder']);
+        Route::patch('tasks/{task}', [TaskController::class, 'update']);
+        Route::delete('tasks/{task}', [TaskController::class, 'destroy']);
+        Route::post('tasks/{task}/media', [TaskController::class, 'upload'])->middleware('throttle:60,1');
+        Route::delete('tasks/{task}/media/{kind}', [TaskController::class, 'removeMedia']);
 
         Route::post('child/alert', [NeedsController::class, 'alert'])->middleware('throttle:30,1');
         Route::get('children/{child}/needs', [NeedsController::class, 'feed']);

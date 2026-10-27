@@ -3,15 +3,27 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Child;
+use App\Services\MediaStore;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ChildController extends Controller
 {
+    /** What a child gets when nothing has been chosen; a special track starts calmer and slower. */
+    public const SUPPORT_STANDARD = ['magnet_px' => 24, 'pace' => 'normal', 'max_choices' => 4, 'no_timers' => false, 'first_then' => false, 'praise' => 'lively'];
+    public const SUPPORT_SPECIAL = ['magnet_px' => 32, 'pace' => 'slow', 'max_choices' => 3, 'no_timers' => true, 'first_then' => true, 'praise' => 'quiet'];
+
     public function index(Request $request): JsonResponse
     {
-        return response()->json($request->user()->children()->get());
+        return response()->json($request->user()->children()->get()->map(fn ($c) => $this->present($c))->all());
+    }
+
+    public function show(Request $request, int $id): JsonResponse
+    {
+        return response()->json($this->present(self::owned($request, $id)));
     }
 
     public function store(Request $request): JsonResponse
@@ -27,16 +39,78 @@ class ChildController extends Controller
             'name' => 'required|string|max:100',
             'date_of_birth' => 'required|date|before:today',
             'neurotype' => 'sometimes|in:neurotypical,autism_spectrum,speech_delay,adhd,down_syndrome',
-            'sensory_mode' => 'sometimes|boolean',
             'avatar_id' => 'sometimes|string|max:50',
-        ]);
+        ] + $this->supportRules());
 
-        return response()->json($user->children()->create($data), 201);
+        // A child with a diagnosis starts on the special track unless the parent says otherwise.
+        $data['track'] ??= ($data['neurotype'] ?? 'neurotypical') === 'neurotypical' ? 'standard' : 'special';
+        $data['sensory_mode'] ??= $data['track'] === 'special';
+
+        return response()->json($this->present($user->children()->create($data)), 201);
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $child = self::owned($request, $id);
+        $data = $request->validate([
+            'name' => 'sometimes|string|max:100',
+            'date_of_birth' => 'sometimes|date|before:today',
+            'neurotype' => 'sometimes|in:neurotypical,autism_spectrum,speech_delay,adhd,down_syndrome',
+            'avatar_id' => 'sometimes|string|max:50',
+        ] + $this->supportRules());
+
+        if (isset($data['support_profile'])) {
+            $data['support_profile'] = array_merge($child->support_profile ?? [], $data['support_profile']);
+        }
+        $child->update($data);
+
+        return response()->json($this->present($child->fresh()));
+    }
+
+    /** Privacy: removes the child and everything attached, including every stored picture and sound. */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $child = self::owned($request, $id);
+        $media = app(MediaStore::class);
+
+        foreach ($child->lessons()->with('tasks')->get() as $lesson) {
+            $lesson->tasks->each(fn ($t) => $media->forgetTask($t));
+        }
+        foreach ($child->familyMembers as $m) {
+            Storage::disk('public')->delete([$m->photo_path, $m->audio_prompt_path]);
+        }
+
+        AuditLog::record($request->user(), 'child.deleted', $child, ['name_initial' => mb_substr($child->name, 0, 1)]);
+        $child->delete();
+
+        return response()->json(['ok' => true]);
     }
 
     /** Resolve a child owned by the authenticated parent or 404. */
     public static function owned(Request $request, int $childId): Child
     {
         return $request->user()->children()->findOrFail($childId);
+    }
+
+    private function present(Child $c): array
+    {
+        $defaults = $c->track === 'special' ? self::SUPPORT_SPECIAL : self::SUPPORT_STANDARD;
+
+        return $c->toArray() + ['support' => array_merge($defaults, $c->support_profile ?? [])];
+    }
+
+    private function supportRules(): array
+    {
+        return [
+            'track' => 'sometimes|in:standard,special',
+            'sensory_mode' => 'sometimes|boolean',
+            'support_profile' => 'sometimes|array',
+            'support_profile.magnet_px' => 'sometimes|integer|between:15,40',
+            'support_profile.pace' => 'sometimes|in:slow,normal',
+            'support_profile.max_choices' => 'sometimes|integer|between:2,4',
+            'support_profile.no_timers' => 'sometimes|boolean',
+            'support_profile.first_then' => 'sometimes|boolean',
+            'support_profile.praise' => 'sometimes|in:quiet,lively',
+        ];
     }
 }

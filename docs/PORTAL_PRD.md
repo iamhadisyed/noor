@@ -139,8 +139,8 @@ Support access to a parent's data is **not** impersonation. It is a time-limited
 
 | Phase | Deliverable | Done when |
 |---|---|---|
-| 1 | Email code sign-in, roles, sessions, audit log, this spec | Tests pass; super admin from the setting can sign in |
-| 2 | Support profile, lessons and tasks, media upload with the sound rule, templates | Publishing is blocked with the exact missing items; tests cover both tracks |
+| 1 | Email code sign-in, roles, sessions, audit log, this spec | **Done.** Tests pass; super admin from the setting can sign in |
+| 2 | Support profile, lessons and tasks, media upload with the sound rule, templates | **Done.** Publishing is blocked with the exact missing items; tests cover both tracks |
 | 3 | Reports and alerts endpoints for parents, admin reporting endpoints | Numbers match seeded data in tests |
 | 4 | Web portal (parent and admin screens) in the Kindo visual style | Walkthrough on desktop and phone width; parity matrix signed off |
 | 5 | Household, privacy tools, private media, backups, notification preferences | P0 list closed |
@@ -155,3 +155,12 @@ Please confirm:
 2. Is the super admin allowed to open a child's photos for a flagged report only? (Assumed yes, audited.)
 3. Which email provider will send the codes on the GoDaddy host (cPanel SMTP or a service such as Postmark or SES)?
 4. Are therapists and teachers needed for launch or after?
+
+## 11. Decisions made while building phase 2
+
+- The free plan allows 3 lessons per child (`kindo.free_limits.lessons_per_child`); Pro is unlimited. This number is an assumption: change it in one place.
+- Task rules: spell a word, match a face and listen and repeat require sound; pick the picture, match a face and routine step require a picture; any task can also be marked *needs sound* by the parent.
+- Editing a published lesson so it is no longer complete (removing a sound, deleting a task's picture) returns it to draft at once, so a child never meets a broken task.
+- Audio is validated by content, not file name, and capped at 150 KB. The server cannot transcode on shared hosting, so apps and the browser compress before upload.
+- Pictures are re-encoded server-side to a JPEG of at most 600 px, which strips metadata and anything hidden in the file.
+- Lesson media is on the private disk. Family-card media still uses the public disk and moves to the private disk in phase 5.
