@@ -33,6 +33,6 @@ class SessionController extends Controller
             return $session;
         });
 
-        return response()->json(['id' => $session->id], 201);
+        return response()->json(['id' => $session->id, 'reward' => app(\App\Services\RewardService::class)->forSession($child, $session)], 201);
     }
 }

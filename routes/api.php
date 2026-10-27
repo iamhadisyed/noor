@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GameController;
+use App\Http\Controllers\Api\GameLibraryController;
 use App\Http\Controllers\Api\InsightsController;
 use App\Http\Controllers\Api\ChildController;
 use App\Http\Controllers\Api\ContentReviewController;
@@ -24,6 +26,7 @@ Route::prefix('v1')->group(function () {
 
     // Pictures and sounds: the signed, short-lived link is the credential (works in <img> and <audio>).
     Route::get('media/{task}/{kind}', [MediaController::class, 'show'])->name('media.show')->middleware('signed');
+    Route::get('media/game/{item}/{kind}', [MediaController::class, 'game'])->name('media.game')->middleware('signed');
     Route::get('media/family/{member}/{kind}', [MediaController::class, 'family'])->name('media.family')->middleware('signed');
 
     Route::middleware(['auth:sanctum', 'idempotent'])->group(function () {
@@ -55,6 +58,10 @@ Route::prefix('v1')->group(function () {
             Route::post('content/flags/{id}/resolve', [ContentReviewController::class, 'resolve']);
             Route::get('content/lessons', [ContentReviewController::class, 'lessonsIndex']);
             Route::get('content/lessons/{id}', [ContentReviewController::class, 'lessonShow']);
+            Route::get('games/items', [GameLibraryController::class, 'index']);
+            Route::post('games/items', [GameLibraryController::class, 'store']);
+            Route::post('games/items/{id}', [GameLibraryController::class, 'update'])->middleware('throttle:60,1');
+            Route::delete('games/items/{id}', [GameLibraryController::class, 'destroy']);
             Route::get('content/family/{id}', [ContentReviewController::class, 'familyShow']);
             Route::post('content/lessons/{id}/flag', [ContentReviewController::class, 'flagLesson']);
             Route::get('content/terms', [ContentReviewController::class, 'terms']);
@@ -104,6 +111,14 @@ Route::prefix('v1')->group(function () {
         Route::patch('family/{id}', [FamilyMemberController::class, 'update']);
         Route::delete('family/{id}', [FamilyMemberController::class, 'destroy']);
         Route::post('children/{child}/sessions', [SessionController::class, 'store']);
+
+        Route::get('games', [GameController::class, 'index']);
+        Route::get('games/library', [GameController::class, 'library']);
+        Route::get('children/{child}/rewards', [GameController::class, 'rewards']);
+        Route::patch('children/{child}/rewards/settings', [GameController::class, 'updateSettings']);
+        Route::post('children/{child}/rewards/bonus', [GameController::class, 'bonus']);
+        Route::post('children/{child}/games/{game}/start', [GameController::class, 'start'])->middleware('throttle:60,1');
+        Route::post('game-sessions/{id}/finish', [GameController::class, 'finish']);
 
         Route::get('children/{child}/insights/summary', [InsightsController::class, 'summary']);
         Route::get('children/{child}/insights/daily', [InsightsController::class, 'daily']);

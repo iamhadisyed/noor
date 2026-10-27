@@ -10,9 +10,9 @@ class Child extends Model
 {
     protected $table = 'children';
 
-    protected $fillable = ['user_id', 'name', 'date_of_birth', 'neurotype', 'track', 'support_profile', 'sensory_mode', 'avatar_id'];
+    protected $fillable = ['user_id', 'name', 'date_of_birth', 'neurotype', 'track', 'support_profile', 'sensory_mode', 'avatar_id', 'reward_settings'];
 
-    protected $casts = ['date_of_birth' => 'date', 'sensory_mode' => 'boolean', 'support_profile' => 'array'];
+    protected $casts = ['date_of_birth' => 'date', 'sensory_mode' => 'boolean', 'support_profile' => 'array', 'reward_settings' => 'array'];
 
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function familyMembers(): HasMany { return $this->hasMany(FamilyMember::class); }
@@ -20,5 +20,6 @@ class Child extends Model
     public function practiceSessions(): HasMany { return $this->hasMany(PracticeSession::class); }
     public function lessons(): HasMany { return $this->hasMany(Lesson::class); }
     public function syllabusModules(): HasMany { return $this->hasMany(SyllabusModule::class); }
+    public function rewardLedger(): HasMany { return $this->hasMany(RewardLedger::class); }
     public function reports(): HasMany { return $this->hasMany(AiDiagnosticReport::class); }
 }

@@ -5,7 +5,7 @@ import { state } from '../main.js';
 
 /** Super admin console. Everything here is aggregate or operational; no child names, pictures or voices. */
 export async function render(ctx, params, query, name) {
-  const view = { overview, usage, quality, content, alerts, ai, accounts, audit, health }[name] || overview;
+  const view = { overview, usage, quality, content, games, alerts, ai, accounts, audit, health }[name] || overview;
   const page = h('div', { class: 'page' }, spinner());
   const out = await view(ctx, page);
   return out || page;
@@ -233,4 +233,41 @@ async function content(ctx, page) {
       h('form', { class: 'row wrap', onsubmit: add, style: 'margin-bottom:16px' }, input, h('button', { class: 'btn primary', type: 'submit' }, 'Add word')),
       r.custom.length ? h('div', { class: 'row wrap' }, r.custom.map((t) => h('span', { class: 'chip' }, t.term, h('button', { class: 'icon-btn', style: 'width:24px;height:24px;min-height:0', 'aria-label': `Remove ${t.term}`, onclick: async () => { try { await api(`/admin/content/terms/${t.id}`, { method: 'DELETE' }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, icon('x', 14))))) : h('p', { class: 'hint' }, 'No custom words yet.'));
   }
+}
+
+/* ---------- game library: the animals the sound games use ---------- */
+async function games(ctx, page) {
+  const body = h('div', null, spinner());
+  page.replaceChildren(head('Game library', 'Animals for the listening games. Each needs a picture and the sound it makes before children can play with it.'), body);
+
+  const draw = async () => {
+    const r = await api('/admin/games/items');
+    const ready = r.complete >= r.needed;
+    const name = h('input', { class: 'input', 'aria-label': 'Animal name in English', placeholder: 'Name in English', maxlength: '60', style: 'max-width:220px' });
+    const nameUr = h('input', { class: 'input', 'aria-label': 'Animal name in Urdu', placeholder: 'اردو نام', maxlength: '60', dir: 'rtl', style: 'max-width:220px' });
+    body.replaceChildren(
+      h('div', { class: 'kpis' }, kpi('Ready to use', `${r.complete} of ${r.items.length}`, ready ? 'the sound games are open' : `${r.needed - r.complete} more needed to open the sound games`, ready ? '' : 'warn')),
+      h('section', { class: 'card', style: 'margin-bottom:16px' }, h('h2', { style: 'margin-bottom:10px' }, 'Add an animal'),
+        h('form', { class: 'row wrap', onsubmit: async (e) => { e.preventDefault(); if (!name.value.trim() || !nameUr.value.trim()) return toast('Enter both names.', 'err'); try { await api('/admin/games/items', { method: 'POST', body: { name_en: name.value.trim(), name_ur: nameUr.value.trim() } }); toast('Added. Now upload its picture and sound.'); draw(); } catch (er) { toast(errorText(er), 'err'); } } },
+          name, nameUr, h('button', { class: 'btn primary', type: 'submit' }, icon('plus', 20), 'Add'))),
+      h('div', { class: 'list' }, r.items.map((i) => card(i))));
+  };
+
+  const card = (i) => {
+    const send = async (field, file) => {
+      const form = new FormData(); form.append(field, file);
+      try { await api(`/admin/games/items/${i.id}`, { method: 'POST', form }); toast('Saved.'); draw(); } catch (e) { toast(errorText(e), 'err'); }
+    };
+    const pick = (field, accept, label) => h('label', { class: 'btn soft sm', style: 'cursor:pointer' }, icon(field === 'image' ? 'image' : 'mic', 16), label,
+      h('input', { type: 'file', accept, hidden: true, 'aria-label': `${label} for ${i.name_en}`, 'data-slot': field, onchange: (e) => { if (e.target.files[0]) send(field, e.target.files[0]); } }));
+    return h('article', { class: 'item', 'data-slug': i.slug, style: 'align-items:flex-start' },
+      i.image_url ? h('img', { src: i.image_url, alt: i.name_en, style: 'width:72px;height:72px;border-radius:18px;object-fit:cover;flex:none' }) : h('div', { class: 'review-task noimg', style: 'width:72px;height:72px;display:grid;place-items:center;border-radius:18px;background:var(--lavender-tint);font-size:12px;color:var(--muted,#8a7e90);flex:none' }, 'No picture'),
+      h('div', { class: 'grow' }, h('b', null, `${i.name_en}  ·  `, h('span', { dir: 'rtl' }, i.name_ur)),
+        h('div', { class: 'row wrap', style: 'margin-top:8px;align-items:center' }, i.audio_url ? h('audio', { controls: true, preload: 'none', src: i.audio_url, 'aria-label': `Sound of ${i.name_en}`, style: 'max-width:240px;height:36px' }) : h('span', { class: 'hint' }, 'No sound yet'),
+          pick('image', 'image/*', i.has_image ? 'Replace picture' : 'Upload picture'), pick('audio', 'audio/*,video/webm,video/mp4', i.has_audio ? 'Replace sound' : 'Upload sound'))),
+      h('div', { class: 'row wrap', style: 'justify-content:flex-end' }, h('span', { class: `chip ${i.complete ? 'sage' : 'warn'}` }, i.complete ? 'Ready' : !i.active ? 'Off' : 'Incomplete'),
+        h('button', { class: 'btn soft sm', onclick: async () => { try { const f = new FormData(); f.append('active', i.active ? '0' : '1'); await api(`/admin/games/items/${i.id}`, { method: 'POST', form: f }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, i.active ? 'Turn off' : 'Turn on'),
+        h('button', { class: 'icon-btn', 'aria-label': `Remove ${i.name_en}`, onclick: async () => { if (!(await confirmBox({ title: `Remove ${i.name_en}?`, body: 'Its picture and sound are deleted.', confirm: 'Remove', danger: true }))) return; try { await api(`/admin/games/items/${i.id}`, { method: 'DELETE' }); draw(); } catch (e) { toast(errorText(e), 'err'); } } }, icon('trash', 18))));
+  };
+  await draw();
 }
