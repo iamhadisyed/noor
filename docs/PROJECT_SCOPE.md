@@ -24,6 +24,7 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF · Test
 | Practice sync (§5.2 data side) | `POST children/{id}/sessions` stores a session + its mistakes | ✅ |
 | AI reports API (§4 Pro) | Generate (queued, Pro only) and fetch latest | ✅ |
 | Printable PECS PDF (§8.3) | Endpoint + Blade view; free = 4-card sample, Pro = chosen cards, A4/Letter. Urdu labels render joined and in the right order (Noto Naskh Arabic, drawn as images); verified against a Chromium reference. Style is Naskh, not Nastaliq | ✅ |
+| UI design system (§3) | Interactive prototype of the Kindo visual language (Welcome, Child Home, Parent Plan) in `design/prototype`, measured from the approved reference. Original placeholder art; not yet in Flutter | 🟡 design reference only |
 | Hosting (§6.1) | Database queue, cPanel cron lines and `schedule:run` documented in README | ✅ |
 
 ## 2. Deliberate deviations from the spec
@@ -61,7 +62,7 @@ Nothing open. Last completed: Urdu in the PECS PDF. DomPDF cannot shape Arabic-s
 
 ## 5. Not done — mobile apps (📱 outside this repo)
 
-Kindo Junior and Kindo Parent apps in full: sensory-safe UI system (§3), Nastaliq tracing engine with snap-to-spline and dot placement (§5.2), phonetic keyboard, offline-first SQLite, family face/voice matching game, AAC board UI, sound lab, haptics/audio feedback, client-side image/audio compression, the §9.1 Dart dispatcher, and the §9.2 Android notification-channel code. The server contracts they need (alerts, sync, device tokens) already exist.
+Kindo Junior and Kindo Parent apps in full (the visual style now exists as a prototype in `design/`, see §1): sensory-safe palette variant, Nastaliq tracing engine with snap-to-spline and dot placement (§5.2), phonetic keyboard, offline-first SQLite, family face/voice matching game, AAC board UI, sound lab, haptics/audio feedback, client-side image/audio compression, the §9.1 Dart dispatcher, and the §9.2 Android notification-channel code. The server contracts they need (alerts, sync, device tokens) already exist.
 
 ## 6. Setup items only you can supply
 
