@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\NeedsController;
 use App\Http\Controllers\Api\PecsController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SessionController;
+use App\Http\Controllers\Api\SyncController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -23,7 +24,9 @@ Route::prefix('v1')->group(function () {
     // Pictures and sounds: the signed, short-lived link is the credential (works in <img> and <audio>).
     Route::get('media/{task}/{kind}', [MediaController::class, 'show'])->name('media.show')->middleware('signed');
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'idempotent'])->group(function () {
+        Route::get('sync', [SyncController::class, 'index']);
+
         Route::get('me', [AuthController::class, 'me']);
         Route::patch('me', [AuthController::class, 'updateMe']);
         Route::post('me/terms', [AuthController::class, 'acceptTerms']);

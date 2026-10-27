@@ -156,6 +156,10 @@ Please confirm:
 3. Which email provider will send the codes on the GoDaddy host (cPanel SMTP or a service such as Postmark or SES)?
 4. Are therapists and teachers needed for launch or after?
 
+## 10a. Mobile first: one source of truth
+
+Most families will use the app, so the app is the main client and the portal must never disagree with it. The server owns the truth. Phones keep a local copy for offline use and catch up through `GET /sync` (cursor and deletes), send writes with an `Idempotency-Key` so retries are safe, and are nudged by a silent push when another device changes something. The contract is in `docs/SYNC.md`; a test plays a phone syncing in steps against a web client editing the same data and requires the same result as a fresh install.
+
 ## 10b. Decisions confirmed by the owner
 
 - **Email**: codes are sent over SMTP (cPanel mailbox or any SMTP service); no third-party mail API.

@@ -22,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        foreach ([\App\Models\Child::class, \App\Models\Lesson::class, \App\Models\LessonTask::class, \App\Models\FamilyMember::class, \App\Models\ChildNeedsLog::class] as $model) {
+            $model::observe(\App\Observers\SyncObserver::class);
+        }
+
         // Sign-in limits: per email+IP and per IP, so one address cannot be hammered and one client cannot spray many.
         RateLimiter::for('otp-request', fn (Request $r) => [
             Limit::perMinute(5)->by(strtolower((string) $r->input('email')) . '|' . $r->ip()),

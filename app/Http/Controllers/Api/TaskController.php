@@ -98,7 +98,7 @@ class TaskController extends Controller
         if (count($ids) !== count($mine) || array_diff($ids, $mine)) {
             return response()->json(['message' => 'The list must contain every task of this lesson exactly once.'], 422);
         }
-        DB::transaction(fn () => collect($ids)->each(fn ($id, $i) => LessonTask::whereKey($id)->update(['position' => $i + 1])));
+        DB::transaction(fn () => collect($ids)->each(fn ($id, $i) => LessonTask::findOrFail($id)->update(['position' => $i + 1])));
 
         return response()->json(['ok' => true]);
     }

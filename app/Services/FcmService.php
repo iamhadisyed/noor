@@ -42,6 +42,31 @@ class FcmService
         return $sent;
     }
 
+    /** A silent data-only push (no banner, no sound). */
+    public function sendData(int $userId, array $data): int
+    {
+        $tokens = DeviceToken::where('user_id', $userId)->get();
+        if ($tokens->isEmpty() || ! ($access = $this->accessToken())) {
+            return 0;
+        }
+        $project = config('kindo.fcm.project_id') ?: ($this->credentials()['project_id'] ?? null);
+        $sent = 0;
+        foreach ($tokens as $device) {
+            $message = ['token' => $device->token, 'data' => array_map('strval', $data), 'android' => ['priority' => 'NORMAL']];
+            if ($device->device_type === 'ios') {
+                $message['apns'] = ['headers' => ['apns-priority' => '5', 'apns-push-type' => 'background'], 'payload' => ['aps' => ['content-available' => 1]]];
+            }
+            $response = Http::withToken($access)->timeout(10)->post("https://fcm.googleapis.com/v1/projects/{$project}/messages:send", ['message' => $message]);
+            if ($response->successful()) {
+                $sent++;
+            } elseif (in_array($response->status(), [400, 404], true) && str_contains((string) $response->body(), 'UNREGISTERED')) {
+                $device->delete();
+            }
+        }
+
+        return $sent;
+    }
+
     public function payload(DeviceToken $device, string $title, string $body, array $data): array
     {
         $message = [
