@@ -36,7 +36,7 @@ The web portal is a browser client of the **same `/api/v1` REST API** the parent
 | Starter templates | `/lesson-templates` | yes | yes |
 | Reports | `/children/{id}/reports/*` | yes | yes |
 | Alerts feed | `/children/{id}/needs` | yes | yes |
-| Family cards | `/children/{id}/family` | yes | yes |
+| Family cards | `/children/{id}/family`, `/family/{id}` | yes | API ready; portal screen not built yet |
 | Household members | `/household/*` | yes | yes |
 | Data export / delete | `/me/export`, `/children/{id}` DELETE | yes | yes |
 | Super admin console | `/admin/*` | no | web only |
@@ -177,4 +177,4 @@ Not yet covered: the filter reads text only (pictures and sounds are reviewed by
 - Editing a published lesson so it is no longer complete (removing a sound, deleting a task's picture) returns it to draft at once, so a child never meets a broken task.
 - Audio is validated by content, not file name, and capped at 150 KB. The server cannot transcode on shared hosting, so apps and the browser compress before upload.
 - Pictures are re-encoded server-side to a JPEG of at most 600 px, which strips metadata and anything hidden in the file.
-- Lesson media is on the private disk. Family-card media still uses the public disk and moves to the private disk in phase 5.
+- Lesson media is on the private disk. Family-card media now uses the same private disk and signed links (phase 5).
