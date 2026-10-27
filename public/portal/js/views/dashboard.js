@@ -2,6 +2,7 @@ import { api } from '../api.js';
 import { h, icon, fmt, toast, errorText, emptyState, spinner } from '../ui.js';
 import { art } from '../art.js';
 import { loadChildren, currentChild, childPicker, state } from '../main.js';
+import { invitationBanner } from './household.js';
 
 const PHRASE = { potty: 'needs the potty', water: 'wants water', food: 'is hungry', sleep: 'is sleepy', hug: 'needs a hug', pain: 'is in pain', help: 'needs help' };
 export const needPhrase = (n) => PHRASE[(n || '').toLowerCase()] || `needs ${(n || 'something').toLowerCase()}`;
@@ -9,12 +10,14 @@ export const artFor = (n) => (['water', 'potty', 'food', 'sleep', 'hug', 'pain']
 
 export async function render(ctx) {
   const kids = await loadChildren();
+  const banner = await invitationBanner(() => { state.children = null; ctx.go(location.hash); });
   if (!kids.length) {
-    return h('div', { class: 'page' }, h('div', { class: 'page-head' }, h('div', null, h('h1', null, greeting(), ', ', firstName()), h('p', null, 'Let us set up your first child.'))),
+    return h('div', { class: 'page' }, banner, h('div', { class: 'page-head' }, h('div', null, h('h1', null, greeting(), ', ', firstName()), h('p', null, 'Let us set up your first child.'))),
       emptyState('Add your first child', 'Tell us a little about them, then build a first lesson with your own pictures and voice.', h('a', { class: 'btn primary', href: '#/children?new=1' }, icon('plus', 20), 'Add a child')));
   }
   const child = currentChild();
   const wrap = h('div', { class: 'page' }, spinner());
+  const withBanner = (...els) => wrap.replaceChildren(...[banner, ...els].filter(Boolean));
   const load = async () => {
     const [summary, daily, needs, lessons] = await Promise.all([
       api(`/children/${child.id}/insights/summary?days=7`), api(`/children/${child.id}/insights/daily?days=7`),
@@ -25,7 +28,7 @@ export async function render(ctx) {
 
     const days = daily.map((d) => ({ d, label: new Date(d.date + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short' }) }));
     const max = Math.max(1, ...daily.map((d) => d.minutes));
-    wrap.replaceChildren(
+    withBanner(
       h('div', { class: 'page-head' }, h('div', null, h('h1', null, greeting(), ', ', firstName()), h('p', null, `Here is how ${child.name} is doing this week.`)), childPicker(() => ctx.go(location.hash))),
       open ? hero(child, open, load) : h('div', { class: 'alert-hero calm' }, h('div', { class: 'art' }, art('hug', 72)), h('div', { class: 'tx' }, h('h2', null, `No alerts waiting for ${child.name}`), h('p', null, 'You will see a message here the moment they ask for something.'))),
       h('div', { class: 'tiles' },

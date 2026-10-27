@@ -236,4 +236,18 @@ class HouseholdTest extends TestCase
         $this->assertSame(['Ayan'], array_column($this->getJson('/api/v1/children')->json(), 'name'));   // Mama does not see Zoya
         $this->getJson("/api/v1/children/{$mine['id']}")->assertStatus(404);
     }
+
+    public function test_a_co_parent_can_run_rewards_and_games_for_the_shared_child(): void
+    {
+        $this->join();
+        $this->postJson("/api/v1/children/{$this->child['id']}/rewards/bonus", ['minutes' => 10])->assertOk();
+        $start = $this->postJson("/api/v1/children/{$this->child['id']}/games/count/start")->assertCreated();
+        $this->postJson("/api/v1/game-sessions/{$start->json('session_id')}/finish", ['rounds_played' => 5, 'correct' => 5, 'seconds_played' => 30])->assertOk();
+
+        // and the other parent sees the same balance
+        $this->as($this->mama);
+        $this->assertSame(9, $this->getJson("/api/v1/children/{$this->child['id']}/rewards")->json('balance_minutes'));
+        $this->as(User::factory()->create());
+        $this->postJson("/api/v1/game-sessions/{$start->json('session_id')}/finish", ['rounds_played' => 5, 'correct' => 5, 'seconds_played' => 30])->assertStatus(404);
+    }
 }
