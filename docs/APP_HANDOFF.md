@@ -82,7 +82,7 @@ Tick a box only when it works against a real server, not a mock.
 - [ ] Photo is re-encoded to 600 px; voice is 150 KB at most.
 
 ### 2.6 Picture cards (AAC)
-- [ ] `GET aac-cards` returns the stock cards and the parent's own. Stock cards have `icon_path` (an asset path; the stock icon pictures are **not shipped yet**, see section 8). The parent's own cards have `custom: true` and signed `icon_url` / `audio_url`.
+- [ ] `GET aac-cards` returns the stock cards and the parent's own. Stock cards have `icon_path`, a path under the site's public folder (for example `aac/water.png`, served at `APP_URL/aac/water.png`). The 13 stock pictures shipped are plain placeholders; final artwork replaces the files with the same names, so cache them and refresh occasionally. The parent's own cards have `custom: true` and signed `icon_url` / `audio_url`.
 - [ ] Create, edit and delete own cards: `POST children/{id}/aac-cards`, `POST|PATCH aac-cards/{id}`, `DELETE aac-cards/{id}` (multipart: `english_label`, `urdu_label` optional, `category` one of `needs`, `food`, `emotions`, `activities`, `icon`, `audio` optional). Free plan: 3 per child (402 after). Words on the blocked list are refused with 422.
 - [ ] Printable PECS sheet: `GET pecs.pdf` (free plan gets the four core cards).
 
@@ -156,7 +156,7 @@ Follow `docs/SYNC.md` exactly. In short:
 
 | Item | Status | Who |
 |---|---|---|
-| Stock AAC card icon pictures | the 13 stock cards have labels but no pictures | design |
+| Final artwork for the stock AAC card icons | placeholder pictures are shipped for all 13 (`public/aac`); replace the files with the same names | design |
 | Animal pictures and sounds for the two listening games | the owner uploads them in the portal's Game library; games open when at least 4 animals have both | owner |
 | Icon artwork for the counting, memory and pattern games | the server sends names only | design |
 | Letter outline (spline) data for tracing | does not exist | content and design |

@@ -61,6 +61,8 @@ Run `php artisan config:cache` in production; keys are read through `config/kind
 
 Scope note: this repo contains the backend only. The Flutter/native apps from the spec are not included. The checklist for the people building them is in `docs/APP_HANDOFF.md`.
 
+Stock card pictures: `php artisan kindo:stock-icons` draws original placeholder pictures into `public/aac` (kept if a file already exists, `--force` to redraw); replace any file with final artwork.
+
 Urdu in the PECS PDF: DomPDF cannot shape Arabic script, so `App\Support\UrduShaper` joins letters and `UrduText` draws each label with GD/FreeType (needs the `gd` extension with FreeType) using Noto Naskh Arabic from `resources/fonts` (SIL OFL licence included).
 
 ## Web portal (`/portal`)
