@@ -1,6 +1,6 @@
 # Hand-off checklist for the apps team
 
-For whoever builds **Kindo Junior** (the child's app) and **Kindo Parent** (the parent's app). The server and the parent web portal are finished and live in this repo. The apps are not. This page says what to build, in what order, and which server rule or document each part must follow.
+For whoever builds **Kindo Junior** (the child's app) and **Kindo Parent** (the parent's app). The server and the parent web portal are finished and live in this repo. **A first version of both apps now exists in `apps/`** (Flutter, one shared API/sync package and one shared widget package; see `apps/README.md`). Work through the checklist below to see what is covered (almost everything in sections 2 to 4), then spend your time on what the apps still need: a Firebase project and push test, store accounts and purchases, final artwork and sounds, calligraphic Urdu stroke data, app icons, and testing on real phones. This page says what the apps must do and which server rule or document each part must follow.
 
 Everything goes through one REST API, `/api/v1`. The web portal uses exactly the same API, so anything the portal can do, the app can do, and the two stay in step by construction. Read these first:
 

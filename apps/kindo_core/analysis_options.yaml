@@ -1,0 +1,14 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  language:
+    strict-casts: false
+  errors:
+    # JSON maps are dynamic by nature; the models read them defensively.
+    avoid_dynamic_calls: ignore
+    use_null_aware_elements: ignore
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    always_declare_return_types: true

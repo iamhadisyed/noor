@@ -1,0 +1,29 @@
+name: kindo_parent
+description: "Kindo Parent: the parent's app for lessons, picture cards, alerts, reports and play-time rewards. Works with the Kindo web portal."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  kindo_core:
+    path: ../kindo_core
+  kindo_ui:
+    path: ../kindo_ui
+  flutter_localizations:
+    sdk: flutter
+  provider: ^6.1.5+1
+  share_plus: ^13.3.1
+  cross_file: ^0.3.5+5
+
+dev_dependencies:
+  http: ^1.6.0
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

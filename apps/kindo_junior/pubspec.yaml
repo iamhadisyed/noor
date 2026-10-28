@@ -1,0 +1,27 @@
+name: kindo_junior
+description: "Kindo Junior: the child's app. Picture cards to ask for things, lessons, tracing, spelling, games and calm activities, all working offline."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  kindo_core:
+    path: ../kindo_core
+  kindo_ui:
+    path: ../kindo_ui
+  provider: ^6.1.5+1
+
+dev_dependencies:
+  http: ^1.6.0
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

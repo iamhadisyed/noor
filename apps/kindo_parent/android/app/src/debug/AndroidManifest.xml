@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- INTERNET is needed in development for hot reload. Plain http is allowed here only, so a phone can reach a test server on the local network;
+         the release build (src/main) allows https only. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application android:usesCleartextTraffic="true"/>
+</manifest>

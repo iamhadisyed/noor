@@ -28,6 +28,7 @@ class AacCardController extends Controller
             'id' => $c->id, 'child_id' => $c->child_id, 'category' => $c->category, 'english_label' => $c->english_label, 'urdu_label' => $c->urdu_label,
             'icon_path' => $custom ? null : $c->icon_path, 'audio_path' => $custom ? null : $c->audio_path,
             'icon_url' => $custom ? $media->aacUrl($c, 'icon') : null, 'audio_url' => $custom ? $media->aacUrl($c, 'audio') : null,
+            'icon_v' => $custom ? MediaStore::version($c->icon_path) : null, 'audio_v' => $custom ? MediaStore::version($c->audio_path) : null,
             'is_emergency' => $c->is_emergency, 'is_pro' => $c->is_pro, 'custom' => $custom, 'updated_at' => $c->updated_at,
         ];
     }
