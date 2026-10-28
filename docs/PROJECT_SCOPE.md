@@ -65,7 +65,7 @@ Nothing open. Every phase of the portal plan (`docs/PORTAL_PRD.md` §9, phases 1
 | Desensitization Sound Lab (§5.1) | Nothing (needs sound content) |
 | Tracing results storage (§5.2) | Per-session accuracy, mistakes and steadiness are stored and reported, and the app can send optional per-letter results (`letters[]`) that feed a Letter by letter report (accuracy, guide use, steadiness, trend, focus letters) for parents and specialists. Per-child assist settings now include the guide style and fading help. Letter spline data (content) is still outstanding |
 | In-app purchases (§4) | Pro is sold by voucher code and admin grant; Google Play / App Store purchase and receipt validation are not built (need store accounts). The subscription ledger already has a `store` source |
-| Report PDF export | Reports export as CSV; a PDF report for the portal is not built |
+| Report PDF export | ✅ `GET children/{id}/insights/report.pdf` (A4: practice totals, letter by letter, most missed, alerts, milestones; Urdu letters drawn as images) and Reports > Print report; CSV export remains |
 | Custom AAC cards | Stock cards only; parents cannot add their own AAC cards |
 | Tier gating of lesson content (§4) | Urdu letters Alif–Se, 50 CVC words etc. are content/client rules; not modelled server-side |
 | Seed content | No icon artwork, animal pictures/sounds, Urdu letter spline or CVC word data (see §6) |
