@@ -17,6 +17,7 @@ class Child extends Model
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function familyMembers(): HasMany { return $this->hasMany(FamilyMember::class); }
     public function needsLogs(): HasMany { return $this->hasMany(ChildNeedsLog::class); }
+    public function aacCards(): HasMany { return $this->hasMany(AacCard::class); }
     public function practiceSessions(): HasMany { return $this->hasMany(PracticeSession::class); }
     public function lessons(): HasMany { return $this->hasMany(Lesson::class); }
     public function syllabusModules(): HasMany { return $this->hasMany(SyllabusModule::class); }

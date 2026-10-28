@@ -30,6 +30,7 @@ const routes = [
   { path: '/lessons/:id', view: lazy('./views/lesson-editor.js'), role: 'parent', nav: 'lessons' },
   { path: '/specialists', view: lazy('./views/specialists.js'), role: 'parent', nav: 'specialists' },
   { path: '/shared', view: lazy('./views/shared.js'), role: 'parent', nav: 'shared' },
+  { path: '/cards', view: lazy('./views/cards.js'), role: 'parent', nav: 'cards' },
   { path: '/rewards', view: lazy('./views/rewards.js'), role: 'parent', nav: 'rewards' },
   { path: '/reports', view: lazy('./views/reports.js'), role: 'parent', nav: 'reports' },
   { path: '/alerts', view: lazy('./views/alerts.js'), role: 'parent', nav: 'alerts' },
@@ -48,7 +49,7 @@ const routes = [
   { path: '/admin/health', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-health', name: 'health' },
 ];
 const NAV = {
-  parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['rewards', '#/rewards', 'star', 'Rewards'], ['specialists', '#/specialists', 'shield', 'Specialists'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['settings', '#/settings', 'gear', 'Settings']],
+  parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['cards', '#/cards', 'image', 'Cards'], ['rewards', '#/rewards', 'star', 'Rewards'], ['specialists', '#/specialists', 'shield', 'Specialists'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['settings', '#/settings', 'gear', 'Settings']],
   super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-games', '#/admin/games', 'star', 'Game library'], ['a-news', '#/admin/announcements', 'bell', 'Announcements'], ['a-vouchers', '#/admin/vouchers', 'list', 'Vouchers'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
 };
 

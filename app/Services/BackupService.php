@@ -15,7 +15,7 @@ use ZipArchive;
 class BackupService
 {
     public const DIR = 'backups';
-    public const MEDIA_DIRS = ['lessons', 'family', 'games'];
+    public const MEDIA_DIRS = ['lessons', 'family', 'games', 'aac'];
     private const SKIP = ['cache', 'cache_locks', 'sessions', 'jobs', 'job_batches', 'failed_jobs', 'personal_access_tokens', 'login_codes', 'idempotency_keys', 'sync_changes'];
 
     private function disk() { return Storage::disk('local'); }

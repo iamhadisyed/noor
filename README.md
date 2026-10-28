@@ -41,6 +41,8 @@ Run `php artisan config:cache` in production; keys are read through `config/kind
 | GET | task-types | the per-type picture and sound rules, shared by web and app |
 | GET | lesson-templates | starter lessons for the standard and special tracks |
 | GET/POST | children/{id}/lessons (+ `/from-template/{id}`) | free plan: 3 lessons per child |
+| GET | aac-cards | stock cards plus your own (`custom: true`, with signed `icon_url` / `audio_url`) |
+| POST/PATCH/DELETE | children/{id}/aac-cards · aac-cards/{id} | your own picture cards: multipart `english_label`, `urdu_label`, `category` (needs/food/emotions/activities), `icon`, optional `audio`; free plan 3 per child |
 | POST | children/{id}/lessons/import | Pro: multipart `photo` (+ `language`, `week_number`) → draft lesson via Groq/Gemini vision; photo is not kept; 10 per hour |
 | GET/PATCH/DELETE | lessons/{id} | DELETE archives |
 | POST | lessons/{id}/publish · unpublish · duplicate | publish returns 422 with the exact missing pictures and sounds |

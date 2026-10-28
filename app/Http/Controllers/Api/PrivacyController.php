@@ -69,6 +69,14 @@ class PrivacyController extends Controller
             return $row;
         })->all();
 
+        $cards = \App\Models\AacCard::whereIn('child_id', $ids)->orderBy('id')->get()->map(function ($c) use ($addFile) {
+            $row = collect($c->toArray())->except(['icon_path', 'audio_path'])->all();
+            $row['picture_file'] = $addFile($c->icon_path, "media/cards/{$c->id}-picture." . pathinfo((string) $c->icon_path, PATHINFO_EXTENSION));
+            $row['voice_file'] = $addFile($c->audio_path, "media/cards/{$c->id}-voice." . pathinfo((string) $c->audio_path, PATHINFO_EXTENSION));
+
+            return $row;
+        })->all();
+
         $data = [
             'exported_at' => now()->toIso8601String(),
             'about' => 'Everything Kindo holds about this account. Pictures and voices are in the media folder and named in the entries below.',
@@ -77,6 +85,7 @@ class PrivacyController extends Controller
             'children' => $kids->toArray(),
             'lessons' => $lessons,
             'family_cards' => $family,
+            'picture_cards' => $cards,
             'alerts' => ChildNeedsLog::whereIn('child_id', $ids)->orderBy('id')->get()->toArray(),
             'practice_sessions' => PracticeSession::whereIn('child_id', $ids)->with('mistakes', 'letters')->orderBy('id')->get()->toArray(),
             'ai_reports' => AiDiagnosticReport::whereIn('child_id', $ids)->orderBy('id')->get()->toArray(),
