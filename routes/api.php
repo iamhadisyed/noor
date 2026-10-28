@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\FamilyMemberController;
 use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\LessonImportController;
 use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\MilestoneController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\NeedsController;
 use App\Http\Controllers\Api\NotificationPrefsController;
@@ -160,6 +161,8 @@ Route::prefix('v1')->group(function () {
 
         Route::get('games', [GameController::class, 'index']);
         Route::get('games/library', [GameController::class, 'library']);
+        Route::get('children/{child}/milestones', [MilestoneController::class, 'index']);
+        Route::get('children/{child}/milestones/{key}/card.png', [MilestoneController::class, 'card'])->where('key', '[a-z0-9_]+')->middleware('throttle:30,1');
         Route::get('children/{child}/rewards', [GameController::class, 'rewards']);
         Route::patch('children/{child}/rewards/settings', [GameController::class, 'updateSettings']);
         Route::post('children/{child}/rewards/bonus', [GameController::class, 'bonus']);
