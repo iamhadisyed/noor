@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Kindo records your voice so your child can hear it on lessons and picture cards.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Kindo uses the camera to take pictures for lessons, picture cards and family cards.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Kindo lets you choose pictures for lessons, picture cards and family cards.</string>
 </dict>
 </plist>

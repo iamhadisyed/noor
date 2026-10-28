@@ -58,6 +58,11 @@ class KindoSession extends ChangeNotifier {
     _syncSub = sync.onChange.listen((_) => notifyListeners());
   }
 
+  /// The site address without `/api/v1`, where public files such as the stock picture cards live.
+  String get origin => baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
+
+  String publicUrl(String path) => '$origin/${path.startsWith('/') ? path.substring(1) : path}';
+
   bool get signedIn => token != null && token!.isNotEmpty;
   List<Child> get children => sync.children;
   Child? get currentChild {

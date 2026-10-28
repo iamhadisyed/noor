@@ -4,6 +4,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:kindo_core/kindo_core.dart';
+
 import '../session.dart';
 import '../theme.dart';
 
@@ -110,4 +112,18 @@ class SoundButton extends StatelessWidget {
           ),
         ),
       );
+}
+
+/// The picture on a picture card: the parent's own (signed link) or the stock one shipped with the site.
+class CardPicture extends StatelessWidget {
+  const CardPicture(this.card, {super.key, this.radius = 18});
+  final AacCard card;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.read<KindoSession>();
+    final url = card.iconUrl ?? (card.iconPath == null ? null : s.publicUrl(card.iconPath!));
+    return NetImage(url, version: card.iconV, fit: BoxFit.contain, radius: radius, semanticLabel: card.englishLabel);
+  }
 }
