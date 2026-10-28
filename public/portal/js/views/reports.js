@@ -19,7 +19,7 @@ export async function render(ctx) {
           h('button', { class: 'btn soft', onclick: async () => { try { await download(`/children/${child.id}/insights/export.csv?days=${days}`, `kindo-${child.name}-report.csv`); } catch (e) { toast(errorText(e), 'err'); } } }, icon('download', 20), 'Export CSV'))),
       body);
     try {
-      const [s, daily] = await Promise.all([api(`/children/${child.id}/insights/summary?days=${days}`), api(`/children/${child.id}/insights/daily?days=${days}`)]);
+      const [s, daily, letters] = await Promise.all([api(`/children/${child.id}/insights/summary?days=${days}`), api(`/children/${child.id}/insights/daily?days=${days}`), api(`/children/${child.id}/letters?days=${days}`)]);
       const series = days > 14 ? weekly(daily) : daily.map((d) => ({ label: new Date(d.date + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short' }), value: d.minutes }));
       body.replaceChildren(
         h('div', { class: 'tiles' },
@@ -33,12 +33,25 @@ export async function render(ctx) {
           h('div', { class: 'list', style: 'gap:24px' },
             h('section', { class: 'card' }, h('h2', null, 'By language'), Object.keys(s.practice.by_language).length ? h('div', null, Object.entries(s.practice.by_language).map(([k, v]) => h('div', { class: 'item', style: 'margin-top:10px' }, h('div', { class: 'grow' }, h('b', null, k === 'urdu' ? 'Urdu' : 'English'), h('span', null, `${v.minutes} min`)), h('span', { class: 'chip ink' }, fmt.pct(v.accuracy_pct))))) : h('p', { class: 'muted', style: 'margin-top:8px' }, 'No practice yet.')),
             h('section', { class: 'card' }, h('h2', null, 'Needs and requests'), hbars(s.needs.by_type, { empty: 'No alerts in this period.' })),
+            lettersCard(letters),
             h('section', { class: 'card' }, h('h2', null, 'Letters to practise'), h('p', { class: 'muted' }, 'Most missed targets'), hbars(s.practice.hardest_targets, { empty: 'No mistakes recorded. Nice.' }),
               s.practice.avg_stroke_deviation != null ? h('p', { class: 'hint', style: 'margin-top:10px' }, `Average tracing drift: ${s.practice.avg_stroke_deviation} px`) : null))));
     } catch (e) { body.replaceChildren(h('p', { class: 'msg-err' }, errorText(e))); }
   }
   await draw();
   return page;
+}
+const STATUS = { mastered: ['sage', 'Got it'], practising: ['', 'Getting there'], needs_help: ['rose', 'Needs help'], new: ['', 'New'] };
+const TREND = { up: '↑ improving', down: '↓ slipping', steady: '→ steady' };
+/** Per-letter tracing results: a row per letter with how often it was right, how much guide it needed and the trend. */
+export function lettersCard(l) {
+  const rows = (l?.letters || []).slice(0, 12);
+  return h('section', { class: 'card', id: 'letters-card' }, h('h2', null, 'Letter by letter'), h('p', { class: 'muted' }, l?.focus?.length ? `Focus on: ${l.focus.join('  ')}` : 'Tracing results per letter'),
+    rows.length ? h('div', { class: 'list', style: 'margin-top:10px' }, rows.map((r) => h('div', { class: 'item', 'data-letter': r.letter },
+      h('b', { style: 'font-size:22px;min-width:36px;text-align:center', lang: r.language === 'urdu' ? 'ur' : 'en' }, r.letter),
+      h('div', { class: 'grow' }, h('b', null, `${r.accuracy_pct ?? '—'}% right`), h('span', null, `${r.attempts} tries · guide used ${r.assisted_pct}%${r.avg_deviation != null ? ` · drift ${r.avg_deviation}` : ''}${r.trend ? ` · ${TREND[r.trend]}` : ''}`)),
+      h('span', { class: `chip ${STATUS[r.status][0]}` }, STATUS[r.status][1])))) : h('p', { class: 'muted', style: 'margin-top:8px' }, 'No tracing results yet.'),
+    l?.mastered ? h('p', { class: 'hint', style: 'margin-top:10px' }, `${l.mastered} letter${l.mastered === 1 ? '' : 's'} mastered`) : null);
 }
 const tile = (cls, label, big, unit, sub) => h('div', { class: `tile ${cls}` }, h('span', { class: 'lbl' }, label), h('span', { class: 'big' }, big, unit ? h('small', null, unit) : null), h('span', { class: 'sub' }, sub));
 function weekly(daily) {

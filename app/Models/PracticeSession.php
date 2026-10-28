@@ -12,4 +12,6 @@ class PracticeSession extends Model
     protected $fillable = ['child_id', 'module_id', 'language', 'total_attempts', 'successful_attempts', 'duration_seconds'];
 
     public function mistakes(): HasMany { return $this->hasMany(PracticeMistakeLog::class, 'session_id'); }
+
+    public function letters(): HasMany { return $this->hasMany(SessionLetter::class, 'session_id'); }
 }

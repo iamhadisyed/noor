@@ -12,8 +12,8 @@ use Illuminate\Http\Request;
 class ChildController extends Controller
 {
     /** What a child gets when nothing has been chosen; a special track starts calmer and slower. */
-    public const SUPPORT_STANDARD = ['magnet_px' => 24, 'pace' => 'normal', 'max_choices' => 4, 'no_timers' => false, 'first_then' => false, 'praise' => 'lively'];
-    public const SUPPORT_SPECIAL = ['magnet_px' => 32, 'pace' => 'slow', 'max_choices' => 3, 'no_timers' => true, 'first_then' => true, 'praise' => 'quiet'];
+    public const SUPPORT_STANDARD = ['magnet_px' => 24, 'pace' => 'normal', 'max_choices' => 4, 'no_timers' => false, 'first_then' => false, 'praise' => 'lively', 'guide' => 'dotted', 'fade_assist' => true];
+    public const SUPPORT_SPECIAL = ['magnet_px' => 32, 'pace' => 'slow', 'max_choices' => 3, 'no_timers' => true, 'first_then' => true, 'praise' => 'quiet', 'guide' => 'dotted', 'fade_assist' => true];
 
     public function index(Request $request): JsonResponse
     {
@@ -105,6 +105,8 @@ class ChildController extends Controller
             'support_profile.no_timers' => 'sometimes|boolean',
             'support_profile.first_then' => 'sometimes|boolean',
             'support_profile.praise' => 'sometimes|in:quiet,lively',
+            'support_profile.guide' => 'sometimes|in:none,dotted,arrows',
+            'support_profile.fade_assist' => 'sometimes|boolean',
         ];
     }
 }

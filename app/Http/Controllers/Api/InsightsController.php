@@ -7,6 +7,7 @@ use App\Models\Child;
 use App\Models\ChildNeedsLog;
 use App\Models\PracticeMistakeLog;
 use App\Models\PracticeSession;
+use App\Models\SessionLetter;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -71,6 +72,47 @@ class InsightsController extends Controller
             'avg_stroke_deviation' => $mistakes->whereNotNull('stroke_deviation_score')->avg('stroke_deviation_score') !== null
                 ? round((float) $mistakes->whereNotNull('stroke_deviation_score')->avg('stroke_deviation_score'), 1) : null,
         ];
+    }
+
+    /** Per-letter tracing results over a range: accuracy, steadiness, how much help was needed and whether it is improving. */
+    public function letterStats(Child $child, $from, $to): array
+    {
+        $rows = SessionLetter::where('child_id', $child->id)->whereBetween('created_at', [$from, $to])->orderBy('id')->get();
+        $pct = fn ($rs) => $rs->sum('attempts') ? (int) round($rs->sum('successes') / $rs->sum('attempts') * 100) : null;
+
+        $letters = $rows->groupBy(fn ($r) => $r->language.'|'.$r->letter)->map(function ($g) use ($pct) {
+            $attempts = $g->sum('attempts');
+            $acc = $pct($g);
+            $assisted = (int) round($g->sum('assisted') / max(1, $attempts) * 100);
+            $half = intdiv($g->count(), 2);
+            $early = $g->take($half);
+            $late = $g->skip($half);
+            $trend = null;
+            if ($half >= 1 && $early->sum('attempts') >= 3 && $late->sum('attempts') >= 3) {
+                $d = $pct($late) - $pct($early);
+                $trend = $d >= 10 ? 'up' : ($d <= -10 ? 'down' : 'steady');
+            }
+            $dev = $g->whereNotNull('deviation')->avg('deviation');
+            // Needs help: low accuracy, or mostly done with the guide on. Mastered needs enough tries to mean it.
+            $status = $attempts < 3 ? 'new' : ($acc < 50 ? 'needs_help' : ($acc >= 85 && $assisted <= 25 && $attempts >= 5 ? 'mastered' : 'practising'));
+
+            return ['letter' => $g->first()->letter, 'language' => $g->first()->language, 'attempts' => $attempts, 'accuracy_pct' => $acc, 'assisted_pct' => $assisted,
+                'avg_deviation' => $dev === null ? null : round((float) $dev, 1), 'trend' => $trend, 'status' => $status];
+        })->sortBy([['accuracy_pct', 'asc'], ['attempts', 'desc']])->values();
+
+        return [
+            'letters' => $letters->all(),
+            'focus' => $letters->whereIn('status', ['needs_help', 'practising'])->take(3)->pluck('letter')->values()->all(),
+            'mastered' => $letters->where('status', 'mastered')->count(),
+        ];
+    }
+
+    public function letters(Request $request, int $childId): JsonResponse
+    {
+        $child = ChildController::owned($request, $childId);
+        [$from, $to, $tz] = $this->range($request);
+
+        return response()->json(['range' => ['from' => $from->toDateString(), 'to' => $to->toDateString(), 'tz' => $tz]] + $this->letterStats($child, $from, $to));
     }
 
     /** One row per day, zeros included, so a chart never has gaps. */

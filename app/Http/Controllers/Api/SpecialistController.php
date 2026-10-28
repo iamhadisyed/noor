@@ -193,6 +193,7 @@ class SpecialistController extends Controller
             'range' => ['from' => $from->toDateString(), 'to' => $to->toDateString(), 'tz' => $tz],
             'practice' => app(InsightsController::class)->practice($child, $from, $to),
             'daily' => $daily,
+            'letters' => app(InsightsController::class)->letterStats($child, $from, $to),
             'games' => GameProgress::where('child_id', $child->id)->get()->map(fn ($g) => ['game' => $g->game, 'level' => $g->level, 'plays' => $g->plays, 'last_accuracy' => $g->last_accuracy])->all(),
             'lessons' => $child->lessons()->where('is_template', false)->where('status', '!=', 'archived')->withCount('tasks')->orderBy('week_number')->get()->map(fn ($l) => ['title' => $l->title, 'status' => $l->status, 'week' => $l->week_number, 'language' => $l->language, 'tasks' => $l->tasks_count])->all(),
         ]);
