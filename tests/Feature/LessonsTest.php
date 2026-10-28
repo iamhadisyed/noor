@@ -316,4 +316,41 @@ class LessonsTest extends TestCase
         $this->getJson('/api/v1/billing')->assertJsonPath('limits.free.custom_cards_per_child', 3)->assertJsonPath('limits.pro.custom_cards_per_child', null);
         $this->getJson('/api/v1/meta')->assertJsonPath('limits.custom_cards_per_child_free', 3);
     }
+
+    public function test_the_child_spelling_keyboard_is_the_alphabet_in_order(): void
+    {
+        $k = $this->getJson('/api/v1/meta')->assertOk()->json('keyboards');
+
+        $this->assertSame(range('a', 'z'), $k['english']['letters']);
+        $this->assertSame('ltr', $k['english']['direction']);
+        $this->assertSame(['ا', 'آ', 'ب', 'پ', 'ت', 'ٹ', 'ث'], array_slice($k['urdu']['letters'], 0, 7));
+        $this->assertSame('rtl', $k['urdu']['direction']);
+        $this->assertSame(array_unique($k['urdu']['letters']), $k['urdu']['letters'], 'no letter twice');
+        $this->assertNotSame(['q', 'w', 'e', 'r', 't', 'y'], array_slice($k['english']['letters'], 0, 6), 'never QWERTY');
+    }
+
+    public function test_spell_tasks_say_which_keyboard_they_need(): void
+    {
+        $lesson = $this->lesson();
+
+        $this->assertSame('english', $this->task($lesson['id'], ['type' => 'spell_word', 'title' => 'Cat', 'target' => 'cat'])['keyboard']);
+        $this->assertSame('urdu', $this->task($lesson['id'], ['type' => 'spell_word', 'title' => 'Baap', 'target' => 'باپ'])['keyboard']);
+        $this->assertNull($this->task($lesson['id'], ['type' => 'trace_letter', 'title' => 'Alif', 'target' => 'ا'])['keyboard']);
+    }
+
+    public function test_a_word_the_child_cannot_type_blocks_publishing_with_a_clear_message(): void
+    {
+        $lesson = $this->lesson();
+        foreach (['Cat', 'آم', 'میں', 'کِتاب'] as $ok) {   // capitals, alif madd, noon ghunna and zer are all fine
+            $this->task($lesson['id'], ['type' => 'spell_word', 'title' => $ok, 'target' => $ok, 'needs_audio' => true]);
+        }
+        $bad = $this->task($lesson['id'], ['type' => 'spell_word', 'title' => 'Ice cream', 'target' => 'ice-cream1']);
+
+        $problems = collect($this->getJson("/api/v1/lessons/{$lesson['id']}/readiness")->json('problems'))->keyBy('task_id');
+
+        $this->assertContains('keyboard_letters', $problems[$bad['id']]['missing']);
+        $this->assertStringContainsString("child's keyboard", $problems[$bad['id']]['message']);
+        $this->assertCount(5, $problems, 'only the bad word is flagged for its letters; the others just need their sounds');
+        $this->assertSame(1, $problems->filter(fn ($p) => in_array('keyboard_letters', $p['missing'], true))->count());
+    }
 }

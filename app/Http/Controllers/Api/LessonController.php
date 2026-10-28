@@ -180,6 +180,7 @@ class LessonController extends Controller
     {
         return response()->json([
             'task_types' => LessonRules::types(),
+            'keyboards' => \App\Support\ChildKeyboard::layouts(),   // the child's spelling keyboard: alphabet in order, not QWERTY
             'support_defaults' => ['standard' => ChildController::SUPPORT_STANDARD, 'special' => ChildController::SUPPORT_SPECIAL],
             'neurotypes' => ['neurotypical', 'autism_spectrum', 'speech_delay', 'adhd', 'down_syndrome'],
             'limits' => ['image_max_side' => MediaStore::MAX_IMAGE_SIDE, 'audio_max_kb' => MediaStore::MAX_AUDIO_KB, 'lessons_per_child_free' => (int) config('kindo.free_limits.lessons_per_child'), 'custom_cards_per_child_free' => (int) config('kindo.free_limits.custom_cards_per_child'), 'family_cards_free' => (int) config('kindo.free_limits.family_members'), 'children_free' => (int) config('kindo.free_limits.children'), 'children_pro' => (int) config('kindo.free_limits.pro_children')],
