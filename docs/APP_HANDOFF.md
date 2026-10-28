@@ -113,6 +113,12 @@ Design rule: no clutter, no timers when `no_timers` is on, slow pace when `pace`
 - [ ] **Upload practice results:** `POST children/{id}/sessions` at the end of each session (section 6 for the body). The response carries `reward` (minutes earned and why); show a small, kind celebration.
 - [ ] **Games** (section 4).
 
+## 3b. Activities for every kind of child
+
+- [ ] **More lesson task types** (from `GET task-types`; render from the type, never hard-code): `trace_number` (trace a 1 to 3 digit number), `count_objects` (picture plus answer choices, like `pick_picture` but the choices are numbers), `say_it` (picture; the child says the word, a parent or the app marks it), `social_story` (a short situation in `instruction` with answer choices, for example "A friend takes your toy. How do you feel?"). Task types with `choices: true` carry `options.choices` and `options.correct`.
+- [ ] **Calm activities** (`GET activities`): build one breathing screen and one step-by-step screen that read the steps from the server (the `cue` drives the picture; `seconds` is the pace). Always reachable, also from the needs board for a child who is upset. No score, no sound unless the parent turns it on. Report with `POST children/{id}/activities/{activity}/done`.
+- [ ] **Games**: 11 more, listed with their round shapes in `docs/GAMES.md`. Put the games whose `for` includes the child's track first. `feelings`, `routine_order` and `match_same` are made for children who need more support: no clock, one clear instruction, and gentle wrong-answer feedback ("try again", never a buzzer).
+
 ## 4. Games and play time
 
 Read `docs/GAMES.md`. Summary:

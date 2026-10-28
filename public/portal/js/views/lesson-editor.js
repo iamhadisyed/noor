@@ -26,7 +26,7 @@ function spellKeyboard(keyboards, initial) {
   update(initial);
   return { el: wrap, update };
 }
-const TARGET_HINT = { trace_letter: 'The letter to trace, for example ب', spell_word: 'The word to spell, for example cat', listen_repeat: 'The phrase to repeat' };
+const TARGET_HINT = { trace_letter: 'The letter to trace, for example ب', spell_word: 'The word to spell, for example cat', listen_repeat: 'The phrase to repeat', trace_number: 'The number to trace, for example 7', say_it: 'The word the child should say, for example ball' };
 
 export async function render(ctx, params) {
   const m = await meta();
@@ -174,7 +174,7 @@ export async function render(ctx, params) {
 
     const choices = () => {
       choicesBox.replaceChildren();
-      if (card.task.type !== 'pick_picture') return;
+      if (!typeInfo(card.task.type).choices) return;
       const t = card.task; const opt = t.options || { choices: ['', ''], correct: 0 }; const cs = [...(opt.choices.length ? opt.choices : ['', ''])]; let ok = opt.correct || 0;
       const maxC = child()?.support?.max_choices || 4;
       const save = () => { const clean = cs.map((c) => c.trim()); if (clean.filter(Boolean).length >= 2 && clean.every(Boolean) && ok < clean.length) patchSoon({ options: { choices: clean, correct: ok } }); };

@@ -44,7 +44,7 @@ class GameController extends Controller
     {
         $n = count($this->animals());
 
-        return response()->json(['games' => collect(config('games.games'))->map(fn ($g, $k) => ['game' => $k, 'category' => $g['category'], 'title' => $g['title'], 'about' => $g['about'], 'available' => $this->available($k, $n)])->values()->all(), 'max_level' => config('games.max_level')]);
+        return response()->json(['games' => collect(config('games.games'))->map(fn ($g, $k) => ['game' => $k, 'category' => $g['category'], 'title' => $g['title'], 'for' => $g['for'] ?? ['standard', 'special'], 'about' => $g['about'], 'available' => $this->available($k, $n)])->values()->all(), 'max_level' => config('games.max_level')]);
     }
 
     /** What the app needs to draw the games: the icon names and the animal pictures and sounds. */
@@ -55,7 +55,12 @@ class GameController extends Controller
             foreach ($set as $key => [$ur, $en]) { $icons[] = ['key' => $key, 'category' => $cat, 'name_en' => $en, 'name_ur' => $ur]; }
         }
 
-        return response()->json(['icons' => $icons, 'animals' => $this->animals()]);
+        $feelings = collect(config('games.feelings'))->map(fn ($n, $k) => ['key' => $k, 'name_en' => $n[1], 'name_ur' => $n[0]])->values()->all();
+        $colors = collect(config('games.colors'))->map(fn ($c, $k) => ['key' => $k, 'hex' => $c[0], 'name_en' => $c[1], 'name_ur' => $c[2]])->values()->all();
+        $routines = collect(config('games.routines'))->map(fn ($r, $k) => ['key' => $k, 'title' => $r['title'], 'steps' => collect($r['steps'])->map(fn ($s, $sk) => ['key' => $sk, 'name_en' => $s[1], 'name_ur' => $s[0]])->values()->all()])->values()->all();
+
+        // The apps draw every icon themselves (artwork comes from design); the server only names them.
+        return response()->json(['icons' => $icons, 'feelings' => $feelings, 'colors' => $colors, 'routines' => $routines, 'animals' => $this->animals()]);
     }
 
     public function rewards(Request $request, int $childId): JsonResponse
@@ -74,7 +79,7 @@ class GameController extends Controller
             'streak_days' => $this->rewards->streakDays($child),
             'how_to_earn' => $this->howToEarn($s),
             'games' => collect(config('games.games'))->map(fn ($g, $k) => [
-                'game' => $k, 'category' => $g['category'], 'title' => $g['title'],
+                'game' => $k, 'category' => $g['category'], 'title' => $g['title'], 'for' => $g['for'] ?? ['standard', 'special'],
                 'enabled' => $enabled === null || in_array($k, $enabled, true), 'available' => $this->available($k, $n),
                 'unlocked' => $s['enabled'] && $balance >= 1 && ($enabled === null || in_array($k, $enabled, true)) && $this->available($k, $n),
                 'level' => $progress[$k]->level ?? 1, 'plays' => $progress[$k]->plays ?? 0, 'last_accuracy' => $progress[$k]->last_accuracy ?? null,
@@ -137,7 +142,7 @@ class GameController extends Controller
         $child = ChildController::owned($request, $childId);
         $meta = $this->game($game);
         $s = $this->rewards->settings($child);
-        $data = $request->validate(['rounds' => 'sometimes|integer|between:3,' . config('games.rounds_max')]);
+        $data = $request->validate(['rounds' => 'sometimes|integer|between:3,' . config('games.rounds_max'), 'language' => 'sometimes|in:en,ur']);   // language: for the games about letters and words
 
         if (! $s['enabled'] || ($s['enabled_games'] !== null && ! in_array($game, $s['enabled_games'], true))) {
             return response()->json(['message' => 'This game is switched off for this child.', 'locked' => true, 'reason' => 'switched_off'], 423);
@@ -159,7 +164,7 @@ class GameController extends Controller
 
         return response()->json([
             'session_id' => $session->id, 'game' => $game, 'level' => $level, 'allowed_seconds' => $allowed, 'balance_minutes' => $balance,
-            'rounds' => $this->engine->rounds($game, $level, (int) ($data['rounds'] ?? config('games.rounds_default')), $choices, $animals),
+            'rounds' => $this->engine->rounds($game, $level, (int) ($data['rounds'] ?? config('games.rounds_default')), $choices, $animals, $data['language'] ?? 'en'),
         ], 201);
     }
 
