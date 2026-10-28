@@ -10,8 +10,9 @@ Every picture made for this project, in one place, for demos and reviews. Nothin
 | `stock-cards/` | The 13 placeholder pictures for the stock picture cards (water, potty, milk, bed, food, sleep, hug, pain, help, happy, sad, scared, play) and a contact sheet. Original artwork, drawn by `php artisan kindo:stock-icons`. |
 | `share-cards/` | Milestone cards a parent can share on WhatsApp, in English and Urdu. |
 | `pdf-samples/` | A printable PECS sheet with all 13 cards, a progress report, and a picture of the first page of each. |
+| `apps-live/` | The real Flutter apps (web build) running against a real server, with a demo family: `parent/` (home, lessons, lesson editor, task form, alerts, reports, more, picture and family cards) and `junior/` (home, needs board, a whole lesson with tracing, picking and spelling on the alphabet keyboard, the reward, games, calm, family game). Made by `apps/tool/live-demo/run.sh`. |
 | `design-iterations/` | Earlier rounds of the same designs, kept to show how they were refined. |
 
 ## Refreshing the screenshots
 
-`bash demo/refresh.sh` runs the browser test suite and copies its newest screenshots into `portal-desktop/`. (`app-screens/` come from `design/prototype`; open `design/prototype/index.html` in a browser.)
+`bash demo/refresh.sh` runs the browser test suite and copies its newest screenshots into `portal-desktop/`. (`app-screens/` come from `design/prototype`; open `design/prototype/index.html` in a browser. `apps-live/` is made by `apps/tool/live-demo/run.sh --build`.)

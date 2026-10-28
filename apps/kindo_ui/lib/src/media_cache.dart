@@ -47,7 +47,10 @@ class MediaCache {
     final hit = _memory[key];
     if (hit != null) return Future.value(hit);
 
-    return _inflight[key] ??= _load(url, key).whenComplete(() => _inflight.remove(key));
+    // a block body on purpose: `whenComplete(() => map.remove(key))` would return the very future being completed, and wait for it forever
+    return _inflight[key] ??= _load(url, key).whenComplete(() {
+      _inflight.remove(key);
+    });
   }
 
   Future<Uint8List?> _load(String url, String key) async {

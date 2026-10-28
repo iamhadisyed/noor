@@ -48,18 +48,21 @@ class _ReportsScreenState extends State<ReportsScreen> {
               children: [
                 Stat('${p['minutes'] ?? 0}', context.tr('minutes', 'منٹ')),
                 Stat(p['accuracy_pct'] == null ? '-' : '${p['accuracy_pct']}%', context.tr('right answers', 'درست جوابات'), color: KindoColors.lavenderTint),
-                Stat('${p['sessions'] ?? 0}', context.tr('sessions', 'سیشن')),
+                Stat('${p['sessions'] ?? 0}', p['sessions'] == 1 ? context.tr('session', 'سیشن') : context.tr('sessions', 'سیشن')),
                 Stat('${calm['minutes'] ?? 0}', context.tr('calm minutes', 'پرسکون منٹ'), color: KindoColors.cream),
               ],
             ),
             SectionTitle(context.tr('Asking for things', 'مانگنا')),
-            KindoCard(
+            SizedBox(
+              width: double.infinity,
+              child: KindoCard(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(context.tr('${needs['total'] ?? 0} times, ${needs['answered'] ?? 0} answered', '${needs['total'] ?? 0} بار، ${needs['answered'] ?? 0} کا جواب دیا')),
                 if (needs['avg_reply_seconds'] != null) Text(context.tr('You usually answer in ${needs['avg_reply_seconds']} seconds', 'آپ عموماً ${needs['avg_reply_seconds']} سیکنڈ میں جواب دیتے ہیں'), style: Theme.of(context).textTheme.bodySmall),
                 const SizedBox(height: 8),
                 for (final e in asJson(needs['by_type']).entries) Padding(padding: const EdgeInsets.only(top: 2), child: Text('${e.key}: ${e.value}')),
               ]),
+              ),
             ),
           ]);
         },

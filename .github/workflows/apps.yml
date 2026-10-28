@@ -1,0 +1,34 @@
+name: apps
+
+on:
+  push:
+    branches: [main]
+    paths: ['apps/**', '.github/workflows/apps.yml']
+  pull_request:
+    paths: ['apps/**', '.github/workflows/apps.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [kindo_core, kindo_ui, kindo_parent, kindo_junior]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Dependencies
+        working-directory: apps/${{ matrix.package }}
+        run: flutter pub get
+      - name: Analyze
+        working-directory: apps/${{ matrix.package }}
+        run: ${{ matrix.package == 'kindo_core' && 'dart analyze' || 'flutter analyze' }}
+      - name: Test
+        working-directory: apps/${{ matrix.package }}
+        run: ${{ matrix.package == 'kindo_core' && 'dart test' || 'flutter test' }}

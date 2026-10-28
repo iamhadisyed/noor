@@ -114,7 +114,7 @@ class _Summary extends StatelessWidget {
             children: [
               Stat('${p['minutes'] ?? 0}', context.tr('minutes practised', 'منٹ مشق')),
               Stat(p['accuracy_pct'] == null ? '-' : '${p['accuracy_pct']}%', context.tr('right answers', 'درست جوابات'), color: KindoColors.lavenderTint),
-              Stat('${p['sessions'] ?? 0}', context.tr('practice sessions', 'مشق کے سیشن')),
+              Stat('${p['sessions'] ?? 0}', p['sessions'] == 1 ? context.tr('practice session', 'مشق کا سیشن') : context.tr('practice sessions', 'مشق کے سیشن')),
               Stat('${n['total'] ?? 0}', context.tr('times they asked', 'بار مانگا'), color: KindoColors.cream),
             ],
           ),
