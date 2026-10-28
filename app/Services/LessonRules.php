@@ -66,6 +66,9 @@ class LessonRules
             if ($rule && $rule['target'] && trim((string) $task->target) === '') {
                 $missing[] = 'target';
             }
+            if ($task->type === 'spell_word' && trim((string) $task->target) !== '' && \App\Support\ChildKeyboard::unsupported($task->target) !== []) {
+                $missing[] = 'keyboard_letters';   // the child types on an alphabet keyboard, so the word may only use its letters
+            }
             if (self::needsImage($task) && ! $task->image_path) {
                 $missing[] = 'image';
             }
@@ -96,7 +99,7 @@ class LessonRules
     {
         $words = [
             'sound' => 'a sound', 'image' => 'a picture', 'target' => 'its letter or word',
-            'choices' => 'at least two answer choices', 'fewer_choices' => "no more than {$maxChoices} choices for this child",
+            'keyboard_letters' => 'a word that uses only the letters on the child\'s keyboard (no digits, hyphens or other marks)', 'choices' => 'at least two answer choices', 'fewer_choices' => "no more than {$maxChoices} choices for this child",
         ];
         $parts = array_map(fn ($m) => $words[$m] ?? $m, $missing);
         $last = array_pop($parts);

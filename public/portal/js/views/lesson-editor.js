@@ -5,6 +5,27 @@ import { meta, supportLine } from './children.js';
 import { statusChip } from './lessons.js';
 
 const LANG = { urdu: 'Urdu', english: 'English', both: 'Urdu and English' };
+/** The child's spelling keyboard: the alphabet in order, not QWERTY. Letters of the word are lit so the parent sees what the child will look for. */
+function spellKeyboard(keyboards, initial) {
+  const wrap = h('div', { class: 'kbd-wrap', 'data-keyboard': '' });
+  const note = h('p', { class: 'hint' });
+  const grid = h('div', { class: 'kbd', 'aria-hidden': 'true' });
+  const update = (word) => {
+    const urdu = /\p{Script=Arabic}/u.test(word || '');
+    const layout = keyboards[urdu ? 'urdu' : 'english'];
+    const clean = (word || '').replace(/[\s\u200c\u200d\u064b-\u065f\u0670]+/gu, '');
+    const typed = new Set(urdu ? [...clean] : [...clean.toLowerCase()]);
+    const bad = [...typed].filter((c) => !layout.letters.includes(c));
+    grid.style.setProperty('--cols', layout.columns);
+    grid.setAttribute('dir', layout.direction);
+    grid.replaceChildren(...layout.letters.map((l) => h('span', { class: `key${typed.has(l) ? ' on' : ''}` }, l)));
+    note.textContent = bad.length ? `Your child's keyboard has no ${bad.join(' ')}. Use letters only.` : 'Your child types on this keyboard: the alphabet in order, not like a computer keyboard.';
+    note.classList.toggle('msg-err', bad.length > 0);
+  };
+  wrap.append(grid, note);
+  update(initial);
+  return { el: wrap, update };
+}
 const TARGET_HINT = { trace_letter: 'The letter to trace, for example ب', spell_word: 'The word to spell, for example cat', listen_repeat: 'The phrase to repeat' };
 
 export async function render(ctx, params) {
@@ -142,9 +163,11 @@ export async function render(ctx, params) {
 
     const fields = () => {
       const t = card.task, r = rule(), soundForced = r.audio === 'required';
+      const kb = t.type === 'spell_word' ? spellKeyboard(m.keyboards, t.target) : null;
       return h('div', { class: 'list', style: 'gap:12px' },
         h('div', { class: 'field', style: 'margin:0' }, h('label', { for: `in-${t.id}` }, 'What should the child do?'), h('textarea', { class: 'textarea', id: `in-${t.id}`, style: 'min-height:64px', maxlength: 400, placeholder: 'A short, kind instruction', oninput: (e) => patchSoon({ instruction: e.target.value || null }) }, t.instruction || '')),
-        r.target ? h('div', { class: 'field', style: 'margin:0' }, h('label', { for: `tg-${t.id}` }, r.target_label), h('input', { class: `input${(t.target || '').trim() ? '' : ' err'}`, id: `tg-${t.id}`, value: t.target || '', maxlength: 80, placeholder: TARGET_HINT[t.type], oninput: (e) => { e.target.classList.toggle('err', !e.target.value.trim()); patchSoon({ target: e.target.value }); } })) : null,
+        r.target ? h('div', { class: 'field', style: 'margin:0' }, h('label', { for: `tg-${t.id}` }, r.target_label), h('input', { class: `input${(t.target || '').trim() ? '' : ' err'}`, id: `tg-${t.id}`, value: t.target || '', maxlength: 80, placeholder: TARGET_HINT[t.type], oninput: (e) => { e.target.classList.toggle('err', !e.target.value.trim()); patchSoon({ target: e.target.value }); kb?.update(e.target.value); } })) : null,
+        kb ? kb.el : null,
         h('div', { class: 'setting', style: 'border-top:0;padding:4px 0' }, h('div', { class: 't' }, h('b', null, 'This task needs a sound'), h('span', null, soundForced ? 'Always needed for this kind of task.' : 'Turn on if your child needs to hear something here.')),
           h('button', { class: 'switch', role: 'switch', 'aria-label': 'This task needs a sound', 'aria-checked': String(soundForced || t.needs_audio), disabled: soundForced, onclick: async (e) => { const on = e.currentTarget.getAttribute('aria-checked') !== 'true'; e.currentTarget.setAttribute('aria-checked', String(on)); try { await patch({ needs_audio: on }); await refresh(); } catch { e.currentTarget.setAttribute('aria-checked', String(!on)); } } })));
     };
@@ -224,7 +247,7 @@ export async function render(ctx, params) {
   function drawList() {
     cards.clear();
     list.replaceChildren(...lesson.tasks.map((t, i) => { const c = buildCard({ ...t }, i); cards.set(t.id, c); return c.el; }),
-      lesson.tasks.length ? null : h('div', { class: 'card empty' }, h('h3', null, 'No tasks yet'), h('p', { class: 'muted' }, 'Add the first task. Each one can have a picture and a sound.')),
+      ...(lesson.tasks.length ? [] : [h('div', { class: 'card empty' }, h('h3', null, 'No tasks yet'), h('p', { class: 'muted' }, 'Add the first task. Each one can have a picture and a sound.'))]),   // not null: the native replaceChildren would print the word
       h('button', { class: 'btn soft', style: 'justify-self:start', 'data-act': 'add-task', onclick: addTask }, icon('plus', 20), 'Add a task'));
   }
   function addTask() {
