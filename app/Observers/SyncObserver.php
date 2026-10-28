@@ -6,6 +6,7 @@ use App\Jobs\SyncNudgeJob;
 use App\Models\Assignment;
 use App\Models\Child;
 use App\Models\ChildNeedsLog;
+use App\Models\AacCard;
 use App\Models\FamilyMember;
 use App\Models\Lesson;
 use App\Models\LessonTask;
@@ -34,6 +35,7 @@ class SyncObserver
         $users = Household::userIdsFor($m);
         foreach ($m->lessons()->pluck('id') as $id) { SyncChange::recordFor($users, 'lesson', $id, 'delete'); }
         foreach ($m->familyMembers()->pluck('id') as $id) { SyncChange::recordFor($users, 'family_member', $id, 'delete'); }
+        foreach ($m->aacCards()->pluck('id') as $id) { SyncChange::recordFor($users, 'aac_card', $id, 'delete'); }
         foreach ($m->needsLogs()->pluck('id') as $id) { SyncChange::recordFor($users, 'need', $id, 'delete'); }
         foreach (Assignment::where('child_id', $m->id)->pluck('id') as $id) { SyncChange::recordFor($users, 'assignment', $id, 'delete'); }
     }
@@ -45,7 +47,7 @@ class SyncObserver
             $m instanceof Child => $m,
             $m instanceof Lesson => $m->is_template ? null : $m->child,
             $m instanceof LessonTask => $m->lesson?->is_template ? null : $m->lesson?->child,
-            $m instanceof FamilyMember, $m instanceof ChildNeedsLog, $m instanceof RewardLedger, $m instanceof Assignment => $m->child,
+            $m instanceof FamilyMember, $m instanceof AacCard, $m instanceof ChildNeedsLog, $m instanceof RewardLedger, $m instanceof Assignment => $m->child,
             default => null,
         };
         [$entity, $id, $op] = match (true) {
@@ -53,6 +55,7 @@ class SyncObserver
             $m instanceof Lesson => ['lesson', $m->id, $op],
             $m instanceof LessonTask => ['lesson', $m->lesson_id, 'upsert'],
             $m instanceof FamilyMember => ['family_member', $m->id, $op],
+            $m instanceof AacCard => ['aac_card', $m->id, $op],
             $m instanceof ChildNeedsLog => ['need', $m->id, $op],
             $m instanceof RewardLedger => ['child', $m->child_id, 'upsert'],
             $m instanceof Assignment => ['assignment', $m->id, $op],

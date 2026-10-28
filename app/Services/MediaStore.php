@@ -119,6 +119,38 @@ class MediaStore
         return $has ? URL::temporarySignedRoute('media.family', now()->addMinutes(15), ['member' => $m->id, 'kind' => $kind]) : null;
     }
 
+    // ---------- a parent's own picture cards: private files, signed links ----------
+
+    public function storeAacIcon(\App\Models\AacCard $c, UploadedFile $file): void
+    {
+        $jpeg = $this->encodeJpeg($file->getRealPath());
+        $this->forget($c->icon_path);
+        $c->icon_path = "aac/{$c->child_id}/" . Str::uuid() . '.jpg';
+        Storage::disk(self::DISK)->put($c->icon_path, $jpeg);
+    }
+
+    public function storeAacAudio(\App\Models\AacCard $c, UploadedFile $file): void
+    {
+        [$mime, $ext] = $this->audioKind($file->getRealPath());
+        $this->forget($c->audio_path);
+        $c->audio_path = "aac/{$c->child_id}/" . Str::uuid() . '.' . $ext;
+        Storage::disk(self::DISK)->put($c->audio_path, file_get_contents($file->getRealPath()));
+        $c->audio_mime = $mime;
+    }
+
+    public function forgetAac(\App\Models\AacCard $c): void
+    {
+        $this->forget($c->icon_path);
+        $this->forget($c->audio_path);
+    }
+
+    public function aacUrl(\App\Models\AacCard $c, string $kind): ?string
+    {
+        $has = $kind === 'icon' ? $c->icon_path : $c->audio_path;
+
+        return $has ? URL::temporarySignedRoute('media.aac', now()->addMinutes(15), ['card' => $c->id, 'kind' => $kind]) : null;
+    }
+
     // ---------- game library (platform content, uploaded by the administrator) ----------
 
     public function storeGameImage(GameItem $i, UploadedFile $file): void

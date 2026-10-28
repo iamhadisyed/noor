@@ -28,6 +28,20 @@ class MediaController extends Controller
     }
 
     /** A family card's photo or voice. */
+    public function aac(int $card, string $kind)
+    {
+        abort_unless(in_array($kind, ['icon', 'audio'], true), 404);
+        $c = \App\Models\AacCard::whereNotNull('child_id')->findOrFail($card);
+        $path = $kind === 'icon' ? $c->icon_path : $c->audio_path;
+        abort_unless($path && Storage::disk(MediaStore::DISK)->exists($path), 404);
+
+        return Storage::disk(MediaStore::DISK)->response($path, null, [
+            'Content-Type' => $kind === 'icon' ? 'image/jpeg' : ($c->audio_mime ?: 'audio/mpeg'),
+            'Cache-Control' => 'private, max-age=600',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     public function family(int $member, string $kind)
     {
         abort_unless(in_array($kind, ['photo', 'audio'], true), 404);

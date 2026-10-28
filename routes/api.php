@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\InsightsController;
 use App\Http\Controllers\Api\ChildController;
 use App\Http\Controllers\Api\ContentReviewController;
 use App\Http\Controllers\Api\FamilyMemberController;
+use App\Http\Controllers\Api\AacCardController;
 use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\LessonImportController;
 use App\Http\Controllers\Api\MediaController;
@@ -35,6 +36,7 @@ Route::prefix('v1')->group(function () {
     // Pictures and sounds: the signed, short-lived link is the credential (works in <img> and <audio>).
     Route::get('media/{task}/{kind}', [MediaController::class, 'show'])->name('media.show')->middleware('signed');
     Route::get('media/game/{item}/{kind}', [MediaController::class, 'game'])->name('media.game')->middleware('signed');
+    Route::get('media/aac/{card}/{kind}', [MediaController::class, 'aac'])->name('media.aac')->middleware('signed');
     Route::get('media/family/{member}/{kind}', [MediaController::class, 'family'])->name('media.family')->middleware('signed');
 
     Route::middleware(['auth:sanctum', 'idempotent'])->group(function () {
@@ -150,6 +152,10 @@ Route::prefix('v1')->group(function () {
         Route::post('needs/{log}/seen', [NeedsController::class, 'seen']);
         Route::post('needs/{log}/acknowledge', [NeedsController::class, 'acknowledge']);
         Route::get('aac-cards', [NeedsController::class, 'cards']);
+        Route::post('children/{child}/aac-cards', [AacCardController::class, 'store'])->middleware('throttle:60,1');
+        Route::post('aac-cards/{id}', [AacCardController::class, 'update'])->middleware('throttle:60,1');   // POST so a phone can send files with the change
+        Route::patch('aac-cards/{id}', [AacCardController::class, 'update']);
+        Route::delete('aac-cards/{id}', [AacCardController::class, 'destroy']);
         Route::get('pecs.pdf', [PecsController::class, 'download']);
 
         Route::get('children/{child}/family', [FamilyMemberController::class, 'index']);

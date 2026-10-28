@@ -27,6 +27,9 @@ class NeedsController extends Controller
         ]);
 
         $child = ChildController::owned($request, $data['child_id']);
+        if (! empty($data['card_id']) && AacCard::whereKey($data['card_id'])->whereNotNull('child_id')->where('child_id', '!=', $child->id)->exists()) {
+            return response()->json(['message' => 'That card belongs to another child.', 'errors' => ['card_id' => ['That card belongs to another child.']]], 422);   // a parent's own cards are private to their child
+        }
 
         $log = ChildNeedsLog::create([
             'child_id' => $child->id,
@@ -89,7 +92,7 @@ class NeedsController extends Controller
             $query->where('is_pro', false);
         }
 
-        return response()->json($query->orderBy('category')->get());
+        return response()->json($query->orderBy('category')->orderBy('id')->get()->map(fn ($c) => AacCardController::present($c, app(\App\Services\MediaStore::class)))->all());
     }
 
     private function ownedLog(Request $request, int $id): ChildNeedsLog

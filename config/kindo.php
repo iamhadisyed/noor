@@ -33,6 +33,7 @@ return [
         'children' => 1,
         'pro_children' => 4,
         'family_members' => 2,
+        'custom_cards_per_child' => 3,   // free plan: own picture cards per child; Pro is unlimited
         'lessons_per_child' => 3,   // free plan: custom lessons per child; Pro is unlimited
     ],
 ];

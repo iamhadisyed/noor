@@ -21,6 +21,9 @@ class AccountEraser
         foreach ($child->familyMembers as $m) {
             $this->media->forgetFamily($m);
         }
+        foreach ($child->aacCards as $c) {
+            $this->media->forgetAac($c);
+        }
         $child->delete();
     }
 
