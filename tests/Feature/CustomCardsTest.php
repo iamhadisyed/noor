@@ -149,4 +149,18 @@ class CustomCardsTest extends TestCase
         app(AccountEraser::class)->erase($this->mama);
         Storage::disk('local')->assertMissing($path);
     }
+
+    public function test_media_versions_change_only_when_the_file_is_replaced(): void
+    {
+        $r = $this->make(['audio' => $this->wav()])->assertCreated()->json();
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}$/', $r['icon_v']);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}$/', $r['audio_v']);
+
+        $same = $this->postJson("/api/v1/aac-cards/{$r['id']}", ['english_label' => 'Renamed'])->assertOk()->json();
+        $this->assertSame($r['icon_v'], $same['icon_v'], 'a rename keeps the saved picture');
+
+        $new = $this->post("/api/v1/aac-cards/{$r['id']}", ['icon' => UploadedFile::fake()->image('new.jpg', 200, 200)], ['Accept' => 'application/json'])->assertOk()->json();
+        $this->assertNotSame($r['icon_v'], $new['icon_v'], 'a new picture is a new version');
+        $this->assertSame($r['audio_v'], $new['audio_v']);
+    }
 }

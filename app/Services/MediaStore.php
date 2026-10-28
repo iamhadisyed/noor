@@ -84,6 +84,12 @@ class MediaStore
         $task->update(['audio_path' => $path, 'audio_mime' => $mime]);
     }
 
+    /** A short code that changes whenever the stored file is replaced, so an app can keep its saved copy until then. */
+    public static function version(?string $path): ?string
+    {
+        return $path ? substr(md5($path), 0, 8) : null;
+    }
+
     // ---------- family cards: the same private storage and signed links as lesson media ----------
 
     public function storeFamilyPhoto(FamilyMember $m, UploadedFile $file): void

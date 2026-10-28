@@ -132,6 +132,8 @@ class LessonTask {
     this.imageUrl,
     this.audioUrl,
     this.imageAlt,
+    this.imageV,
+    this.audioV,
     Json? raw,
   }) : raw = raw ?? {};
   factory LessonTask.fromJson(Object? v) {
@@ -154,6 +156,8 @@ class LessonTask {
       imageUrl: _sn(m['image_url']),
       audioUrl: _sn(m['audio_url']),
       imageAlt: _sn(m['image_alt']),
+      imageV: _sn(m['image_v']),
+      audioV: _sn(m['audio_v']),
       raw: m,
     );
   }
@@ -175,6 +179,10 @@ class LessonTask {
   final String? imageUrl;
   final String? audioUrl;
   final String? imageAlt;
+
+  /// Change when the picture or sound is replaced; an app keeps its saved copy until then.
+  final String? imageV;
+  final String? audioV;
   final Json raw;
 }
 
@@ -217,7 +225,7 @@ class Lesson {
 }
 
 class AacCard {
-  AacCard({required this.id, required this.category, required this.englishLabel, required this.urduLabel, this.childId, this.iconPath, this.iconUrl, this.audioUrl, this.isEmergency = false, this.custom = false, Json? raw}) : raw = raw ?? {};
+  AacCard({required this.id, required this.category, required this.englishLabel, required this.urduLabel, this.childId, this.iconPath, this.iconUrl, this.audioUrl, this.iconV, this.audioV, this.isEmergency = false, this.custom = false, Json? raw}) : raw = raw ?? {};
   factory AacCard.fromJson(Object? v) {
     final m = asJson(v);
     return AacCard(
@@ -229,6 +237,8 @@ class AacCard {
       iconPath: _sn(m['icon_path']),
       iconUrl: _sn(m['icon_url']),
       audioUrl: _sn(m['audio_url']),
+      iconV: _sn(m['icon_v']),
+      audioV: _sn(m['audio_v']),
       isEmergency: _b(m['is_emergency']),
       custom: _b(m['custom']),
       raw: m,
@@ -246,6 +256,8 @@ class AacCard {
   /// Your own cards: a signed link.
   final String? iconUrl;
   final String? audioUrl;
+  final String? iconV;
+  final String? audioV;
   final bool isEmergency;
   final bool custom;
   final Json raw;
@@ -291,10 +303,10 @@ class Need {
 }
 
 class FamilyMember {
-  FamilyMember({required this.id, required this.childId, required this.relationTitle, required this.displayName, this.photoUrl, this.audioUrl, Json? raw}) : raw = raw ?? {};
+  FamilyMember({required this.id, required this.childId, required this.relationTitle, required this.displayName, this.photoUrl, this.audioUrl, this.photoV, this.audioV, Json? raw}) : raw = raw ?? {};
   factory FamilyMember.fromJson(Object? v) {
     final m = asJson(v);
-    return FamilyMember(id: _i(m['id']), childId: _i(m['child_id']), relationTitle: _s(m['relation_title']), displayName: _s(m['display_name']), photoUrl: _sn(m['photo_url']), audioUrl: _sn(m['audio_url']), raw: m);
+    return FamilyMember(id: _i(m['id']), childId: _i(m['child_id']), relationTitle: _s(m['relation_title']), displayName: _s(m['display_name']), photoUrl: _sn(m['photo_url']), audioUrl: _sn(m['audio_url']), photoV: _sn(m['photo_v']), audioV: _sn(m['audio_v']), raw: m);
   }
   final int id;
   final int childId;
@@ -302,6 +314,8 @@ class FamilyMember {
   final String displayName;
   final String? photoUrl;
   final String? audioUrl;
+  final String? photoV;
+  final String? audioV;
   final Json raw;
 }
 

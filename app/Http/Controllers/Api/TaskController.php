@@ -26,7 +26,7 @@ class TaskController extends Controller
             'target' => $t->target, 'keyboard' => $t->type === 'spell_word' ? \App\Support\ChildKeyboard::layoutFor($t->target) : null, 'options' => $t->options, 'needs_audio' => $t->needs_audio,
             'requires_sound' => LessonRules::needsAudio($t), 'requires_image' => LessonRules::needsImage($t),
             'has_image' => (bool) $t->image_path, 'has_sound' => (bool) $t->audio_path, 'image_alt' => $t->image_alt,
-            'image_url' => $media->url($t, 'image'), 'audio_url' => $media->url($t, 'audio'),
+            'image_url' => $media->url($t, 'image'), 'audio_url' => $media->url($t, 'audio'), 'image_v' => MediaStore::version($t->image_path), 'audio_v' => MediaStore::version($t->audio_path),
         ];
     }
 

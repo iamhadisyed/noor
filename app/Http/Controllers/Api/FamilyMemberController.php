@@ -18,7 +18,7 @@ class FamilyMemberController extends Controller
     {
         return [
             'id' => $m->id, 'child_id' => $m->child_id, 'relation_title' => $m->relation_title, 'display_name' => $m->display_name,
-            'photo_url' => $media->familyUrl($m, 'photo'), 'audio_url' => $media->familyUrl($m, 'audio'),
+            'photo_url' => $media->familyUrl($m, 'photo'), 'audio_url' => $media->familyUrl($m, 'audio'), 'photo_v' => MediaStore::version($m->photo_path), 'audio_v' => MediaStore::version($m->audio_prompt_path),
             'consented_at' => $m->consented_at, 'created_at' => $m->created_at, 'updated_at' => $m->updated_at,
         ];
     }
