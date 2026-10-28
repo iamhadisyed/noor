@@ -112,7 +112,9 @@ async function audit(ctx, page) {
 async function health(ctx, page) {
   const s = await api('/admin/health');
   const row = (label, ok, detail) => h('div', { class: 'item' }, h('span', { class: `dot${ok ? '' : ' bad'}`, role: 'img', 'aria-label': ok ? 'Healthy' : 'Problem' }), h('div', { class: 'grow' }, h('b', null, label), h('span', null, detail)));
+  const LEVEL = { danger: 'chip warn', warn: 'chip butter', info: 'chip' };
   page.replaceChildren(head('System health', 'Checked just now.'),
+    (s.warnings || []).length ? h('section', { class: 'card', 'data-card': 'config-warnings', style: 'margin-bottom:24px' }, h('h2', { style: 'margin-bottom:12px' }, 'Settings to fix'), h('div', { class: 'list' }, s.warnings.map((w) => h('div', { class: 'item', 'data-warning': w.key }, h('span', { class: LEVEL[w.level] || 'chip' }, w.level === 'danger' ? 'Fix now' : w.level === 'warn' ? 'Fix' : 'Note'), h('div', { class: 'grow' }, h('span', { style: 'color:var(--ink)' }, w.message)))))) : null,
     h('section', { class: 'card' }, h('div', { class: 'list' },
       row('Database', s.database, s.database ? 'Connected' : 'Cannot connect'),
       row('Scheduler (cron)', s.scheduler.alive, s.scheduler.last_run ? `Last ran ${fmt.ago(s.scheduler.last_run)}` : 'Has not run. Check the cPanel cron job.'),

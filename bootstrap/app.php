@@ -13,8 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias(['role' => \App\Http\Middleware\EnsureRole::class, 'idempotent' => \App\Http\Middleware\Idempotent::class]);
+        $middleware->prependToGroup('api', \App\Http\Middleware\ForceJson::class);
         $middleware->appendToGroup('api', \App\Http\Middleware\EnsureActive::class);
+        $middleware->appendToGroup('api', \App\Http\Middleware\CleanInput::class);
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Phone apps often do not send "Accept: application/json". Without this an expired token would be a 500 page and a validation error a redirect.
+        $exceptions->shouldRenderJsonWhen(fn ($request, $e) => $request->is('api/*') || $request->expectsJson());
     })->create();

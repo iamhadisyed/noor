@@ -123,6 +123,32 @@ class AdminController extends Controller
         ]);
     }
 
+    /** Settings that are safe on a laptop but dangerous or broken on a live site. Shown first on the Health page. */
+    private function configWarnings(): array
+    {
+        $w = [];
+        if (config('app.debug')) {
+            $w[] = ['key' => 'debug', 'level' => 'danger', 'message' => 'Debug mode is on (APP_DEBUG=true). Error pages can show passwords and keys to anyone. Set APP_DEBUG=false.'];
+        }
+        if (config('app.env') !== 'production') {
+            $w[] = ['key' => 'env', 'level' => 'warn', 'message' => 'APP_ENV is "'.config('app.env').'". Set APP_ENV=production on the live site.'];
+        }
+        if (! str_starts_with((string) config('app.url'), 'https://')) {
+            $w[] = ['key' => 'https', 'level' => 'warn', 'message' => 'APP_URL does not start with https://. Picture and sound links, and sign-in, should use https.'];
+        }
+        if (! config('kindo.backup.password')) {
+            $w[] = ['key' => 'backup', 'level' => 'warn', 'message' => 'KINDO_BACKUP_PASSWORD is not set, so backups cannot be made.'];
+        }
+        if (! is_file((string) config('kindo.fcm.service_account')) || ! config('kindo.fcm.project_id')) {
+            $w[] = ['key' => 'push', 'level' => 'info', 'message' => 'Push notifications are not set up (Firebase service account and FCM_PROJECT_ID).'];
+        }
+        if (! config('kindo.groq_keys') && ! config('kindo.gemini_keys')) {
+            $w[] = ['key' => 'ai', 'level' => 'info', 'message' => 'No Groq or Gemini keys: AI reports and the photo lesson importer will not work.'];
+        }
+
+        return $w;
+    }
+
     public function health(): JsonResponse
     {
         $last = Cache::get('scheduler:last_run');
@@ -134,6 +160,7 @@ class AdminController extends Controller
             'queue' => ['pending' => Schema::hasTable('jobs') ? DB::table('jobs')->count() : null, 'failed' => Schema::hasTable('failed_jobs') ? DB::table('failed_jobs')->count() : null],
             'scheduler' => ['last_run' => $last, 'alive' => $last ? CarbonImmutable::parse($last)->gt(now()->subMinutes(5)) : false],
             'mail' => ['driver' => config('mail.default')],
+            'warnings' => $this->configWarnings(),
             'backups' => app(\App\Services\BackupService::class)->status(),
             'storage' => ['media_files' => $this->realTasks()->whereNotNull('image_path')->count() + $this->realTasks()->whereNotNull('audio_path')->count()],
             'php' => PHP_VERSION, 'time' => now()->toIso8601String(),

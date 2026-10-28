@@ -36,7 +36,7 @@ class ChildController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:100',
-            'date_of_birth' => 'required|date|before:today',
+            'date_of_birth' => 'required|date|before:today|after:-25 years',
             'neurotype' => 'sometimes|in:neurotypical,autism_spectrum,speech_delay,adhd,down_syndrome',
             'avatar_id' => 'sometimes|string|max:50',
         ] + $this->supportRules());
@@ -53,7 +53,7 @@ class ChildController extends Controller
         $child = self::owned($request, $id);
         $data = $request->validate([
             'name' => 'sometimes|string|max:100',
-            'date_of_birth' => 'sometimes|date|before:today',
+            'date_of_birth' => 'sometimes|date|before:today|after:-25 years',
             'neurotype' => 'sometimes|in:neurotypical,autism_spectrum,speech_delay,adhd,down_syndrome',
             'avatar_id' => 'sometimes|string|max:50',
         ] + $this->supportRules());

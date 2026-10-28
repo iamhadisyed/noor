@@ -119,7 +119,15 @@ function shell(active, content) {
   const items = NAV[role].slice();
   if (role === 'parent' && state.user?.shared_children > 0) items.splice(items.length - 1, 0, ['shared', '#/shared', 'users', 'Shared with me']);   // you are also someone's therapist or teacher
   const link = (n, cls) => h('a', { href: n[1], 'aria-current': n[0] === active ? 'page' : null }, icon(n[2], 22), cls === 'bottom' ? h('span', null, n[3]) : n[3]);
-  const bottom = (role === 'parent' ? items.filter((n) => !['reports', 'children', 'specialists', 'shared'].includes(n[0])) : items.filter((n) => ['a-overview', 'a-content', 'a-accounts', 'a-quality', 'settings'].includes(n[0])));
+  // On a phone the bar holds the four things used most; everything else, and Sign out, is under More so no page is out of reach.
+  const PRIMARY = role === 'parent' ? ['home', 'lessons', 'cards', 'alerts'] : ['a-overview', 'a-content', 'a-accounts', 'a-quality'];
+  const bottom = items.filter((n) => PRIMARY.includes(n[0])).map((n) => (n[0] === 'home' ? [n[0], n[1], n[2], 'Home'] : n));
+  const rest = items.filter((n) => !PRIMARY.includes(n[0]));
+  const sheet = h('div', { class: 'more-sheet', id: 'more-sheet', role: 'group', 'aria-label': 'More pages', hidden: true },
+    rest.map((n) => link(n)), h('button', { class: 'btn soft', onclick: signOut }, icon('logout', 20), 'Sign out'));
+  const moreBtn = h('button', { class: 'more-btn', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'more-sheet', 'aria-current': rest.some((n) => n[0] === active) ? 'page' : null,
+    onclick: () => { const open = sheet.hidden; sheet.hidden = !open; moreBtn.setAttribute('aria-expanded', String(open)); if (open) sheet.querySelector('a')?.focus(); } }, icon('list', 22), h('span', null, 'More'));
+  sheet.addEventListener('keydown', (e) => { if (e.key === 'Escape') { sheet.hidden = true; moreBtn.setAttribute('aria-expanded', 'false'); moreBtn.focus(); } });
   return h('div', { class: 'shell' },
     h('a', { class: 'skip', href: '#content', onclick: (e) => { e.preventDefault(); document.getElementById('content')?.focus(); } }, 'Skip to content'),
     h('aside', { class: 'side' },
@@ -129,7 +137,7 @@ function shell(active, content) {
         h('div', { class: 'who' }, h('div', { class: 'av' }, initial(state.user?.name || state.user?.email)), h('div', null, h('b', null, state.user?.name || state.user?.email), h('span', null, role === 'super_admin' ? 'Super admin' : state.user?.plan === 'pro' ? 'Pro plan' : 'Free plan'))),
         h('button', { class: 'btn soft', onclick: signOut }, icon('logout', 20), 'Sign out'))),
     h('main', { class: 'main', id: 'content', tabindex: '-1' }, announce, content),
-    h('nav', { class: 'bottom-nav', 'aria-label': 'Main' }, bottom.map((n) => link(n, 'bottom'))));
+    h('nav', { class: 'bottom-nav', 'aria-label': 'Main' }, bottom.map((n) => link(n, 'bottom')), moreBtn), sheet);
 }
 export async function signOut() {
   try { await api('/auth/logout', { method: 'POST' }); } catch { /* token may already be gone */ }

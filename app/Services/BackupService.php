@@ -20,6 +20,14 @@ class BackupService
 
     private function disk() { return Storage::disk('local'); }
 
+    /** A path inside one of the media folders and nowhere else: no "..", no leading slash, no odd characters. */
+    public static function isMediaPath(string $path): bool
+    {
+        $dirs = implode('|', array_map('preg_quote', self::MEDIA_DIRS));
+
+        return (bool) preg_match('#^('.$dirs.')/[A-Za-z0-9._/-]+$#', $path) && ! str_contains($path, '..') && ! str_contains($path, '//');
+    }
+
     /** @return list<string> tables worth keeping */
     public function tables(): array
     {
@@ -124,7 +132,7 @@ class BackupService
         }
         foreach ($m['files'] as $path => $size) {
             $stat = $zip->statName("files/{$path}");
-            if (! $stat || $stat['size'] !== $size) {
+            if (! self::isMediaPath((string) $path) || ! $stat || $stat['size'] !== $size) {
                 $problems[] = "File {$path} is missing or damaged.";
             }
         }
@@ -192,6 +200,9 @@ class BackupService
         }
         $n = 0;
         foreach (array_keys($m['files']) as $path) {
+            if (! self::isMediaPath((string) $path)) {
+                continue;   // never write outside the media folders, whatever the backup file says
+            }
             $stream = $zip->getStream("files/{$path}");
             if ($stream) {
                 $this->disk()->put($path, stream_get_contents($stream));
@@ -214,7 +225,7 @@ class BackupService
             }
         }
         foreach ($m['files'] as $path => $size) {
-            if (! ($stat = $zip->statName("files/{$path}")) || $stat['size'] !== $size) {
+            if (! self::isMediaPath((string) $path) || ! ($stat = $zip->statName("files/{$path}")) || $stat['size'] !== $size) {
                 $problems[] = "File {$path} is missing or damaged.";
             }
         }
