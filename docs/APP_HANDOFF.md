@@ -42,6 +42,8 @@ Tick a box only when it works against a real server, not a mock.
 | 429 | rate limit | back off |
 
 - Messages are written for parents. Show `message` as is.
+- Rate limits are per signed-in parent and per endpoint, so one busy endpoint never uses up another's allowance. The ones a screen can meet: data export 3 per hour, delete-code 5 per hour, photo lesson import 10 per hour, voucher redeem 10 per hour, household invite 10 per hour, specialist code 20 per hour, child alerts 30 per minute, milestone cards 30 per minute, progress report PDF 20 per minute, picture and media uploads 60 per minute. A 429 includes `Retry-After`.
+- A `POST` that creates something (lesson, task, card, child) returns the finished record with its defaults filled in (for example a new lesson has `status: "draft"` and `week_number: 1`), so you can store the response as is.
 - Picture and sound links (`*_url`) are signed and **expire after 15 minutes**. Download media when you sync and keep the file. Never store the link.
 - Dates are ISO 8601 in UTC. Reward "today" and quiet hours follow the server's `APP_TIMEZONE` and the parent's own timezone setting.
 
@@ -56,7 +58,7 @@ Tick a box only when it works against a real server, not a mock.
 - [ ] Settings: edit profile `PATCH me`; list and sign out other devices `GET/DELETE me/sessions`; notification settings `GET/PATCH me/notifications` (quiet hours with timezone, muted kinds); data export `GET me/export` (a zip); delete account is two steps, `POST me/delete-code` (emails a code) then `DELETE me` with that code.
 
 ### 2.2 Children and support profile
-- [ ] `GET/POST children`, `GET/PATCH/DELETE children/{id}`. Free plan: 1 child; Pro: 4.
+- [ ] `GET/POST children`, `GET/PATCH/DELETE children/{id}`. Free plan: 1 child; Pro: 4. If you do not send `track`, the server starts a child with a `neurotype` other than `neurotypical` on the `special` track (slower, quieter, `sensory_mode` on) and others on `standard`. Show the parent the result and let them change it.
 - [ ] `track` is `standard` or `special`. The **support profile** (`support`) holds `magnet_px`, `pace`, `max_choices`, `no_timers`, `first_then`, `praise`, `guide` (none, dotted, arrows) and `fade_assist`. `GET meta` returns the defaults for both tracks and the upload limits; build the settings screen from it.
 - [ ] Only the owner can delete a child or the account. Other family members cannot.
 
@@ -66,7 +68,7 @@ Tick a box only when it works against a real server, not a mock.
 - [ ] Tasks: create, edit, reorder, delete; media with `POST tasks/{id}/media` (`kind=image` or `audio`). Images are re-encoded to a 600 px JPEG by the server; sounds are checked by content and must be 150 KB or less. Compress on the phone first.
 - [ ] `POST lessons/{id}/publish` answers 422 with the exact tasks and what each lacks. Show it as a checklist. `GET lessons/{id}/readiness` gives the same list without publishing.
 - [ ] A lesson held for moderator review cannot be published until the review is finished; a bad-word match never blocks **saving**, only publishing.
-- [ ] Free plan: 3 own lessons per child (402 after that).
+- [ ] Free plan: 3 own lessons per child (402 after that). Copying a template or duplicating a lesson counts too.
 - [ ] **Pro: lesson from a photo.** `POST children/{id}/lessons/import` (multipart `photo`, optional `language`, `week_number`) returns a **draft** lesson. Tell the parent plainly that the photo is read once and not kept. 422 means the page could not be read; offer to retake. Limit: 10 per hour.
 
 ### 2.4 Alerts (the most important screen)
@@ -95,7 +97,7 @@ Tick a box only when it works against a real server, not a mock.
 - [ ] Celebrate: `GET children/{id}/milestones`, then `GET children/{id}/milestones/{key}/card.png?lang=en|ur&name=0|1`. The response is a 1080 x 1080 PNG. **Share it through the phone's share sheet** (WhatsApp appears there). Let the parent switch the language and hide the child's name before sharing. The card carries no photo or other detail.
 - [ ] Pro: AI report `POST children/{id}/reports` (queued, returns 202) then `GET children/{id}/reports/latest`. 402 on the free plan.
 - [ ] Household: invite a partner or grandparent (`POST household/invite`), accept or decline invitations, leave a family. Everyone in a household gets every change.
-- [ ] Plan: `GET billing`, redeem a voucher code `POST billing/redeem`. **Pro is sold by voucher and admin grant only.** In-app purchases are not built (section 8).
+- [ ] Plan: `GET billing` (the `limits` object lists every free and Pro limit, including `custom_cards_per_child`; `GET meta` has the same numbers for building forms), redeem a voucher code `POST billing/redeem`. **Pro is sold by voucher and admin grant only.** In-app purchases are not built (section 8).
 - [ ] Announcements from the owner: `GET announcements`, `POST announcements/{id}/dismiss`.
 
 ## 3. Kindo Junior app (the child's app)
@@ -114,7 +116,7 @@ Design rule: no clutter, no timers when `no_timers` is on, slow pace when `pace`
 
 Read `docs/GAMES.md`. Summary:
 - [ ] Show `GET children/{id}/rewards`: balance, and for each game `unlocked`, `locked`, `switched off` or `needs content`.
-- [ ] `POST children/{id}/games/{game}/start` returns the **whole session** (rounds and answers) so it plays offline. A 423 carries `reason`: `no_minutes` (with `how_to_earn`), `switched_off` or `no_content`.
+- [ ] `POST children/{id}/games/{game}/start` returns the **whole session** (`session_id`, `level`, `allowed_seconds`, `balance_minutes` and `rounds[]`, each with its prompt, options and `answer_index`) (rounds and answers) so it plays offline. A 423 carries `reason`: `no_minutes` (with `how_to_earn`), `switched_off` or `no_content`.
 - [ ] Stop the game when `allowed_seconds` runs out. When it ends, `POST game-sessions/{id}/finish {rounds_played, correct, seconds_played}`. Only the time actually played is spent. Reporting twice changes nothing.
 - [ ] Draw the icons yourself: the server sends only icon names (`apple`, `ball` ...) in `GET games/library`, with English and Urdu names. Animal pictures and sounds come as signed links; cache them.
 - [ ] Rewards are earned by **practice**, never by game scores. Do not add a score-for-minutes loop.

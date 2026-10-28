@@ -289,4 +289,31 @@ class LessonsTest extends TestCase
         $this->assertDatabaseMissing('lessons', ['id' => $lesson['id']]);
         $this->assertDatabaseHas('audit_logs', ['action' => 'child.deleted']);
     }
+
+    public function test_create_responses_carry_the_same_values_as_a_later_read(): void
+    {
+        $made = $this->lesson();
+        $this->assertSame('draft', $made['status']);
+        $this->assertSame(1, $made['week_number']);
+        $this->assertFalse($made['is_template']);
+        $this->assertEquals($this->getJson("/api/v1/lessons/{$made['id']}")->json('status'), $made['status']);
+
+        $task = $this->task($made['id']);
+        $this->assertFalse($task['needs_audio']);
+    }
+
+    public function test_one_busy_endpoint_does_not_use_up_another_ones_rate_limit(): void
+    {
+        for ($i = 0; $i < 4; $i++) {
+            $this->postJson('/api/v1/child/alert', ['child_id' => $this->child->id, 'need_type' => 'water'])->assertOk();
+        }
+        // the data export allows 3 an hour; four alerts must not count against it
+        $this->get('/api/v1/me/export')->assertOk();
+    }
+
+    public function test_plan_limits_are_listed_for_the_apps(): void
+    {
+        $this->getJson('/api/v1/billing')->assertJsonPath('limits.free.custom_cards_per_child', 3)->assertJsonPath('limits.pro.custom_cards_per_child', null);
+        $this->getJson('/api/v1/meta')->assertJsonPath('limits.custom_cards_per_child_free', 3);
+    }
 }

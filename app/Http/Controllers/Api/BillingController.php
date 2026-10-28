@@ -16,8 +16,8 @@ class BillingController extends Controller
     public function show(Request $request): JsonResponse
     {
         return response()->json($this->billing->summary($request->user()) + [
-            'limits' => ['free' => ['children' => (int) config('kindo.free_limits.children'), 'lessons_per_child' => (int) config('kindo.free_limits.lessons_per_child'), 'family_cards' => (int) config('kindo.free_limits.family_members')],
-                'pro' => ['children' => (int) config('kindo.free_limits.pro_children'), 'lessons_per_child' => null, 'family_cards' => null]],
+            'limits' => ['free' => ['children' => (int) config('kindo.free_limits.children'), 'lessons_per_child' => (int) config('kindo.free_limits.lessons_per_child'), 'family_cards' => (int) config('kindo.free_limits.family_members'), 'custom_cards_per_child' => (int) config('kindo.free_limits.custom_cards_per_child')],
+                'pro' => ['children' => (int) config('kindo.free_limits.pro_children'), 'lessons_per_child' => null, 'family_cards' => null, 'custom_cards_per_child' => null]],
             'store_purchase' => false,   // buying inside the apps is not switched on yet; vouchers are
         ]);
     }
