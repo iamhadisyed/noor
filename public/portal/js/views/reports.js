@@ -34,6 +34,7 @@ export async function render(ctx) {
           h('div', { class: 'list', style: 'gap:24px' },
             h('section', { class: 'card' }, h('h2', null, 'By language'), Object.keys(s.practice.by_language).length ? h('div', null, Object.entries(s.practice.by_language).map(([k, v]) => h('div', { class: 'item', style: 'margin-top:10px' }, h('div', { class: 'grow' }, h('b', null, k === 'urdu' ? 'Urdu' : 'English'), h('span', null, `${v.minutes} min`)), h('span', { class: 'chip ink' }, fmt.pct(v.accuracy_pct))))) : h('p', { class: 'muted', style: 'margin-top:8px' }, 'No practice yet.')),
             h('section', { class: 'card' }, h('h2', null, 'Needs and requests'), hbars(s.needs.by_type, { empty: 'No alerts in this period.' })),
+            s.calm && s.calm.sessions ? h('section', { class: 'card', 'data-card': 'calm' }, h('h2', null, 'Calm activities'), h('p', { class: 'muted' }, `${s.calm.sessions} times · ${s.calm.minutes} min`), hbars(s.calm.by_activity, { empty: '' })) : null,
             lettersCard(letters),
             h('section', { class: 'card' }, h('h2', null, 'Letters to practise'), h('p', { class: 'muted' }, 'Most missed targets'), hbars(s.practice.hardest_targets, { empty: 'No mistakes recorded. Nice.' }),
               s.practice.avg_stroke_deviation != null ? h('p', { class: 'hint', style: 'margin-top:10px' }, `Average tracing drift: ${s.practice.avg_stroke_deviation} px`) : null))));

@@ -86,6 +86,7 @@ class PrivacyController extends Controller
             'lessons' => $lessons,
             'family_cards' => $family,
             'picture_cards' => $cards,
+            'calm_sessions' => \App\Models\CalmSession::whereIn('child_id', $ids)->orderBy('id')->get()->toArray(),
             'alerts' => ChildNeedsLog::whereIn('child_id', $ids)->orderBy('id')->get()->toArray(),
             'practice_sessions' => PracticeSession::whereIn('child_id', $ids)->with('mistakes', 'letters')->orderBy('id')->get()->toArray(),
             'ai_reports' => AiDiagnosticReport::whereIn('child_id', $ids)->orderBy('id')->get()->toArray(),

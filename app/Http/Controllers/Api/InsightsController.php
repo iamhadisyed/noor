@@ -36,6 +36,7 @@ class InsightsController extends Controller
         return response()->json([
             'range' => ['from' => $from->toDateString(), 'to' => $to->toDateString(), 'tz' => $tz],
             'practice' => $this->practice($child, $from, $to),
+            'calm' => ActivityController::summary($child->id, $from, $to),
             'needs' => [
                 'total' => $needs->count(),
                 'by_type' => $needs->groupBy('need_type')->map->count()->sortDesc(),

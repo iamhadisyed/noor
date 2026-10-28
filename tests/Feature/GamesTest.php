@@ -94,6 +94,14 @@ class GamesTest extends TestCase
                             $this->assertSame(count($r['pairs']), count(array_unique(array_column($r['pairs'], 'key'))));
                             continue;
                         }
+                        if ($game === 'routine_order') {
+                            $this->assertSame(count($r['steps']), count($r['answer_order']));
+                            continue;
+                        }
+                        if ($game === 'spell_picture') {
+                            $this->assertNotSame('', $r['target']);
+                            continue;
+                        }
                         $opts = $r['options'];
                         // "odd one out" needs at least three things to compare
                         $this->assertCount($game === 'odd_one_out' ? max(3, $choices) : $choices, $opts, "{$game} L{$level} choices");

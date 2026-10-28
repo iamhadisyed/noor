@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ChildController;
 use App\Http\Controllers\Api\ContentReviewController;
 use App\Http\Controllers\Api\FamilyMemberController;
 use App\Http\Controllers\Api\AacCardController;
+use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\LessonImportController;
 use App\Http\Controllers\Api\MediaController;
@@ -167,6 +168,8 @@ Route::prefix('v1')->group(function () {
 
         Route::get('games', [GameController::class, 'index']);
         Route::get('games/library', [GameController::class, 'library']);
+        Route::get('activities', [ActivityController::class, 'index']);
+        Route::post('children/{child}/activities/{activity}/done', [ActivityController::class, 'done'])->middleware('throttle:60,1,activity-done');
         Route::get('children/{child}/milestones', [MilestoneController::class, 'index']);
         Route::get('children/{child}/milestones/{key}/card.png', [MilestoneController::class, 'card'])->where('key', '[a-z0-9_]+')->middleware('throttle:30,1,children-milestones-card-png');
         Route::get('children/{child}/rewards', [GameController::class, 'rewards']);

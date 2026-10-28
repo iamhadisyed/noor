@@ -83,7 +83,7 @@ class LessonsTest extends TestCase
         $this->assertSame(600, $m['limits']['image_max_side']);
         $this->assertSame(150, $m['limits']['audio_max_kb']);
         $this->assertSame(1, $m['limits']['children_free']);
-        $this->assertCount(6, $m['task_types']);
+        $this->assertCount(10, $m['task_types']);
     }
 
     public function test_a_draft_can_always_be_saved_but_publish_lists_exactly_what_is_missing(): void

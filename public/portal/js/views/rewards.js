@@ -2,7 +2,7 @@ import { api, fetchBlob } from '../api.js';
 import { h, icon, fmt, toast, errorText, emptyState, spinner, modal } from '../ui.js';
 import { loadChildren, currentChild, childPicker } from '../main.js';
 
-const CAT = { math: 'Maths', listening: 'Listening', brain: 'Brain games' };
+const CAT = { math: 'Maths', listening: 'Listening', brain: 'Brain games', language: 'Letters and words', concepts: 'Colours and groups', social: 'Feelings', daily_living: 'Daily routines' };
 const REASON = { good_score: 'Good score', effort: 'Tried hard', improvement: 'Improving', streak: 'Practice streak', parent_bonus: 'Bonus from you', play: 'Played a game' };
 
 /** Practice earns play minutes; games are unlocked while there are minutes to spend. Parents set every rule. */
@@ -55,6 +55,7 @@ export async function render(ctx) {
   const games = (r) => h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:6px' }, 'Games'), h('p', { class: 'muted', style: 'margin-bottom:16px' }, 'They get harder as your child does well, and easier if it is a struggle.'),
     h('div', { class: 'list' }, r.games.map((g) => h('div', { class: 'item', 'data-game': g.game },
       h('div', { class: 'grow' }, h('b', null, g.title.en), h('span', null, `${CAT[g.category]} · level ${g.level} · played ${g.plays}×${g.last_accuracy == null ? '' : ` · last ${g.last_accuracy}%`}`)),
+      g.for && g.for.length === 1 && g.for[0] === 'special' ? h('span', { class: 'chip', title: 'Made with extra support in mind' }, 'Extra support') : null,
       !g.available ? h('span', { class: 'chip' }, 'Needs content') : !g.enabled ? h('span', { class: 'chip warn' }, 'Switched off') : g.unlocked ? h('span', { class: 'chip sage' }, 'Unlocked') : h('span', { class: 'chip ink' }, 'Locked'),
       h('button', { class: 'switch', role: 'switch', 'aria-label': `${g.title.en} on or off`, 'aria-checked': String(g.enabled), onclick: async (e) => {
         const enabledNow = r.games.filter((x) => x.enabled).map((x) => x.game);
