@@ -172,6 +172,7 @@ Route::prefix('v1')->group(function () {
         Route::get('children/{child}/insights/summary', [InsightsController::class, 'summary']);
         Route::get('children/{child}/letters', [InsightsController::class, 'letters']);
         Route::get('children/{child}/insights/daily', [InsightsController::class, 'daily']);
+        Route::get('children/{child}/insights/report.pdf', [InsightsController::class, 'exportPdf'])->middleware('throttle:20,1');
         Route::get('children/{child}/insights/export.csv', [InsightsController::class, 'exportCsv']);
         Route::post('children/{child}/reports', [ReportController::class, 'generate']);
         Route::get('children/{child}/reports/latest', [ReportController::class, 'latest']);

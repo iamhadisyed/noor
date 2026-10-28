@@ -157,6 +157,25 @@ class InsightsController extends Controller
         }, "kindo-{$child->id}-report.csv", ['Content-Type' => 'text/csv']);
     }
 
+    /** A printable progress report for a parent to keep or hand to a teacher or therapist. */
+    public function exportPdf(Request $request, int $childId)
+    {
+        $child = ChildController::owned($request, $childId);
+        [$from, $to, $tz] = $this->range($request);
+        $summary = $this->summary($request, $childId)->getData(true);
+        $letters = $this->letterStats($child, $from, $to);
+        $ur = function (?string $t, int $px = 64, string $c = '#120c15', string $css = 'glyph') {
+            $img = preg_match('/\p{Arabic}/u', (string) $t) ? \App\Support\UrduText::imageDataUri($t, $px, $c) : null;
+
+            return new \Illuminate\Support\HtmlString($img ? '<img src="'.$img.'" class="'.$css.'" alt="">' : e((string) $t));
+        };
+
+        return \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.progress-report', [
+            'child' => $child, 'from' => $from, 'to' => $to, 's' => $summary, 'letters' => $letters, 'ur' => $ur,
+            'milestones' => array_slice(app(\App\Services\Milestones::class)->for($child), 0, 6),
+        ])->setPaper('a4', 'portrait')->download("kindo-{$child->id}-progress-report.pdf");
+    }
+
     /** Stop spreadsheet formulas in exported text (a cell starting with = + - @ would run). */
     private function csvSafe(string $v): string
     {

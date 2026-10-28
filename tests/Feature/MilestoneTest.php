@@ -113,4 +113,17 @@ class MilestoneTest extends TestCase
         $this->getJson("/api/v1/children/{$this->child->id}/milestones")->assertNotFound();
         $this->get("/api/v1/children/{$this->child->id}/milestones/streak_3/card.png")->assertNotFound();
     }
+
+    public function test_the_progress_report_pdf_is_made_for_the_owner_only(): void
+    {
+        $this->practise(0, 20, [['letter' => 'ب', 'attempts' => 5, 'successes' => 4]]);
+        $url = "/api/v1/children/{$this->child->id}/insights/report.pdf?days=7";
+
+        $r = $this->get($url)->assertOk();
+        $this->assertStringStartsWith('%PDF', $r->getContent());
+        $this->assertStringContainsString('pdf', $r->headers->get('Content-Type'));
+
+        Sanctum::actingAs(User::factory()->create());
+        $this->get($url)->assertNotFound();
+    }
 }

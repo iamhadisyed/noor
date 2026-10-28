@@ -19,6 +19,8 @@ const { OUT, launch, login, check } = require('./lib.cjs');
   check('the trend and guide use are shown', /improving/.test(first) && /guide used/.test(first));
   check('a steady letter is marked as got it', /Got it/.test(await page.textContent('#letters-card [data-letter="ا"]')));
   check('a focus line names what to practise', /Focus on: ب/.test(await page.textContent('#letters-card')));
+  const dl = page.waitForEvent('download'); await page.click('[data-act=export-pdf]'); const d = await dl;
+  check('the progress report downloads as a PDF', /progress-report\.pdf$/.test(d.suggestedFilename()));
   await page.screenshot({ path: path.join(OUT, 'letters-report.png'), fullPage: true });
   check('no unexpected browser errors', errors.length === 0, errors.join(' | '));
   await browser.close();

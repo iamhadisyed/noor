@@ -16,7 +16,8 @@ export async function render(ctx) {
       h('div', { class: 'page-head' }, h('div', null, h('h1', null, 'Reports'), h('p', null, `How ${child.name} is getting on.`)),
         h('div', { class: 'row' }, childPicker(draw),
           h('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Period' }, [[7, '7 days'], [30, '30 days'], [90, '90 days']].map(([d, l]) => h('button', { role: 'radio', 'aria-checked': String(days === d), onclick: () => { days = d; draw(); } }, l))),
-          h('button', { class: 'btn soft', onclick: async () => { try { await download(`/children/${child.id}/insights/export.csv?days=${days}`, `kindo-${child.name}-report.csv`); } catch (e) { toast(errorText(e), 'err'); } } }, icon('download', 20), 'Export CSV'))),
+          h('button', { class: 'btn soft', onclick: async () => { try { await download(`/children/${child.id}/insights/export.csv?days=${days}`, `kindo-${child.name}-report.csv`); } catch (e) { toast(errorText(e), 'err'); } } }, icon('download', 20), 'Export CSV'),
+          h('button', { class: 'btn soft', 'data-act': 'export-pdf', onclick: async () => { try { await download(`/children/${child.id}/insights/report.pdf?days=${days}`, `kindo-${child.name}-progress-report.pdf`); } catch (e) { toast(errorText(e), 'err'); } } }, icon('download', 20), 'Print report'))),
       body);
     try {
       const [s, daily, letters] = await Promise.all([api(`/children/${child.id}/insights/summary?days=${days}`), api(`/children/${child.id}/insights/daily?days=${days}`), api(`/children/${child.id}/letters?days=${days}`)]);
