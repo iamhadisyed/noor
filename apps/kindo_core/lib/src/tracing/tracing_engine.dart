@@ -145,7 +145,8 @@ class TracingEngine {
         lines.add(s);
       }
     }
-    final all = [for (final l in lines) ...l];
+    // a fast swipe gives few touch points, so fill in the line between them before judging how much of the shape it reached
+    final all = [for (final l in lines) ..._densify(l, max(2.0, canvasSize / 80))];
     if (all.isEmpty) return const TraceResult(success: false, coverage: 0, meanDeviationPx: 0, mistake: 'letter_omission');
 
     var covered = 0, total = 0;
@@ -172,6 +173,21 @@ class TracingEngine {
     final success = mistake == null && coverage >= 0.8 && dev <= tol;
 
     return TraceResult(success: success, coverage: coverage, meanDeviationPx: dev, mistake: success ? null : (mistake ?? 'letter_omission'));
+  }
+
+  /// Points added along each segment so none is more than [step] apart.
+  static List<Pt> _densify(List<Pt> pts, double step) {
+    if (pts.length < 2) return pts;
+    final out = <Pt>[pts.first];
+    for (var i = 1; i < pts.length; i++) {
+      final a = pts[i - 1], b = pts[i];
+      final n = (a.distanceTo(b) / step).ceil();
+      for (var k = 1; k <= n; k++) {
+        out.add(Pt(a.x + (b.x - a.x) * k / n, a.y + (b.y - a.y) * k / n));
+      }
+    }
+
+    return out;
   }
 
   /// True when the child drew the main stroke from the wrong end.

@@ -32,7 +32,7 @@ class _PictureCards extends StatelessWidget {
     if (child == null) return const SizedBox.shrink();
     final all = s.sync.aacCardsFor(child.id);
     final mine = all.where((c) => c.custom).toList();
-    final stock = all.where((c) => !c.custom).toList();
+    final stock = s.stockCards;
 
     return ListView(padding: pagePadding, children: [
       Row(children: [

@@ -58,6 +58,15 @@ void main() {
       }
     });
 
+    test('a fast swipe with only a few touch points still counts as following the shape', () {
+      final g = StrokeLibrary.lookup('1')!;
+      // three touch points only: the corners of the stroke
+      final swipe = [g.strokes.first.map((p) => p.scaled(size)).toList()];
+      final r = engine.evaluate(userStrokes: swipe, glyph: g, canvasSize: size, magnetPx: 24);
+      expect(r.success, isTrue);
+      expect(r.coverage, greaterThan(.9));
+    });
+
     test('drawing nothing is an omission', () {
       final g = StrokeLibrary.lookup('A')!;
       final r = engine.evaluate(userStrokes: [], glyph: g, canvasSize: size, magnetPx: 24);

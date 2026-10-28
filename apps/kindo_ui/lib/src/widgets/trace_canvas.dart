@@ -59,10 +59,11 @@ class TraceCanvasState extends State<TraceCanvas> {
           height: side,
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(28), border: Border.all(color: KindoColors.line, width: 2)),
           clipBehavior: Clip.antiAlias,
-          child: GestureDetector(
-            onPanStart: (d) => setState(() => _strokes.add([_snapped(d.localPosition)])),
-            onPanUpdate: (d) => setState(() => _strokes.last.add(_snapped(d.localPosition))),
-            onTapDown: (d) => setState(() => _strokes.add([_snapped(d.localPosition)])),
+          // pointer events (not pan gestures) so a tap for a dot and a drag for a line are handled the same way
+          child: Listener(
+            behavior: HitTestBehavior.opaque,
+            onPointerDown: (e) => setState(() => _strokes.add([_snapped(e.localPosition)])),
+            onPointerMove: (e) => setState(() => _strokes.last.add(_snapped(e.localPosition))),
             child: CustomPaint(size: Size(side, side), painter: _TracePainter(widget.glyph, _strokes, guide, side)),
           ),
         ),

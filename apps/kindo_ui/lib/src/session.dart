@@ -31,6 +31,9 @@ class KindoSession extends ChangeNotifier {
   UserProfile? user;
   Json meta = {};
   Map<String, KeyboardLayout> keyboards = {};
+
+  /// The ready-made picture cards (they are not part of the change feed, so they are fetched and kept separately).
+  List<AacCard> stockCards = [];
   String lang = 'en';
   int? currentChildId;
 
@@ -46,6 +49,7 @@ class KindoSession extends ChangeNotifier {
   static const _kLang = 'kindo.lang';
   static const _kChild = 'kindo.child';
   static const _kMeta = 'kindo.meta';
+  static const _kStock = 'kindo.stock_cards';
 
   void _build(String base) {
     baseUrl = base;
@@ -80,6 +84,14 @@ class KindoSession extends ChangeNotifier {
     currentChildId = int.tryParse(await store.read(_kChild) ?? '');
     final m = await store.read(_kMeta);
     if (m != null) _setMeta(m);
+    final st = await store.read(_kStock);
+    if (st != null) {
+      try {
+        stockCards = (_decode(st) as List).map(AacCard.fromJson).toList();
+      } catch (_) {
+        stockCards = [];
+      }
+    }
     await sync.load();
     await outbox.load();
     ready = true;
@@ -131,6 +143,8 @@ class KindoSession extends ChangeNotifier {
     await store.remove(_kChild);
     await sync.clear();
     await store.remove('kindo.outbox');
+    await store.remove(_kStock);
+    stockCards = [];
     await media.clear();
     outbox = Outbox(client, store);
     stopAutoSync();
@@ -149,6 +163,9 @@ class KindoSession extends ChangeNotifier {
       await store.write(_kMeta, const JsonCodecShim().encode(meta));
       await flushOutbox();
       await sync.sync();
+      final cards = await api.aacCards();
+      stockCards = cards.where((c) => !c.custom).toList();
+      await store.write(_kStock, const JsonCodecShim().encode([for (final c in stockCards) c.raw]));
       online = true;
       unawaited(_prefetch());
     } on ApiException catch (e) {
@@ -188,6 +205,9 @@ class KindoSession extends ChangeNotifier {
       for (final f in sync.familyFor(c.id)) {
         if (f.photoUrl != null) items.add((url: f.photoUrl!, version: f.photoV));
         if (f.audioUrl != null) items.add((url: f.audioUrl!, version: f.audioV));
+      }
+      for (final k in stockCards) {
+        if (k.iconPath != null) items.add((url: publicUrl(k.iconPath!), version: null));
       }
       for (final k in sync.aacCardsFor(c.id)) {
         if (k.iconUrl != null) items.add((url: k.iconUrl!, version: k.iconV));
@@ -229,6 +249,13 @@ class KindoSession extends ChangeNotifier {
   Future<void> selectChild(int id) async {
     currentChildId = id;
     await store.write(_kChild, '$id');
+    notifyListeners();
+  }
+
+  /// Back to "who is playing?" without signing the parent out.
+  Future<void> signOutChild() async {
+    currentChildId = null;
+    await store.remove(_kChild);
     notifyListeners();
   }
 

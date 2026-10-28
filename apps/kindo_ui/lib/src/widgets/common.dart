@@ -7,7 +7,13 @@ import '../theme.dart';
 
 /// `context.tr('Hello', 'سلام')`: the text for the app's current language.
 extension KindoText on BuildContext {
-  String tr(String en, String ur) => watch<KindoSession>().lang == 'ur' && ur.isNotEmpty ? ur : en;
+  ///
+  /// Safe to call inside a button handler as well as in `build`: the app's locale follows the session language, so asking for the
+  /// locale is what makes the widget rebuild when the language changes (`watch` would throw outside `build`).
+  String tr(String en, String ur) {
+    Localizations.maybeLocaleOf(this);
+    return read<KindoSession>().lang == 'ur' && ur.isNotEmpty ? ur : en;
+  }
 
   /// The language code (`en` or `ur`) without listening for changes.
   String get lang => read<KindoSession>().lang;

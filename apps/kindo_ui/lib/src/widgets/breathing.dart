@@ -40,7 +40,7 @@ class _BreathingBubbleState extends State<BreathingBubble> with SingleTickerProv
         final s = _steps[_step];
         final secs = widget.slow ? (s.seconds * 1.5).round() : s.seconds;
         if (mounted) setState(() {});
-        final target = switch (s.cue) { 'grow' => 1.0, 'shrink' => .45, _ => _c.value };
+        final target = switch (s.cue) { 'in' => 1.0, 'out' => .45, _ => _c.value };
         await _c.animateTo(target, duration: Duration(seconds: secs), curve: Curves.easeInOut);
         _elapsed += secs;
       }
