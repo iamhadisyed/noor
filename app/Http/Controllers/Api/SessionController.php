@@ -17,9 +17,9 @@ class SessionController extends Controller
         $data = $request->validate([
             'module_id' => 'nullable|integer|exists:syllabus_modules,id',
             'language' => 'required|in:urdu,english',
-            'total_attempts' => 'required|integer|min:0',
+            'total_attempts' => 'required|integer|min:0|max:5000',
             'successful_attempts' => 'required|integer|min:0|lte:total_attempts',
-            'duration_seconds' => 'required|integer|min:0',
+            'duration_seconds' => 'required|integer|min:0|max:43200',   // twelve hours is already more than a child can practise
             'mistakes' => 'sometimes|array|max:200',
             'mistakes.*.target_string' => 'required|string|max:100',
             'mistakes.*.attempted_string' => 'required|string|max:100',

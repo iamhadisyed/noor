@@ -19,6 +19,8 @@ class MediaStore
     public const DISK = 'local';
     public const MAX_IMAGE_SIDE = 600;
     public const MAX_IMAGE_UPLOAD_KB = 2048;
+    public const MAX_PIXELS_SIDE = 8000;       // longest side of an uploaded picture, before it is shrunk
+    public const MAX_PIXELS = 25_000_000;      // 25 megapixels, about 100 MB once opened
     public const MAX_AUDIO_KB = 150;
     public const AUDIO_MIMES = ['audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/ogg', 'audio/webm', 'video/webm', 'video/mp4', 'audio/wav', 'audio/x-wav', 'audio/wave'];
 
@@ -35,6 +37,12 @@ class MediaStore
     /** Re-encode any picture to a JPEG of at most 600 px. This strips metadata and anything hidden in the file. */
     public function encodeJpeg(string $file, ?int $maxSide = null): string
     {
+        // Read the size from the header first: a tiny file can claim to be a huge picture and use all the server's memory when opened.
+        $size = @getimagesize($file);
+        if (is_array($size) && ($size[0] > self::MAX_PIXELS_SIDE || $size[1] > self::MAX_PIXELS_SIDE || $size[0] * $size[1] > self::MAX_PIXELS)) {
+            throw new \InvalidArgumentException('That picture is too large. Please use a smaller one.');
+        }
+
         $src = @imagecreatefromstring((string) file_get_contents($file));
         if (! $src) {
             throw new \InvalidArgumentException('That file is not a picture we can read.');
