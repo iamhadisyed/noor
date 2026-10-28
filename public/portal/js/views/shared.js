@@ -2,6 +2,7 @@ import { api } from '../api.js';
 import { h, icon, fmt, toast, errorText, emptyState, spinner, confirmBox } from '../ui.js';
 import { bars, hbars } from '../charts.js';
 import { state, go } from '../main.js';
+import { lettersCard } from './reports.js';
 
 const ROLE = { therapist: 'Therapist', teacher: 'Teacher' };
 const tile = (cls, label, big, unit, sub) => h('div', { class: `tile ${cls}` }, h('span', { class: 'lbl' }, label), h('span', { class: 'big' }, big, unit ? h('small', null, unit) : null), h('span', { class: 'sub' }, sub));
@@ -25,6 +26,7 @@ export async function render(ctx, params, query) {
       h('div', { class: 'grid2', style: 'align-items:start' },
         h('div', { class: 'list', style: 'gap:24px' },
           h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:12px' }, 'Minutes per day'), bars(s.daily.map((d) => ({ label: String(new Date(d.date + 'T12:00:00').getDate()), value: d.minutes })), { thin: true, name: 'Minutes per day' })),
+          lettersCard(s.letters),
           h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:12px' }, 'Hardest letters and words'), hbars(p.hardest_targets, { empty: 'No mistakes recorded yet.' }), h('h2', { style: 'margin:20px 0 12px' }, 'Kinds of mistake'), hbars(p.mistake_types, { empty: 'None yet.' })),
           h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:12px' }, 'Lessons'), s.lessons.length ? h('div', { class: 'list' }, s.lessons.map((l) => h('div', { class: 'item' }, h('div', { class: 'grow' }, h('b', null, l.title), h('span', null, `Week ${l.week} · ${l.tasks} tasks · ${l.language}`)), h('span', { class: `chip ${l.status === 'published' ? 'sage' : ''}` }, l.status)))) : h('p', { class: 'muted' }, 'No lessons yet.'))),
         h('div', { class: 'list', style: 'gap:24px' }, exerciseForm(s, work), h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:12px' }, 'Game levels'), s.games.length ? h('div', { class: 'list' }, s.games.map((g) => h('div', { class: 'item' }, h('div', { class: 'grow' }, h('b', null, g.game.replace(/_/g, ' ')), h('span', null, `played ${g.plays}×${g.last_accuracy == null ? '' : ` · last ${g.last_accuracy}%`}`)), h('span', { class: 'chip' }, `Level ${g.level}`)))) : h('p', { class: 'muted' }, 'No games played yet.')),

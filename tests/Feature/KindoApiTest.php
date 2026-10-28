@@ -160,4 +160,55 @@ class KindoApiTest extends TestCase
 
         $this->assertSame(1, PracticeMistakeLog::count());
     }
+
+    public function test_letter_results_are_stored_and_summarised(): void
+    {
+        Sanctum::actingAs($user = User::factory()->create());
+        $child = $this->child($user);
+        $post = fn (array $letters) => $this->postJson("/api/v1/children/{$child->id}/sessions", [
+            'language' => 'urdu', 'total_attempts' => 5, 'successful_attempts' => 3, 'duration_seconds' => 60, 'letters' => $letters,
+        ])->assertCreated();
+
+        $post([['letter' => 'ب', 'attempts' => 4, 'successes' => 1, 'assisted' => 3, 'deviation' => 12.5], ['letter' => 'ا', 'attempts' => 6, 'successes' => 6, 'assisted' => 0, 'deviation' => 3]]);
+        $post([['letter' => 'ب', 'attempts' => 4, 'successes' => 4, 'assisted' => 1]]);
+
+        $r = $this->getJson("/api/v1/children/{$child->id}/letters?days=7")->assertOk()->json();
+        $ba = collect($r['letters'])->firstWhere('letter', 'ب');
+        $this->assertSame(63, $ba['accuracy_pct']);
+        $this->assertSame(8, $ba['attempts']);
+        $this->assertSame('up', $ba['trend']);
+        $this->assertSame('practising', $ba['status']);
+        $this->assertSame('mastered', collect($r['letters'])->firstWhere('letter', 'ا')['status']);
+        $this->assertSame(1, $r['mastered']);
+        $this->assertSame(['ب'], $r['focus']);
+        $this->assertSame('ب', $r['letters'][0]['letter'], 'weakest letter first');
+    }
+
+    public function test_letter_results_are_validated_optional_and_private(): void
+    {
+        Sanctum::actingAs($user = User::factory()->create());
+        $child = $this->child($user);
+        $base = ['language' => 'urdu', 'total_attempts' => 1, 'successful_attempts' => 1, 'duration_seconds' => 5];
+
+        $this->postJson("/api/v1/children/{$child->id}/sessions", $base)->assertCreated();   // old apps send no letters
+        $this->postJson("/api/v1/children/{$child->id}/sessions", $base + ['letters' => [['letter' => 'ب', 'attempts' => 2, 'successes' => 3]]])->assertUnprocessable();
+        $this->postJson("/api/v1/children/{$child->id}/sessions", $base + ['letters' => [['letter' => 'ب', 'attempts' => 2, 'successes' => 1, 'assisted' => 5]]])->assertUnprocessable();
+        $this->assertSame([], $this->getJson("/api/v1/children/{$child->id}/letters")->json('letters'));
+
+        Sanctum::actingAs(User::factory()->create());
+        $this->getJson("/api/v1/children/{$child->id}/letters")->assertNotFound();
+    }
+
+    public function test_tracing_assist_settings_are_part_of_the_support_profile(): void
+    {
+        Sanctum::actingAs($user = User::factory()->create());
+        $child = $this->child($user);
+
+        $this->assertSame('dotted', $this->getJson("/api/v1/children/{$child->id}")->json('support.guide'));
+        $this->patchJson("/api/v1/children/{$child->id}", ['support_profile' => ['guide' => 'arrows', 'fade_assist' => false]])->assertOk();
+        $s = $this->getJson("/api/v1/children/{$child->id}")->json('support');
+        $this->assertSame('arrows', $s['guide']);
+        $this->assertFalse($s['fade_assist']);
+        $this->patchJson("/api/v1/children/{$child->id}", ['support_profile' => ['guide' => 'sparkles']])->assertUnprocessable();
+    }
 }

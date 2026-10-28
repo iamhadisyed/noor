@@ -85,6 +85,7 @@ h3 { font-size: 18px; line-height: 1.25; font-weight: 700; letter-spacing: -.2px
 .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border-radius: var(--r-pill); background: var(--lavender-tint); font-size: 13.5px; font-weight: 600; white-space: nowrap; }
 .chip.ink { background: var(--ink); color: #fff; }
 .chip.sage { background: #dcefe4; color: var(--sage-deep); }
+.chip.rose { background: var(--warn-tint); color: var(--warn); }
 .chip.butter { background: var(--butter); }
 .chip.warn { background: var(--warn-tint); color: var(--warn); }
 .chip.orchid { background: #f7d8fc; }

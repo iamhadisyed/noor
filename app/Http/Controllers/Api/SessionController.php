@@ -25,11 +25,19 @@ class SessionController extends Controller
             'mistakes.*.attempted_string' => 'required|string|max:100',
             'mistakes.*.stroke_deviation_score' => 'nullable|numeric|between:0,999.99',
             'mistakes.*.mistake_type' => 'required|in:phonetic_substitution,letter_omission,dot_misplacement,stroke_inversion',
+            // Optional per-letter tracing results; older app versions simply leave this out.
+            'letters' => 'sometimes|array|max:120',
+            'letters.*.letter' => 'required|string|max:20',
+            'letters.*.attempts' => 'required|integer|between:1,200',
+            'letters.*.successes' => 'required|integer|min:0|lte:letters.*.attempts',
+            'letters.*.assisted' => 'sometimes|integer|min:0|lte:letters.*.attempts',
+            'letters.*.deviation' => 'nullable|numeric|between:0,999.99',
         ]);
 
         $session = DB::transaction(function () use ($child, $data) {
-            $session = $child->practiceSessions()->create(collect($data)->except('mistakes')->all());
+            $session = $child->practiceSessions()->create(collect($data)->except('mistakes', 'letters')->all());
             $session->mistakes()->createMany($data['mistakes'] ?? []);
+            $session->letters()->createMany(collect($data['letters'] ?? [])->map(fn ($l) => $l + ['child_id' => $child->id, 'language' => $data['language']])->all());
             return $session;
         });
 

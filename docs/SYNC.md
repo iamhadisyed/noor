@@ -56,4 +56,4 @@ Last write wins, field by field as sent. Rules that never bend, whichever device
 `family_member` changes carry `photo_url` and `audio_url` (signed, 15 minutes), never storage paths. Photos are re-encoded to a JPEG of at most 600 px and voices are checked by content (150 KB max). Create with `POST children/{id}/family` (multipart: `relation_title`, `display_name`, `photo`, `audio`, and `consent=1`, the parent's confirmation that they may use this photo and voice); change names or swap a file with `POST family/{id}` (or `PATCH` for names only); remove with `DELETE family/{id}`. A bad replacement file never costs the parent the existing one.
 
 ## 6. What is not in the feed yet
-Practice sessions (uploaded by the child app with `POST children/{id}/sessions`) and reports. Reports are fetched on demand.
+Practice sessions (uploaded by the child app with `POST children/{id}/sessions`, optionally with per-letter results in `letters[]`) and reports. The tracing assist settings `support.guide` (none/dotted/arrows) and `support.fade_assist` travel in the child's support profile. Reports are fetched on demand.

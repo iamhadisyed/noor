@@ -78,7 +78,7 @@ class PrivacyController extends Controller
             'lessons' => $lessons,
             'family_cards' => $family,
             'alerts' => ChildNeedsLog::whereIn('child_id', $ids)->orderBy('id')->get()->toArray(),
-            'practice_sessions' => PracticeSession::whereIn('child_id', $ids)->with('mistakes')->orderBy('id')->get()->toArray(),
+            'practice_sessions' => PracticeSession::whereIn('child_id', $ids)->with('mistakes', 'letters')->orderBy('id')->get()->toArray(),
             'ai_reports' => AiDiagnosticReport::whereIn('child_id', $ids)->orderBy('id')->get()->toArray(),
             'moderation_flags' => ContentFlag::where('user_id', $user->id)->orderBy('id')->get(['id', 'reason', 'term', 'excerpt', 'status', 'action', 'created_at', 'reviewed_at'])->toArray(),
             'activity_log' => AuditLog::where('actor_id', $user->id)->orderBy('id')->get(['action', 'created_at', 'ip'])->toArray(),

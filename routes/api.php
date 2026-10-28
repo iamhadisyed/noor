@@ -165,6 +165,7 @@ Route::prefix('v1')->group(function () {
         Route::post('game-sessions/{id}/finish', [GameController::class, 'finish']);
 
         Route::get('children/{child}/insights/summary', [InsightsController::class, 'summary']);
+        Route::get('children/{child}/letters', [InsightsController::class, 'letters']);
         Route::get('children/{child}/insights/daily', [InsightsController::class, 'daily']);
         Route::get('children/{child}/insights/export.csv', [InsightsController::class, 'exportCsv']);
         Route::post('children/{child}/reports', [ReportController::class, 'generate']);
