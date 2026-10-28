@@ -20,6 +20,7 @@ return [
     'admin_token_ttl_hours' => 12,
 
     'groq_model' => env('GROQ_MODEL', 'llama-3.1-8b-instant'),
+    'groq_vision_model' => env('GROQ_VISION_MODEL', 'meta-llama/llama-4-scout-17b-16e-instruct'),
     'gemini_model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
 
     'fcm' => [

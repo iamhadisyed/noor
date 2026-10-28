@@ -41,6 +41,7 @@ Run `php artisan config:cache` in production; keys are read through `config/kind
 | GET | task-types | the per-type picture and sound rules, shared by web and app |
 | GET | lesson-templates | starter lessons for the standard and special tracks |
 | GET/POST | children/{id}/lessons (+ `/from-template/{id}`) | free plan: 3 lessons per child |
+| POST | children/{id}/lessons/import | Pro: multipart `photo` (+ `language`, `week_number`) → draft lesson via Groq/Gemini vision; photo is not kept; 10 per hour |
 | GET/PATCH/DELETE | lessons/{id} | DELETE archives |
 | POST | lessons/{id}/publish · unpublish · duplicate | publish returns 422 with the exact missing pictures and sounds |
 | POST/PATCH/DELETE | lessons/{id}/tasks · tasks/{id} · reorder | |

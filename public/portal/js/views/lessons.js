@@ -14,11 +14,12 @@ export async function render(ctx, params, query) {
   let tab = query.tab === 'templates' ? 'templates' : 'mine', trackFilter = 'all';
   const page = h('div', { class: 'page' });
 
-  const upgrade = (msg) => modal((box, close) => box.append(h('h2', null, 'Lesson limit reached'), h('p', { class: 'muted' }, msg), h('div', { class: 'actions' }, h('button', { class: 'btn primary', onclick: close }, 'OK'))));
+  const upgrade = (msg) => modal((box, close) => box.append(h('h2', null, 'Kindo Pro needed'), h('p', { class: 'muted' }, msg), h('div', { class: 'actions' }, h('button', { class: 'btn primary', onclick: close }, 'OK'))));
 
   async function draw() {
     const child = currentChild();
     const head = h('div', { class: 'page-head' }, h('div', null, h('h1', null, 'Lessons'), h('p', null, `Lessons for ${child.name}. Each task can have its own picture and sound.`)), h('div', { class: 'row' }, childPicker(draw),
+      h('button', { class: 'btn soft', 'data-act': 'import-photo', onclick: () => importPhoto(child) }, icon('camera', 20), 'From a photo'),
       h('button', { class: 'btn primary', onclick: () => newLesson(child) }, icon('plus', 20), 'New lesson')));
     const tabs = h('div', { class: 'tabs', role: 'tablist' }, [['mine', 'My lessons'], ['templates', 'Starter templates']].map(([k, l]) => h('button', { role: 'tab', 'aria-selected': String(tab === k), onclick: () => { tab = k; draw(); } }, l)));
     const body = h('div', null, spinner());
@@ -75,6 +76,25 @@ export async function render(ctx, params, query) {
       box.append(h('h2', null, `New lesson for ${child.name}`), h('div', { class: 'field', style: 'margin-top:16px' }, h('label', { for: 'lt' }, 'Title'), title),
         h('div', { class: 'grid2' }, h('div', { class: 'field' }, h('label', { for: 'll' }, 'Language'), lang), h('div', { class: 'field' }, h('label', { for: 'lw' }, 'Week'), week)), err,
         h('div', { class: 'actions' }, h('button', { class: 'btn soft', onclick: close }, 'Cancel'), go1));
+    });
+  }
+  /** A photo of a syllabus or worksheet page becomes a draft lesson. The photo is read once and not kept. */
+  function importPhoto(child) {
+    modal((box, close) => {
+      const file = h('input', { class: 'input', id: 'ip', type: 'file', accept: 'image/jpeg,image/png,image/webp', capture: 'environment', 'aria-label': 'Photo of the page' });
+      const lang = h('select', { class: 'select', id: 'il' }, Object.entries(LANG).map(([v, l]) => h('option', { value: v }, l)));
+      lang.value = 'both';
+      const err = h('div', { class: 'msg-err', role: 'alert' });
+      const ok = h('button', { class: 'btn primary', 'data-act': 'run-import', onclick: async () => {
+        if (!file.files[0]) { err.textContent = 'Choose or take a photo of the page first.'; return; }
+        const f = new FormData(); f.append('photo', file.files[0]); f.append('language', lang.value);
+        ok.disabled = true; ok.textContent = 'Reading the page…'; err.textContent = '';
+        try { const l = await api(`/children/${child.id}/lessons/import`, { method: 'POST', form: f }); close(); toast('Draft lesson made. Check it, then add sounds and pictures.'); go(`#/lessons/${l.id}`); }
+        catch (e) { ok.disabled = false; ok.textContent = 'Make a draft'; if (e.status === 402) { close(); upgrade(e.message); } else err.textContent = errorText(e); }
+      } }, 'Make a draft');
+      box.append(h('h2', null, `Lesson from a photo for ${child.name}`), h('p', { class: 'muted' }, 'Take a clear photo of one page of the syllabus or worksheet. We turn it into a draft you can edit. The photo is read once by our AI helper and is not saved.'),
+        h('div', { class: 'field', style: 'margin-top:16px' }, h('label', { for: 'ip' }, 'Photo'), file), h('div', { class: 'field' }, h('label', { for: 'il' }, 'Language on the page'), lang), err,
+        h('div', { class: 'actions' }, h('button', { class: 'btn soft', onclick: close }, 'Cancel'), ok));
     });
   }
   function duplicate(l) {
