@@ -62,7 +62,7 @@ class TaskController extends Controller
         $data = $request->validate($this->taskRules());
         $this->checkCorrect($data);
 
-        $task = $lesson->tasks()->create($data + ['position' => ($lesson->tasks()->max('position') ?? 0) + 1]);
+        $task = $lesson->tasks()->create($data + ['position' => ($lesson->tasks()->max('position') ?? 0) + 1])->refresh();   // refresh: pick up database defaults
         app(ContentFilter::class)->scanTask($task);
 
         return response()->json(self::present($task, $this->media) + ['lesson_unpublished' => LessonController::revalidate($lesson)], 201);

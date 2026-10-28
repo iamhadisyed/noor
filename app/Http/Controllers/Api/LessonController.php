@@ -59,7 +59,7 @@ class LessonController extends Controller
         $lesson = $child->lessons()->create($data + ['user_id' => $request->user()->id, 'track' => $data['track'] ?? $child->track]);
         app(ContentFilter::class)->scanLesson($lesson);
 
-        return response()->json($this->present($lesson), 201);
+        return response()->json($this->present($lesson->refresh()), 201);   // refresh: the database fills in status, week and the like
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -182,7 +182,7 @@ class LessonController extends Controller
             'task_types' => LessonRules::types(),
             'support_defaults' => ['standard' => ChildController::SUPPORT_STANDARD, 'special' => ChildController::SUPPORT_SPECIAL],
             'neurotypes' => ['neurotypical', 'autism_spectrum', 'speech_delay', 'adhd', 'down_syndrome'],
-            'limits' => ['image_max_side' => MediaStore::MAX_IMAGE_SIDE, 'audio_max_kb' => MediaStore::MAX_AUDIO_KB, 'lessons_per_child_free' => (int) config('kindo.free_limits.lessons_per_child'), 'children_free' => (int) config('kindo.free_limits.children'), 'children_pro' => (int) config('kindo.free_limits.pro_children')],
+            'limits' => ['image_max_side' => MediaStore::MAX_IMAGE_SIDE, 'audio_max_kb' => MediaStore::MAX_AUDIO_KB, 'lessons_per_child_free' => (int) config('kindo.free_limits.lessons_per_child'), 'custom_cards_per_child_free' => (int) config('kindo.free_limits.custom_cards_per_child'), 'family_cards_free' => (int) config('kindo.free_limits.family_members'), 'children_free' => (int) config('kindo.free_limits.children'), 'children_pro' => (int) config('kindo.free_limits.pro_children')],
         ]);
     }
 
