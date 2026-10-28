@@ -1,0 +1,16 @@
+name: kindo_core
+description: Shared code for the Kindo Parent and Kindo Junior apps - API client, models, offline sync, game and tracing logic. Pure Dart, no Flutter needed.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  http: ^1.6.0
+  http_parser: ^4.1.2
+  meta: ^1.19.0
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.31.1
