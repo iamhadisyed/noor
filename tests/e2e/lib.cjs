@@ -20,7 +20,7 @@ async function launch(opts = {}) {
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
-  page.on('console', (m) => { if (m.type() === 'error' && !/status of (404|422|403|423)/.test(m.text())) errors.push('console: ' + m.text()); });   // expected API refusals are not failures
+  page.on('console', (m) => { if (m.type() === 'error' && !/status of (404|422|403|423|402)/.test(m.text())) errors.push('console: ' + m.text()); });   // expected API refusals are not failures
   return { browser, ctx, page, errors };
 }
 

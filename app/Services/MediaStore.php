@@ -33,7 +33,7 @@ class MediaStore
     }
 
     /** Re-encode any picture to a JPEG of at most 600 px. This strips metadata and anything hidden in the file. */
-    public function encodeJpeg(string $file): string
+    public function encodeJpeg(string $file, ?int $maxSide = null): string
     {
         $src = @imagecreatefromstring((string) file_get_contents($file));
         if (! $src) {
@@ -41,7 +41,7 @@ class MediaStore
         }
 
         [$w, $h] = [imagesx($src), imagesy($src)];
-        $k = min(1, self::MAX_IMAGE_SIDE / max($w, $h));
+        $k = min(1, ($maxSide ?? self::MAX_IMAGE_SIDE) / max($w, $h));
         $nw = max(1, (int) round($w * $k));
         $nh = max(1, (int) round($h * $k));
 

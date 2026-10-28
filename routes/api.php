@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ChildController;
 use App\Http\Controllers\Api\ContentReviewController;
 use App\Http\Controllers\Api\FamilyMemberController;
 use App\Http\Controllers\Api\LessonController;
+use App\Http\Controllers\Api\LessonImportController;
 use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\NeedsController;
@@ -126,6 +127,7 @@ Route::prefix('v1')->group(function () {
         Route::get('lesson-templates', [LessonController::class, 'templates']);
         Route::get('children/{child}/lessons', [LessonController::class, 'index']);
         Route::post('children/{child}/lessons', [LessonController::class, 'store']);
+        Route::post('children/{child}/lessons/import', [LessonImportController::class, 'store'])->middleware('throttle:10,60');
         Route::post('children/{child}/lessons/from-template/{template}', [LessonController::class, 'fromTemplate']);
         Route::get('lessons/{lesson}', [LessonController::class, 'show']);
         Route::patch('lessons/{lesson}', [LessonController::class, 'update']);

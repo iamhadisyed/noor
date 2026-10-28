@@ -135,7 +135,7 @@ Support access to a parent's data is **not** impersonation. It is a time-limited
 
 **P2, later**
 14. Therapist and teacher access with a 6-digit code and assignments.
-15. Camera-to-syllabus import creating a draft lesson.
+15. Camera-to-syllabus import creating a draft lesson. **Built** (Pro): Lessons > From a photo.
 16. Content review queue with automatic checks, and multi-language voices.
 17. Offline edits in the app with conflict handling.
 
