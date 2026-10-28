@@ -35,6 +35,13 @@ export async function api(path, { method = 'GET', body, form, signal } = {}) {
   return data;
 }
 
+/** Fetch an authenticated file as a Blob (for pictures that need the sign-in token). */
+export async function fetchBlob(path) {
+  const res = await fetch(BASE + path, { headers: { Authorization: `Bearer ${auth.token}` } });
+  if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => ({})));
+  return res.blob();
+}
+
 /** Download an authenticated file (the CSV export) as a browser download. */
 export async function download(path, filename) {
   const res = await fetch(BASE + path, { headers: { Authorization: `Bearer ${auth.token}` } });

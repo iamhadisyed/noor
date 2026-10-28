@@ -1,5 +1,5 @@
-import { api } from '../api.js';
-import { h, icon, fmt, toast, errorText, emptyState, spinner } from '../ui.js';
+import { api, fetchBlob } from '../api.js';
+import { h, icon, fmt, toast, errorText, emptyState, spinner, modal } from '../ui.js';
 import { loadChildren, currentChild, childPicker } from '../main.js';
 
 const CAT = { math: 'Maths', listening: 'Listening', brain: 'Brain games' };
@@ -14,14 +14,43 @@ export async function render(ctx) {
 
   async function load() {
     const child = currentChild();
-    const r = await api(`/children/${child.id}/rewards`);
-    body.replaceChildren(summary(child, r), h('div', { class: 'grid2', style: 'align-items:start' }, h('div', { class: 'list', style: 'gap:24px' }, games(r), ledger(r)), h('div', { class: 'list', style: 'gap:24px' }, rules(child, r), bonus(child))));
+    const [r, ms] = await Promise.all([api(`/children/${child.id}/rewards`), api(`/children/${child.id}/milestones`)]);
+    body.replaceChildren(summary(child, r), h('div', { class: 'grid2', style: 'align-items:start' }, h('div', { class: 'list', style: 'gap:24px' }, celebrate(child, ms.milestones), games(r), ledger(r)), h('div', { class: 'list', style: 'gap:24px' }, rules(child, r), bonus(child))));
   }
 
   const summary = (child, r) => h('div', { class: 'tiles' },
     tile('t1', 'Play time saved', r.balance_minutes, 'min', r.balance_minutes ? 'ready to spend' : 'practise to earn some'),
     tile('t2', 'Earned today', r.earned_today, `/ ${r.settings.daily_cap_minutes}`, 'minutes, daily limit'),
     tile('t3', 'Practice streak', r.streak_days, r.streak_days === 1 ? 'day' : 'days', `${r.settings.streak_days} days in a row earns a bonus`));
+
+  /** Milestones the child has really reached, each with a picture to share (for example on WhatsApp). */
+  const celebrate = (child, list) => h('section', { class: 'card lav', 'data-card': 'milestones' }, h('h2', { style: 'margin-bottom:6px' }, 'Celebrate'), h('p', { style: 'color:var(--ink-2);margin-bottom:12px' }, `Proud of ${child.name}? Share a card with family.`),
+    list.length ? h('div', { class: 'list' }, list.slice(0, 6).map((m) => h('div', { class: 'item', 'data-milestone': m.key },
+      h('div', { class: 'grow' }, h('b', null, m.title.en), h('span', null, m.earned_on ? fmt.date(m.earned_on) : '')),
+      h('button', { class: 'btn soft sm', 'data-act': 'share-card', onclick: () => shareCard(child, m) }, icon('share', 18), 'Share')))) : h('p', { style: 'color:var(--ink-2)' }, 'Nothing to celebrate yet. A 3-day streak, an hour of practice or a mastered letter will show up here.'));
+
+  function shareCard(child, m) {
+    modal((box, close) => {
+      let lang = 'en', showName = true, blob = null, url = null;
+      const img = h('img', { class: 'card-preview', alt: `Milestone card: ${m.title.en}`, style: 'width:100%;max-width:360px;border-radius:20px;display:block;margin:12px auto' });
+      const err = h('div', { class: 'msg-err', role: 'alert' });
+      const load2 = async () => {
+        err.textContent = '';
+        try { blob = await fetchBlob(`/children/${child.id}/milestones/${m.key}/card.png?lang=${lang}&name=${showName ? 1 : 0}`); if (url) URL.revokeObjectURL(url); url = URL.createObjectURL(blob); img.src = url; } catch (e) { err.textContent = errorText(e); }
+      };
+      const langSel = h('select', { class: 'select', id: 'cl', 'aria-label': 'Card language', onchange: () => { lang = langSel.value; load2(); } }, h('option', { value: 'en' }, 'English'), h('option', { value: 'ur' }, 'اردو'));
+      const nameSw = h('button', { class: 'switch', role: 'switch', 'aria-label': `Show ${child.name}'s first name`, 'aria-checked': 'true', onclick: () => { showName = !showName; nameSw.setAttribute('aria-checked', String(showName)); load2(); } });
+      const file = () => new File([blob], 'kindo-milestone.png', { type: 'image/png' });
+      const canShare = () => blob && navigator.canShare && navigator.canShare({ files: [file()] });
+      box.append(h('h2', null, m.title.en), h('p', { class: 'muted' }, 'The card shows only what is on the picture: the first name if you leave it on, the milestone, and Kindo. No photo or details.'), img,
+        h('div', { class: 'row', style: 'justify-content:space-between;margin:8px 0' }, h('label', { for: 'cl' }, 'Language'), langSel),
+        h('div', { class: 'item' }, h('div', { class: 'grow' }, h('b', null, 'Show first name')), nameSw), err,
+        h('div', { class: 'actions' }, h('button', { class: 'btn soft', onclick: () => { if (url) URL.revokeObjectURL(url); close(); } }, 'Close'),
+          h('button', { class: 'btn soft', 'data-act': 'download-card', onclick: () => { if (!blob) return; const a = Object.assign(document.createElement('a'), { href: url, download: 'kindo-milestone.png' }); document.body.append(a); a.click(); a.remove(); } }, 'Save picture'),
+          h('button', { class: 'btn primary', 'data-act': 'send-card', onclick: async () => { try { if (canShare()) await navigator.share({ files: [file()], title: 'Kindo milestone' }); else toast('Sharing is not available here. Save the picture and send it from your phone.'); } catch (e) { if (e.name !== 'AbortError') toast('Could not share. Save the picture instead.', 'err'); } } }, 'Share')));
+      load2();
+    });
+  }
 
   const games = (r) => h('section', { class: 'card' }, h('h2', { style: 'margin-bottom:6px' }, 'Games'), h('p', { class: 'muted', style: 'margin-bottom:16px' }, 'They get harder as your child does well, and easier if it is a struggle.'),
     h('div', { class: 'list' }, r.games.map((g) => h('div', { class: 'item', 'data-game': g.game },

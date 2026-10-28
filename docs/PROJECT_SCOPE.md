@@ -60,7 +60,7 @@ Nothing open. Every phase of the portal plan (`docs/PORTAL_PRD.md` §9, phases 1
 | Spec item | Gap |
 |---|---|
 | Syllabus & Camera importer (§5.2, Pro) | ✅ `POST children/{id}/lessons/import` reads a photo of a page through Groq vision, falling back to Gemini, and makes a draft lesson (trace letter, spell word, listen and repeat). Needs the Groq/Gemini keys in `.env`; the photo is never stored; output is cleaned and bad-word scanned. Quality on real Urdu pages needs a trial with real photos. The old `syllabus_*` tables are unused |
-| WhatsApp brag cards (§5.3) | No milestone aggregation or shareable card image |
+| WhatsApp brag cards (§5.3) | ✅ `GET children/{id}/milestones` lists what the child has really reached (practice streaks, practice time, letters mastered, game levels); `GET .../milestones/{key}/card.png` makes a 1080×1080 card in English or Urdu, first name optional, nothing else personal. Portal: Rewards > Celebrate, with preview, save and share. The app shares the same PNG through the phone's share sheet (WhatsApp included) |
 | First-Then routine engine (§5.1) | The `first_then` setting and a `routine_step` task type exist; there is no dedicated routine scheduler or visual card data |
 | Desensitization Sound Lab (§5.1) | Nothing (needs sound content) |
 | Tracing results storage (§5.2) | Per-session accuracy, mistakes and steadiness are stored and reported, and the app can send optional per-letter results (`letters[]`) that feed a Letter by letter report (accuracy, guide use, steadiness, trend, focus letters) for parents and specialists. Per-child assist settings now include the guide style and fading help. Letter spline data (content) is still outstanding |
