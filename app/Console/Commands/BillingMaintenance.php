@@ -29,6 +29,9 @@ class BillingMaintenance extends Command
                 }
             });
 
+        // an ended plan changes what the child's app may enforce (screen time), so the children are touched to reach the apps through sync
+        $endedIds = User::where('subscription_tier', 'pro')->whereNotNull('subscription_expires_at')->where('subscription_expires_at', '<', now())->pluck('id');
+        \App\Models\Child::whereIn('user_id', $endedIds)->get()->each->touch();
         $ended = User::where('subscription_tier', 'pro')->whereNotNull('subscription_expires_at')->where('subscription_expires_at', '<', now())->update(['subscription_tier' => 'free']);
         $this->info("Warned {$warned}, ended {$ended}.");
 

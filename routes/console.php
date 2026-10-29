@@ -34,3 +34,6 @@ Schedule::call(function () {
 Schedule::command('kindo:billing-daily')->dailyAt('04:05')->name('billing-daily');
 // Nightly backup. Without KINDO_BACKUP_PASSWORD it does nothing and the admin health page shows no recent backup.
 Schedule::command('kindo:backup')->dailyAt('02:30')->when(fn () => (bool) config('kindo.backup.password'))->name('nightly-backup')->onFailure(fn () => \Illuminate\Support\Facades\Log::error('Nightly backup failed'));
+
+// Put the public demo accounts back to their starting state.
+Schedule::command('kindo:demo-reset')->dailyAt('03:40')->when(fn () => (bool) config('kindo.demo.enabled'))->name('demo-reset');

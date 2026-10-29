@@ -19,7 +19,7 @@ class User extends Authenticatable
 
     protected $attributes = ['role' => 'parent', 'status' => 'active'];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'pin_hash'];
 
     protected function casts(): array
     {
@@ -30,6 +30,8 @@ class User extends Authenticatable
             'terms_accepted_at' => 'datetime',
             'notification_prefs' => 'array',
             'password' => 'hashed',
+            'pin_locked_until' => 'datetime',
+            'is_demo' => 'boolean',
         ];
     }
 
