@@ -12,7 +12,7 @@ namespace App\Services;
 class GameEngine
 {
     /** @param list<array> $animals complete library items: id, name_en, name_ur, image_url, audio_url */
-    public function rounds(string $game, int $level, int $count, int $choices, array $animals = [], string $lang = 'en'): array
+    public function rounds(string $game, int $level, int $count, int $choices, array $animals = [], string $lang = 'en', int $age = 6): array
     {
         $level = max(1, min(config('games.max_level'), $level));
         $choices = max(2, min(4, $choices));
@@ -50,6 +50,11 @@ class GameEngine
                 'scramble' => $this->scramble($level, $lang),
                 'hangman' => $this->hangman($level, $lang),
                 'times_table' => $this->timesTable($level, $choices),
+                'science_animals', 'science_ocean', 'science_space', 'science_chemistry', 'science_ai' => $this->science(config("games.games.{$game}.topic"), $age, $choices, $lang),
+                'table_row' => $this->tableRow($level, $choices),
+                'division_facts' => $this->divisionFacts($level, $choices),
+                'case_match' => $this->caseMatch($level, $choices, $lang),
+                'number_word' => $this->numberWord($level, $choices, $lang),
                 default => throw new \InvalidArgumentException("Unknown game {$game}"),
             };
         }
@@ -224,6 +229,15 @@ class GameEngine
         return $all;
     }
 
+    /** Every picture a word game can use: the icons plus the extra words. Names may be empty in one language; callers skip those. */
+    private function pictureBank(): array
+    {
+        $all = $this->allIcons();
+        foreach (config('games.words') as $key => [$ur, $en]) { $all[] = ['key' => $key, 'category' => 'word', 'name_en' => ucfirst($en), 'name_ur' => $ur ?? '']; }
+
+        return $all;
+    }
+
     private function alphabet(string $lang): array
     {
         return $lang === 'ur' ? \App\Support\ChildKeyboard::URDU : \App\Support\ChildKeyboard::ENGLISH;
@@ -239,7 +253,7 @@ class GameEngine
 
     private function firstLetter(int $level, int $choices, string $lang): array
     {
-        $icons = array_values(array_filter($this->allIcons(), fn ($i) => $this->firstLetterOf($i, $lang) !== null));
+        $icons = array_values(array_filter($this->pictureBank(), fn ($i) => $this->firstLetterOf($i, $lang) !== null));
         $icon = $icons[array_rand($icons)];
         $right = $this->firstLetterOf($icon, $lang);
         $abc = $this->alphabet($lang);
@@ -257,15 +271,15 @@ class GameEngine
         $max = [1 => 3, 2 => 4, 3 => 5, 4 => 6, 5 => 8][$level];
         $keys = $this->alphabet($lang);
         $words = [];
-        foreach ($this->allIcons() as $icon) {
+        foreach ($this->pictureBank() as $icon) {
             $word = $lang === 'ur' ? $icon['name_ur'] : mb_strtolower($icon['name_en']);
-            if (mb_strlen($word) <= $max && \App\Support\ChildKeyboard::unsupported($word) === [] && ! preg_match('/\s/u', $word)) {
+            if ($word !== '' && mb_strlen($word) <= $max && \App\Support\ChildKeyboard::unsupported($word) === [] && ! preg_match('/\s/u', $word)) {
                 $words[] = [$icon, $word];
             }
         }
         if ($words === []) {   // no picture has a name this short in this language: fall back to the shortest English ones
             $lang = 'en';
-            foreach ($this->allIcons() as $icon) {
+            foreach ($this->pictureBank() as $icon) {
                 if (mb_strlen($icon['name_en']) <= 4) { $words[] = [$icon, mb_strtolower($icon['name_en'])]; }
             }
         }
@@ -478,7 +492,7 @@ class GameEngine
     /** A word to read; pick the picture. */
     private function wordToPicture(int $choices, string $lang): array
     {
-        $all = $this->allIcons();
+        $all = array_values(array_filter($this->pictureBank(), fn ($i) => ($lang === 'ur' ? $i['name_ur'] : $i['name_en']) !== ''));
         $target = $all[array_rand($all)];
         $others = array_values(array_filter($all, fn ($i) => $i['key'] !== $target['key']));
         shuffle($others);
@@ -491,7 +505,7 @@ class GameEngine
 
     private function lastLetter(int $level, int $choices, string $lang): array
     {
-        $icons = array_values(array_filter($this->allIcons(), fn ($i) => $this->edgeLetter($i, $lang, false) !== null));
+        $icons = array_values(array_filter($this->pictureBank(), fn ($i) => $this->edgeLetter($i, $lang, false) !== null));
         $icon = $icons[array_rand($icons)];
         $right = $this->edgeLetter($icon, $lang, false);
         $abc = $this->alphabet($lang);
@@ -645,5 +659,89 @@ class GameEngine
         [$options, $answer] = $this->pick($right, $wrong, $choices);
 
         return ['prompt' => ['en' => 'How many altogether?', 'ur' => 'کل کتنے ہوئے؟'], 'expression' => "{$a} × {$b}", 'a' => $a, 'b' => $b, 'icon' => $this->icon(), 'options' => $options, 'answer_index' => $answer];
+    }
+
+    /** A question from the Discover facts that fit the child's age. The fact travels with the round so the app can show "Did you know?". */
+    private function science(string $topic, int $age, int $choices, string $lang): array
+    {
+        $facts = array_values(array_filter(config("learn.facts.{$topic}"), fn ($f) => $age >= $f[1][0] && $age <= $f[1][1]));
+        if ($facts === []) { $facts = array_values(array_filter(config("learn.facts.{$topic}"), fn ($f) => abs($age - ($f[1][0] + $f[1][1]) / 2) <= 3)) ?: config("learn.facts.{$topic}"); }
+        [$key, , $emoji, $title, $text, $q, $right, $wrong] = $facts[array_rand($facts)];
+        $i = $lang === 'ur' ? 1 : 0;
+        // The fact's own wrong answers come first; other answers from the same topic fill the gaps when 4 choices are wanted.
+        $own = array_map(fn ($w) => $w[$i], $wrong);
+        $others = array_map(fn ($f) => $f[6][$i], array_filter(config("learn.facts.{$topic}"), fn ($f) => $f[0] !== $key));
+        shuffle($others);
+        [$options, $answer] = $this->pick($right[$i], array_slice(array_values(array_unique(array_merge($own, $others))), 0, $choices - 1), $choices);
+
+        return ['prompt' => ['en' => $q[0], 'ur' => $q[1]], 'lang' => $lang, 'expression' => $emoji, 'options' => $options, 'answer_index' => $answer,
+            'learn' => ['key' => $key, 'emoji' => $emoji, 'title' => ['en' => $title[0], 'ur' => $title[1]], 'text' => ['en' => $text[0], 'ur' => $text[1]]]];
+    }
+
+    /** One row of a times table with a hole: 3, 6, ?, 12. */
+    private function tableRow(int $level, int $choices): array
+    {
+        $tables = [1 => [2, 5, 10], 2 => [2, 3, 4, 5, 10], 3 => [2, 3, 4, 5, 6, 10], 4 => range(2, 9), 5 => range(2, 12)][$level];
+        $t = $tables[array_rand($tables)];
+        $row = array_map(fn ($n) => $t * $n, range(1, 5));
+        $hole = random_int(1, 4);
+        $right = $row[$hole];
+        $show = $row;
+        $show[$hole] = '?';
+        [$options, $answer] = $this->pick($right, [$right + $t, $right - $t, $right + 1, $right - 1, $right + 2, $right - 2], $choices);
+
+        return ['prompt' => ['en' => 'Complete the table of ' . $t, 'ur' => $t . ' کا پہاڑا مکمل کرو'], 'expression' => implode(', ', $show), 'options' => $options, 'answer_index' => $answer];
+    }
+
+    private function divisionFacts(int $level, int $choices): array
+    {
+        $d = [1 => [2, 5, 10], 2 => [2, 3, 4, 5], 3 => [2, 3, 4, 5, 6], 4 => range(2, 9), 5 => range(2, 12)][$level];
+        $d = $d[array_rand($d)];
+        $q = random_int(1, $level <= 2 ? 5 : 10);
+        [$options, $answer] = $this->pick($q, [$q + 1, $q - 1, $q + 2, $q * 2, $d, $q + $d], $choices);
+        $options = array_values($options);
+
+        return ['prompt' => ['en' => 'Share equally. How many each?', 'ur' => 'برابر بانٹو۔ ہر ایک کو کتنے؟'], 'expression' => ($d * $q) . ' ÷ ' . $d, 'options' => $options, 'answer_index' => array_search($q, $options, true)];
+    }
+
+    /** Pair a capital letter with its small letter (English), or a letter with its name. */
+    private function caseMatch(int $level, int $choices, string $lang): array
+    {
+        $abc = $this->alphabet('en');
+        $right = $abc[array_rand($abc)];
+        $upper = $level >= 3 && random_int(0, 1) === 1;
+        $shown = $upper ? $right : mb_strtoupper($right);
+        $ask = $upper ? 'capital' : 'small';
+        $fmt = fn (string $l) => $upper ? mb_strtoupper($l) : $l;
+        $wrong = array_map($fmt, array_filter($abc, fn ($l) => $l !== $right));
+        // Look-alike pairs are the real challenge, so they are offered first at higher levels.
+        $alike = ['b' => 'd', 'd' => 'b', 'p' => 'q', 'q' => 'p', 'm' => 'n', 'n' => 'm', 'u' => 'v', 'v' => 'u'];
+        $options0 = $level >= 3 && isset($alike[$right]) ? [$fmt($alike[$right])] : [];
+        [$options, $answer] = $this->pick($fmt($right), array_merge($options0, $wrong), $choices);
+        if ($options0 !== [] && ! in_array($options0[0], $options, true)) { $options[$answer === 0 ? 1 : 0] = $options0[0]; }
+
+        return ['prompt' => ['en' => $upper ? 'Find the capital letter' : 'Find the small letter', 'ur' => $upper ? 'بڑا حرف ڈھونڈو' : 'چھوٹا حرف ڈھونڈو'], 'lang' => 'en', 'expression' => $upper ? mb_strtolower($shown) : $shown, 'options' => $options, 'answer_index' => $answer];
+    }
+
+    /** The number, and its name in words. */
+    private function numberWord(int $level, int $choices, string $lang): array
+    {
+        $en = [0 => 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+        $ur = [0 => 'صفر', 'ایک', 'دو', 'تین', 'چار', 'پانچ', 'چھ', 'سات', 'آٹھ', 'نو', 'دس', 'گیارہ', 'بارہ', 'تیرہ', 'چودہ', 'پندرہ', 'سولہ', 'سترہ', 'اٹھارہ', 'انیس', 'بیس'];
+        $words = $lang === 'ur' ? $ur : $en;
+        $max = [1 => 5, 2 => 10, 3 => 12, 4 => 15, 5 => 20][$level];
+        $n = random_int($level === 1 ? 1 : 0, $max);
+        $toWord = random_int(0, 1) === 1;
+        if ($toWord) {
+            [$options, $answer] = $this->pick($words[$n], array_slice($words, 0, $max + 1), $choices);
+            $shown = (string) $n;
+            $prompt = ['en' => 'Find the name of this number', 'ur' => 'اس عدد کا نام ڈھونڈو'];
+        } else {
+            [$options, $answer] = $this->numbers($n, $max, $choices);
+            $shown = $words[$n];
+            $prompt = ['en' => 'Find the number', 'ur' => 'عدد ڈھونڈو'];
+        }
+
+        return ['prompt' => $prompt, 'lang' => $lang, 'expression' => $shown, 'options' => $options, 'answer_index' => $answer];
     }
 }

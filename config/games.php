@@ -55,6 +55,17 @@ return [
         'read_clock' => ['category' => 'math', 'age' => [7, 10], 'title' => ['en' => 'What time is it?', 'ur' => 'کیا وقت ہوا ہے؟'], 'about' => 'Read the clock face.', 'needs_items' => false, 'for' => ['standard']],
         'scramble' => ['category' => 'language', 'age' => [7, 10], 'title' => ['en' => 'Word puzzle', 'ur' => 'لفظوں کی پہیلی'], 'about' => 'The letters are jumbled. Put them in order.', 'needs_items' => false, 'for' => ['standard']],
         'hangman' => ['category' => 'language', 'age' => [7, 10], 'title' => ['en' => 'Guess the word', 'ur' => 'لفظ بوجھو'], 'about' => 'Guess the secret word one letter at a time.', 'needs_items' => false, 'for' => ['standard']],
+        // Discover quizzes: free to play (no play minutes needed). The facts come from config/learn.php, chosen by the child's age.
+        'science_animals' => ['category' => 'science', 'free' => true, 'topic' => 'animals', 'age' => [3, 10], 'title' => ['en' => 'Animal quiz', 'ur' => 'جانوروں کا کوئز'], 'about' => 'Animals and where they live.', 'needs_items' => false, 'for' => ['standard', 'special']],
+        'science_ocean' => ['category' => 'science', 'free' => true, 'topic' => 'ocean', 'age' => [3, 10], 'title' => ['en' => 'Under the sea quiz', 'ur' => 'سمندر کا کوئز'], 'about' => 'Sea animals and the deep ocean.', 'needs_items' => false, 'for' => ['standard', 'special']],
+        'science_space' => ['category' => 'science', 'free' => true, 'topic' => 'space', 'age' => [3, 10], 'title' => ['en' => 'Space quiz', 'ur' => 'خلا کا کوئز'], 'about' => 'The Sun, Moon, planets and galaxies.', 'needs_items' => false, 'for' => ['standard', 'special']],
+        'science_chemistry' => ['category' => 'science', 'free' => true, 'topic' => 'chemistry', 'age' => [3, 10], 'title' => ['en' => 'Matter quiz', 'ur' => 'مادے کا کوئز'], 'about' => 'Solids, liquids, gases and what things are made of.', 'needs_items' => false, 'for' => ['standard', 'special']],
+        'science_ai' => ['category' => 'science', 'free' => true, 'topic' => 'ai', 'age' => [3, 10], 'title' => ['en' => 'AI quiz', 'ur' => 'اے آئی کوئز'], 'about' => 'What AI is and how to use it safely.', 'needs_items' => false, 'for' => ['standard', 'special']],
+        // Tables and matching
+        'table_row' => ['category' => 'math', 'age' => [6, 10], 'title' => ['en' => 'Complete the table', 'ur' => 'پہاڑا مکمل کرو'], 'about' => 'Fill the gap in a times-table row: 3, 6, ?, 12.', 'needs_items' => false, 'for' => ['standard']],
+        'division_facts' => ['category' => 'math', 'age' => [8, 10], 'title' => ['en' => 'Sharing sums', 'ur' => 'تقسیم'], 'about' => 'Share equally: 12 ÷ 3 = ?', 'needs_items' => false, 'for' => ['standard']],
+        'case_match' => ['category' => 'language', 'age' => [4, 7], 'title' => ['en' => 'Big and small letters', 'ur' => 'بڑے اور چھوٹے حروف'], 'about' => 'Match the capital letter with its small letter.', 'needs_items' => false, 'for' => ['standard', 'special']],
+        'number_word' => ['category' => 'math', 'age' => [5, 8], 'title' => ['en' => 'Number words', 'ur' => 'عدد کے نام'], 'about' => 'Match the number with its name: 7 and seven.', 'needs_items' => false, 'for' => ['standard']],
         'times_table' => ['category' => 'math', 'age' => [8, 10], 'title' => ['en' => 'Times tables', 'ur' => 'پہاڑے'], 'about' => 'Multiply with pictures of groups.', 'needs_items' => false, 'for' => ['standard']],
     ],
     'min_library_items' => 4,           // sound games need at least this many animals with a picture and a sound
@@ -102,6 +113,10 @@ return [
         'penguin' => [null, 'penguin'], 'dolphin' => [null, 'dolphin'], 'elephant' => ['ہاتھی', 'elephant'], 'egg' => ['انڈا', 'egg'], 'hat' => ['ٹوپی', 'hat'],
         'bag' => ['بستہ', 'bag'], 'shoe' => ['جوتا', 'shoe'], 'key' => ['چابی', 'key'], 'bell' => ['گھنٹی', 'bell'], 'pen' => ['قلم', 'pen'],
         'cup' => ['پیالہ', 'cup'],
+        'ice' => [null, 'ice'], 'juice' => [null, 'juice'], 'nose' => [null, 'nose'], 'queen' => [null, 'queen'], 'umbrella' => [null, 'umbrella'], 'van' => [null, 'van'],
+        'xylophone' => [null, 'xylophone'], 'yoyo' => [null, 'yoyo'], 'zebra' => [null, 'zebra'], 'owl' => ['الو', 'owl'], 'duck' => ['بطخ', 'duck'], 'butterfly' => ['تتلی', 'butterfly'],
+        'soap' => ['صابن', 'soap'], 'parrot' => ['طوطا', 'parrot'], 'glasses' => ['عینک', 'glasses'], 'balloon' => ['غبارہ', 'balloon'], 'lemon' => ['لیموں', 'lemon'], 'whale' => ['وہیل', 'whale'],
+        'pear' => ['ناشپاتی', 'pear'], 'ear' => ['کان', 'ear'], 'hand' => ['ہاتھ', 'hand'], 'ant' => ['چیونٹی', 'ant'], 'sock' => ['جراب', 'sock'], 'jar' => [null, 'jar'],
     ],
 
     'colors' => [

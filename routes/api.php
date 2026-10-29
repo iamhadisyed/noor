@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\GuidanceController;
+use App\Http\Controllers\Api\LearnController;
 use App\Http\Controllers\Api\ScreenTimeController;
 use App\Http\Controllers\Api\UpgradeController;
 use App\Http\Controllers\Api\ActivityLogController;
@@ -138,6 +139,8 @@ Route::prefix('v1')->group(function () {
         Route::delete('children/{child}', [ChildController::class, 'destroy']);
 
         Route::get('meta', [LessonController::class, 'meta']);
+        Route::get('learn', [LearnController::class, 'index']);
+        Route::get('learn/{topic}', [LearnController::class, 'show']);
         Route::get('guidance', [GuidanceController::class, 'index']);
         Route::get('guidance/{guide}', [GuidanceController::class, 'show']);
         Route::get('task-types', [LessonController::class, 'taskTypes']);

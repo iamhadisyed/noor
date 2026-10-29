@@ -81,7 +81,7 @@ class GameController extends Controller
             'games' => collect(config('games.games'))->map(fn ($g, $k) => [
                 'game' => $k, 'category' => $g['category'], 'title' => $g['title'], 'for' => $g['for'] ?? ['standard', 'special'], 'age' => $g['age'] ?? [3, 10],
                 'enabled' => $enabled === null || in_array($k, $enabled, true), 'available' => $this->available($k, $n),
-                'unlocked' => $s['enabled'] && $balance >= 1 && ($enabled === null || in_array($k, $enabled, true)) && $this->available($k, $n),
+                'unlocked' => $s['enabled'] && ($balance >= 1 || ($g['free'] ?? false)) && ($enabled === null || in_array($k, $enabled, true)) && $this->available($k, $n),
                 'level' => $progress[$k]->level ?? 1, 'plays' => $progress[$k]->plays ?? 0, 'last_accuracy' => $progress[$k]->last_accuracy ?? null,
             ])->values()->all(),
             'ledger' => $child->rewardLedger()->orderByDesc('id')->limit(30)->get()->map(fn ($r) => ['id' => $r->id, 'minutes' => $r->minutes, 'reason' => $r->reason, 'note' => $r->note, 'created_at' => $r->created_at])->all(),
@@ -151,20 +151,21 @@ class GameController extends Controller
         if (! $this->available($game, count($animals))) {
             return response()->json(['message' => 'This game is not ready yet: it needs more animal pictures and sounds.', 'locked' => true, 'reason' => 'no_content'], 423);
         }
+        $free = (bool) ($meta['free'] ?? false);   // Discover quizzes cost no play minutes
         $balance = $this->rewards->balance($child);
-        if ($balance < 1) {
+        if ($balance < 1 && ! $free) {
             return response()->json(['message' => 'No play time yet. Practise to earn some.', 'locked' => true, 'reason' => 'no_minutes', 'balance_minutes' => 0, 'how_to_earn' => $this->howToEarn($s)], 423);
         }
 
         // An abandoned game that never reported leaves nothing owed: only a finished game spends minutes.
         $level = GameProgress::where('child_id', $child->id)->where('game', $game)->value('level') ?? 1;
         $choices = min(4, max(2, (int) (($child->support_profile['max_choices'] ?? ($child->track === 'special' ? ChildController::SUPPORT_SPECIAL : ChildController::SUPPORT_STANDARD)['max_choices']))));
-        $allowed = min($balance, (int) $s['max_session_minutes']) * 60;
+        $allowed = $free ? (int) $s['max_session_minutes'] * 60 : min($balance, (int) $s['max_session_minutes']) * 60;
         $session = GameSession::create(['child_id' => $child->id, 'game' => $game, 'level' => $level, 'allowed_seconds' => $allowed]);
 
         return response()->json([
             'session_id' => $session->id, 'game' => $game, 'level' => $level, 'allowed_seconds' => $allowed, 'balance_minutes' => $balance,
-            'rounds' => $this->engine->rounds($game, $level, (int) ($data['rounds'] ?? config('games.rounds_default')), $choices, $animals, $data['language'] ?? 'en'),
+            'rounds' => $this->engine->rounds($game, $level, (int) ($data['rounds'] ?? config('games.rounds_default')), $choices, $animals, $data['language'] ?? 'en', $child->date_of_birth ? max(3, min(10, (int) $child->date_of_birth->diffInYears(now()))) : 6),
         ], 201);
     }
 
@@ -177,7 +178,7 @@ class GameController extends Controller
 
         if ($session->status === 'open') {
             $seconds = min($data['seconds_played'], $session->allowed_seconds);
-            $minutes = $this->rewards->spend($child, (int) ceil($seconds / 60), $session->id);
+            $minutes = (config("games.games.{$session->game}.free") ?? false) ? 0 : $this->rewards->spend($child, (int) ceil($seconds / 60), $session->id);
             $session->update(['status' => 'finished', 'rounds_played' => $data['rounds_played'], 'correct' => $data['correct'], 'seconds_played' => $seconds, 'minutes_spent' => $minutes, 'finished_at' => now()]);
             $this->progress($child, $session);
         }
