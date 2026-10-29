@@ -1,1 +1,70 @@
-[{"wait":2500,"shot":"01-home"},{"tap":"Lessons","wait":800,"shot":"02-lessons"},{"tap":"Week 1: letters and numbers","wait":3500,"shot":"03-lesson-editor"},{"tap":"Spell bed","wait":2500,"shot":"04-task-form"},{"tap":"Save","wait":1500},{"tap":"Back"},{"tap":"Alerts","wait":1200,"shot":"05-alerts"},{"tap":"Reports","wait":2500,"shot":"06-reports"},{"tap":"More","wait":800,"shot":"07-more"},{"tap":"Picture and family cards","wait":3500,"shot":"08-picture-cards"},{"tap":"Family","wait":3000,"shot":"09-family-cards"}]
+[
+ {
+  "wait": 2500,
+  "shot": "01-home"
+ },
+ {
+  "tap": "Lessons",
+  "wait": 800,
+  "shot": "02-lessons"
+ },
+ {
+  "tap": "Week 1: letters and numbers",
+  "wait": 3500,
+  "shot": "03-lesson-editor"
+ },
+ {
+  "tap": "Spell bed",
+  "wait": 2500,
+  "shot": "04-task-form"
+ },
+ {
+  "tap": "Save",
+  "wait": 1500
+ },
+ {
+  "tap": "Back"
+ },
+ {
+  "click": [
+   195,
+   812
+  ],
+  "wait": 1200,
+  "shot": "05-alerts"
+ },
+ {
+  "tap": "Reports",
+  "wait": 2500,
+  "shot": "06-reports"
+ },
+ {
+  "tap": "More",
+  "wait": 800,
+  "shot": "07-more"
+ },
+ {
+  "tap": "Picture and family cards",
+  "wait": 3500,
+  "shot": "08-picture-cards"
+ },
+ {
+  "tap": "Family",
+  "wait": 3000,
+  "shot": "09-family-cards"
+ },
+ {
+  "tap": "Back",
+  "wait": 800
+ },
+ {
+  "tap": "Autism guide for parents",
+  "wait": 2500,
+  "shot": "10-autism-guide"
+ },
+ {
+  "tap": "Health checks doctors often ask about",
+  "wait": 900,
+  "shot": "11-autism-guide-health-checks"
+ }
+]

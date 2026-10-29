@@ -5,6 +5,7 @@
 // A child on a "no timers" profile taps to move to the next step instead of watching a clock; `seconds` is then only a gentle guide.
 return [
     'breathing_bubble' => [
+        'emoji' => '🫧', 'age' => [3, 10],
         'kind' => 'breathing', 'for' => ['special', 'standard'],
         'title' => ['en' => 'Breathe with the bubble', 'ur' => 'بلبلے کے ساتھ سانس لو'],
         'about' => ['en' => 'A bubble grows as you breathe in and shrinks as you breathe out.', 'ur' => 'سانس اندر لینے پر بلبلہ بڑا ہوتا ہے اور باہر نکالنے پر چھوٹا۔'],
@@ -16,6 +17,7 @@ return [
         ],
     ],
     'five_senses' => [
+        'emoji' => '👀', 'age' => [4, 10],
         'kind' => 'grounding', 'for' => ['special', 'standard'],
         'title' => ['en' => 'Look, touch, listen', 'ur' => 'دیکھو، چھوؤ، سنو'],
         'about' => ['en' => 'Notice things around you, one sense at a time.', 'ur' => 'ایک ایک حس سے اپنے آس پاس کی چیزوں پر دھیان دو۔'],
@@ -29,6 +31,7 @@ return [
         ],
     ],
     'squeeze_release' => [
+        'emoji' => '💪', 'age' => [3, 10],
         'kind' => 'relax', 'for' => ['special', 'standard'],
         'title' => ['en' => 'Squeeze and let go', 'ur' => 'دباؤ اور چھوڑ دو'],
         'about' => ['en' => 'Squeeze each part of your body tight, then let it go soft.', 'ur' => 'جسم کے ہر حصے کو زور سے دباؤ، پھر ڈھیلا چھوڑ دو۔'],
@@ -43,6 +46,7 @@ return [
         ],
     ],
     'slow_count' => [
+        'emoji' => '🔢', 'age' => [3, 8],
         'kind' => 'counting', 'for' => ['special', 'standard'],
         'title' => ['en' => 'Count slowly to ten', 'ur' => 'آہستہ آہستہ دس تک گنو'],
         'about' => ['en' => 'One number at a time, nice and slow.', 'ur' => 'ایک ایک عدد، آرام آرام سے۔'],
@@ -50,6 +54,7 @@ return [
         'steps' => array_map(fn ($n) => ['cue' => 'do', 'seconds' => 2, 'text' => ['en' => (string) $n, 'ur' => (string) $n]], range(1, 10)),
     ],
     'movement_break' => [
+        'emoji' => '🤸', 'age' => [3, 10],
         'kind' => 'movement', 'for' => ['special', 'standard'],
         'title' => ['en' => 'Move your body', 'ur' => 'جسم ہلاؤ'],
         'about' => ['en' => 'A short break to stretch and wiggle.', 'ur' => 'کھینچنے اور ہلنے کا ایک مختصر وقفہ۔'],
@@ -60,6 +65,84 @@ return [
             ['cue' => 'do', 'seconds' => 8, 'text' => ['en' => 'Stomp your feet like an elephant', 'ur' => 'ہاتھی کی طرح پاؤں پٹخو']],
             ['cue' => 'do', 'seconds' => 8, 'text' => ['en' => 'Shake your hands like a wet puppy', 'ur' => 'گیلے پلے کی طرح ہاتھ جھٹکو']],
             ['cue' => 'rest', 'seconds' => 6, 'text' => ['en' => 'Stand still and breathe', 'ur' => 'خاموش کھڑے ہو کر سانس لو']],
+        ],
+    ],
+    'balloon_belly' => [
+        'emoji' => '🎈', 'age' => [3, 7],
+        'kind' => 'breathing', 'for' => ['special', 'standard'],
+        'title' => ['en' => 'Blow up a belly balloon', 'ur' => 'پیٹ کا غبارہ پھلاؤ'],
+        'about' => ['en' => 'Put a hand on your tummy. It grows like a balloon, then goes soft.', 'ur' => 'ہاتھ پیٹ پر رکھو۔ وہ غبارے کی طرح پھولتا ہے، پھر نرم ہو جاتا ہے۔'],
+        'cycles' => 5,
+        'steps' => [
+            ['cue' => 'in', 'seconds' => 4, 'text' => ['en' => 'Fill your tummy balloon', 'ur' => 'پیٹ کا غبارہ بھرو']],
+            ['cue' => 'hold', 'seconds' => 1, 'text' => ['en' => 'Hold it', 'ur' => 'روکو']],
+            ['cue' => 'out', 'seconds' => 5, 'text' => ['en' => 'Let the air out slowly', 'ur' => 'ہوا آہستہ نکالو']],
+        ],
+    ],
+    'bubble_blowing' => [
+        'emoji' => '🌈', 'age' => [3, 8],
+        'kind' => 'breathing', 'for' => ['special', 'standard'],
+        'title' => ['en' => 'Blow a rainbow bubble', 'ur' => 'قوس قزح کا بلبلہ پھونکو'],
+        'about' => ['en' => 'Smell the flower, then blow a long, slow bubble.', 'ur' => 'پھول سونگھو، پھر لمبا آہستہ بلبلہ پھونکو۔'],
+        'cycles' => 6,
+        'steps' => [
+            ['cue' => 'in', 'seconds' => 3, 'text' => ['en' => 'Smell the flower', 'ur' => 'پھول سونگھو']],
+            ['cue' => 'out', 'seconds' => 6, 'text' => ['en' => 'Blow a big, slow bubble', 'ur' => 'بڑا آہستہ بلبلہ پھونکو']],
+        ],
+    ],
+    'animal_stretch' => [
+        'emoji' => '🐱', 'age' => [3, 8],
+        'kind' => 'movement', 'for' => ['special', 'standard'],
+        'title' => ['en' => 'Animal stretches', 'ur' => 'جانوروں کی طرح کھنچاؤ'],
+        'about' => ['en' => 'Stretch and move like your favourite animals.', 'ur' => 'اپنے پسندیدہ جانوروں کی طرح کھنچو اور ہلو۔'],
+        'cycles' => 1,
+        'steps' => [
+            ['cue' => 'do', 'seconds' => 8, 'text' => ['en' => 'Arch your back like a cat', 'ur' => 'بلی کی طرح کمر اوپر اٹھاؤ']],
+            ['cue' => 'do', 'seconds' => 8, 'text' => ['en' => 'Hop like a frog', 'ur' => 'مینڈک کی طرح اچھلو']],
+            ['cue' => 'do', 'seconds' => 8, 'text' => ['en' => 'Stretch your wings like a bird', 'ur' => 'پرندے کی طرح پر پھیلاؤ']],
+            ['cue' => 'do', 'seconds' => 8, 'text' => ['en' => 'Walk slowly like a turtle', 'ur' => 'کچھوے کی طرح آہستہ چلو']],
+            ['cue' => 'rest', 'seconds' => 6, 'text' => ['en' => 'Curl up small and breathe', 'ur' => 'چھوٹے ہو کر سانس لو']],
+        ],
+    ],
+    'slow_simon' => [
+        'emoji' => '🧍', 'age' => [4, 10],
+        'kind' => 'movement', 'for' => ['special', 'standard'],
+        'title' => ['en' => 'Slow Simon says', 'ur' => 'آہستہ سائمن کہتا ہے'],
+        'about' => ['en' => 'Copy each move, nice and slow.', 'ur' => 'ہر حرکت آہستہ آہستہ دہراؤ۔'],
+        'cycles' => 1,
+        'steps' => [
+            ['cue' => 'do', 'seconds' => 6, 'text' => ['en' => 'Touch your nose', 'ur' => 'ناک کو چھوؤ']],
+            ['cue' => 'do', 'seconds' => 6, 'text' => ['en' => 'Clap three times', 'ur' => 'تین بار تالی بجاؤ']],
+            ['cue' => 'do', 'seconds' => 6, 'text' => ['en' => 'Wave with both hands', 'ur' => 'دونوں ہاتھ ہلاؤ']],
+            ['cue' => 'do', 'seconds' => 6, 'text' => ['en' => 'Stand on one foot', 'ur' => 'ایک پاؤں پر کھڑے ہو']],
+            ['cue' => 'rest', 'seconds' => 5, 'text' => ['en' => 'Sit down and smile', 'ur' => 'بیٹھ جاؤ اور مسکراؤ']],
+        ],
+    ],
+    'body_scan' => [
+        'emoji' => '🌙', 'age' => [6, 10],
+        'kind' => 'relax', 'for' => ['standard', 'special'],
+        'title' => ['en' => 'Sleepy body scan', 'ur' => 'نیند بھرا جسم'],
+        'about' => ['en' => 'Let each part of your body get heavy and soft.', 'ur' => 'جسم کے ہر حصے کو بھاری اور نرم ہونے دو۔'],
+        'cycles' => 1,
+        'steps' => [
+            ['cue' => 'rest', 'seconds' => 8, 'text' => ['en' => 'Feel your feet. Let them go heavy', 'ur' => 'اپنے پاؤں محسوس کرو۔ انہیں بھاری ہونے دو']],
+            ['cue' => 'rest', 'seconds' => 8, 'text' => ['en' => 'Feel your legs. Soft and still', 'ur' => 'ٹانگیں محسوس کرو۔ نرم اور ساکن']],
+            ['cue' => 'rest', 'seconds' => 8, 'text' => ['en' => 'Feel your tummy rise and fall', 'ur' => 'پیٹ کا اٹھنا اور بیٹھنا محسوس کرو']],
+            ['cue' => 'rest', 'seconds' => 8, 'text' => ['en' => 'Feel your arms and hands. Loose and warm', 'ur' => 'بازو اور ہاتھ محسوس کرو۔ ڈھیلے اور گرم']],
+            ['cue' => 'rest', 'seconds' => 8, 'text' => ['en' => 'Relax your face and your jaw', 'ur' => 'چہرہ اور جبڑا ڈھیلا چھوڑ دو']],
+        ],
+    ],
+    'good_things' => [
+        'emoji' => '🌟', 'age' => [6, 10],
+        'kind' => 'grounding', 'for' => ['standard', 'special'],
+        'title' => ['en' => 'Three good things', 'ur' => 'تین اچھی باتیں'],
+        'about' => ['en' => 'Think of three things that made today good.', 'ur' => 'تین چیزیں سوچو جنہوں نے آج کا دن اچھا بنایا۔'],
+        'cycles' => 1,
+        'steps' => [
+            ['cue' => 'do', 'seconds' => 10, 'text' => ['en' => 'Think of someone who was kind to you', 'ur' => 'کسی ایسے کو سوچو جو تم سے مہربان تھا']],
+            ['cue' => 'do', 'seconds' => 10, 'text' => ['en' => 'Think of something that made you laugh', 'ur' => 'کوئی بات سوچو جس نے تمہیں ہنسایا']],
+            ['cue' => 'do', 'seconds' => 10, 'text' => ['en' => 'Think of something you are good at', 'ur' => 'کوئی چیز سوچو جو تم اچھی کرتے ہو']],
+            ['cue' => 'rest', 'seconds' => 6, 'text' => ['en' => 'Smile and take one slow breath', 'ur' => 'مسکراؤ اور ایک لمبی سانس لو']],
         ],
     ],
 ];

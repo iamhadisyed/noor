@@ -166,7 +166,7 @@ void main() {
   test('every game can be started, played with the runner and finished', () async {
     await api.addBonusMinutes(child.id, 60);
     final games = await api.games(child.id);
-    expect(games.length, greaterThanOrEqualTo(19));
+    expect(games.length, greaterThanOrEqualTo(30));
     var played = 0;
     for (final info in games.where((g) => g.available)) {
       final start = await api.startGame(child.id, info.game, rounds: 5, language: 'en');
@@ -175,7 +175,7 @@ void main() {
         switch (run.kind) {
           case RoundKind.choice:
             run.answerChoice((run.current['answer_index'] as num).toInt());
-          case RoundKind.spell:
+          case RoundKind.spell || RoundKind.scramble || RoundKind.guess:
             run.answerSpelling('${run.current['target']}');
           case RoundKind.order:
             run.answerOrder((run.current['answer_order'] as List).map((e) => '$e').toList());
@@ -190,7 +190,7 @@ void main() {
       expect(done['accuracy'], 100);
       played++;
     }
-    expect(played, greaterThanOrEqualTo(17), reason: 'the two animal sound games need an administrator to add pictures and sounds first');
+    expect(played, greaterThanOrEqualTo(28), reason: 'the two animal sound games need an administrator to add pictures and sounds first');
   });
 
   test('a locked game says why', () async {
@@ -205,7 +205,8 @@ void main() {
 
   test('calm activities are listed and counted', () async {
     final all = await api.activities();
-    expect(all.map((a) => a.activity), contains('breathing_bubble'));
+    expect(all.map((a) => a.activity), containsAll(['breathing_bubble', 'balloon_belly', 'good_things']));
+    expect(all.every((a) => a.emoji.isNotEmpty), isTrue);
     expect(all.every((a) => a.steps.isNotEmpty && a.steps.every((s) => s.text.ur.isNotEmpty)), isTrue);
     await api.calmDone(child.id, 'breathing_bubble', seconds: 60);
     final s = await api.insightsSummary(child.id);

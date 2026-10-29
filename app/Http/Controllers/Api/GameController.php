@@ -44,7 +44,7 @@ class GameController extends Controller
     {
         $n = count($this->animals());
 
-        return response()->json(['games' => collect(config('games.games'))->map(fn ($g, $k) => ['game' => $k, 'category' => $g['category'], 'title' => $g['title'], 'for' => $g['for'] ?? ['standard', 'special'], 'about' => $g['about'], 'available' => $this->available($k, $n)])->values()->all(), 'max_level' => config('games.max_level')]);
+        return response()->json(['games' => collect(config('games.games'))->map(fn ($g, $k) => ['game' => $k, 'category' => $g['category'], 'title' => $g['title'], 'for' => $g['for'] ?? ['standard', 'special'], 'age' => $g['age'] ?? [3, 10], 'about' => $g['about'], 'available' => $this->available($k, $n)])->values()->all(), 'max_level' => config('games.max_level')]);
     }
 
     /** What the app needs to draw the games: the icon names and the animal pictures and sounds. */
@@ -79,7 +79,7 @@ class GameController extends Controller
             'streak_days' => $this->rewards->streakDays($child),
             'how_to_earn' => $this->howToEarn($s),
             'games' => collect(config('games.games'))->map(fn ($g, $k) => [
-                'game' => $k, 'category' => $g['category'], 'title' => $g['title'], 'for' => $g['for'] ?? ['standard', 'special'],
+                'game' => $k, 'category' => $g['category'], 'title' => $g['title'], 'for' => $g['for'] ?? ['standard', 'special'], 'age' => $g['age'] ?? [3, 10],
                 'enabled' => $enabled === null || in_array($k, $enabled, true), 'available' => $this->available($k, $n),
                 'unlocked' => $s['enabled'] && $balance >= 1 && ($enabled === null || in_array($k, $enabled, true)) && $this->available($k, $n),
                 'level' => $progress[$k]->level ?? 1, 'plays' => $progress[$k]->plays ?? 0, 'last_accuracy' => $progress[$k]->last_accuracy ?? null,

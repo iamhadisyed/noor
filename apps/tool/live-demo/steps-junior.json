@@ -164,20 +164,91 @@
   "shot": "15-games"
  },
  {
+  "scroll": 900,
+  "wait": 500
+ },
+ {
+  "wait": 300,
+  "shot": "15a-games-shelf-1"
+ },
+ {
+  "scroll": 900,
+  "wait": 500
+ },
+ {
+  "wait": 300,
+  "shot": "15a-games-shelf-2"
+ },
+ {
+  "scroll": 900,
+  "wait": 500
+ },
+ {
+  "wait": 300,
+  "shot": "15a-games-shelf-3"
+ },
+ {
+  "scroll": 900,
+  "wait": 500
+ },
+ {
+  "wait": 300,
+  "shot": "15a-games-shelf-4"
+ },
+ {
   "click": [
-   100,
-   260
+   95,
+   750
   ],
-  "wait": 3000,
-  "shot": "15b-game-round"
+  "wait": 3500,
+  "shot": "15b-word-puzzle"
  },
  {
   "tap": "Back",
-  "wait": 800
+  "wait": 900
+ },
+ {
+  "click": [
+   290,
+   750
+  ],
+  "wait": 3500
+ },
+ {
+  "click": [
+   40,
+   720
+  ]
+ },
+ {
+  "click": [
+   90,
+   720
+  ]
+ },
+ {
+  "wait": 500,
+  "shot": "15c-guess-the-word"
  },
  {
   "tap": "Back",
-  "wait": 800
+  "wait": 900
+ },
+ {
+  "click": [
+   290,
+   550
+  ],
+  "wait": 3500,
+  "shot": "15d-read-the-clock"
+ },
+ {
+  "tap": "Back",
+  "wait": 900
+ },
+ {
+  "tap": "Back",
+  "wait": 900
  },
  {
   "tap": "Calm",

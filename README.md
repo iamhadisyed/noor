@@ -42,6 +42,7 @@ Run `php artisan config:cache` in production; keys are read through `config/kind
 | GET | lesson-templates | starter lessons for the standard and special tracks |
 | GET/POST | children/{id}/lessons (+ `/from-template/{id}`) | free plan: 3 lessons per child |
 | GET | aac-cards | stock cards plus your own (`custom: true`, with signed `icon_url` / `audio_url`) |
+| GET | guidance · guidance/{guide} | parent guides, general information only (Pro; the free plan gets 402 with the section titles). `autism`: health checks doctors often ask about, food, exercise, sleep and routines, when to see a doctor soon, always with the disclaimer first and last, in English and Urdu |
 | POST/PATCH/DELETE | children/{id}/aac-cards · aac-cards/{id} | your own picture cards: multipart `english_label`, `urdu_label`, `category` (needs/food/emotions/activities), `icon`, optional `audio`; free plan 3 per child |
 | POST | children/{id}/lessons/import | Pro: multipart `photo` (+ `language`, `week_number`) → draft lesson via Groq/Gemini vision; photo is not kept; 10 per hour |
 | GET/PATCH/DELETE | lessons/{id} | DELETE archives |

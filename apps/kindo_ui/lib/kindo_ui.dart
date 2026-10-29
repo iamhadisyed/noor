@@ -18,3 +18,5 @@ export 'src/widgets/spell_board.dart';
 export 'src/widgets/trace_canvas.dart';
 export 'src/widgets/share.dart';
 export 'src/widgets/speech.dart';
+export 'src/widgets/clock_face.dart';
+export 'src/widgets/confetti.dart';

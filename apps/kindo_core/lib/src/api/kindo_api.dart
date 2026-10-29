@@ -188,5 +188,8 @@ class KindoApi {
   // ---------- keeping in step ----------
 
   /// The change feed. See `docs/SYNC.md`. Most callers use `SyncEngine` instead.
+  // ---- parent guides (Pro) ----
+  /// A parent guide such as `autism`. A 402 [ApiException] (see [ApiException.needsUpgrade]) carries a `preview` of the section titles in its body.
+  Future<Json> guidance(String guide) async => asJson(await client.get('/guidance/$guide'));
   Future<Json> sync({int? cursor}) async => asJson(await client.get('/sync', query: {'cursor': cursor}));
 }

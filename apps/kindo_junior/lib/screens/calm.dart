@@ -46,7 +46,9 @@ class _CalmHubState extends State<CalmHub> {
   Widget build(BuildContext context) {
     final s = context.watch<KindoSession>();
     final ur = s.lang == 'ur';
-    final items = _items;
+    final age = s.currentChild?.ageYears();
+    // the ones made for this child's age come first
+    final items = _items == null ? null : ([..._items!]..sort((a, b) => (a.fitsAge(age) ? 0 : 1) - (b.fitsAge(age) ? 0 : 1)));
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('Calm', 'سکون'))),
       body: items == null
@@ -59,9 +61,9 @@ class _CalmHubState extends State<CalmHub> {
                     color: const Color(0xFFCFE8DB),
                     onTap: () => goTo(context, CalmPlayer(activity: a)),
                     child: Row(children: [
-                      Icon(a.kind == 'breathing' ? Icons.air_rounded : Icons.spa_rounded, size: 44),
+                      Text(a.emoji.isEmpty ? (a.kind == 'breathing' ? '🫧' : '🌿') : a.emoji, style: const TextStyle(fontSize: 46)),
                       const SizedBox(width: 16),
-                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(ur ? a.title.ur : a.title.en, style: Theme.of(context).textTheme.titleLarge), Text(ur ? a.about.ur : a.about.en, style: Theme.of(context).textTheme.bodySmall)])),
+                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(ur ? a.title.ur : a.title.en, style: Theme.of(context).textTheme.titleLarge), Text(ur ? a.about.ur : a.about.en, style: Theme.of(context).textTheme.bodySmall), const SizedBox(height: 6), Pill(context.tr('Ages ${a.ageMin}-${a.ageMax}', 'عمر ${a.ageMin}-${a.ageMax}'), color: Colors.white.withValues(alpha: .7))])),
                     ]),
                   ),
                 ),
@@ -145,7 +147,7 @@ class _CalmPlayerState extends State<CalmPlayer> {
           height: 220,
           decoration: const BoxDecoration(color: Color(0xFFCFE8DB), shape: BoxShape.circle),
           alignment: Alignment.center,
-          child: Icon(st.cue == 'rest' ? Icons.self_improvement_rounded : Icons.accessibility_new_rounded, size: 110),
+          child: Text(_a.emoji.isNotEmpty ? _a.emoji : (st.cue == 'rest' ? '🧘' : '🤸'), style: const TextStyle(fontSize: 100)),
         ),
         const SizedBox(height: 24),
         Text(ur ? st.text.ur : st.text.en, style: Theme.of(context).textTheme.headlineMedium, textAlign: TextAlign.center),

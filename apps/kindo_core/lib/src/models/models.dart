@@ -321,7 +321,7 @@ class FamilyMember {
 
 /// A game in the catalogue, with the child's progress in it.
 class GameInfo {
-  GameInfo({required this.game, required this.category, required this.title, required this.forTracks, this.enabled = true, this.available = true, this.unlocked = false, this.level = 1, this.plays = 0, this.lastAccuracy});
+  GameInfo({required this.game, required this.category, required this.title, required this.forTracks, this.enabled = true, this.available = true, this.unlocked = false, this.level = 1, this.plays = 0, this.lastAccuracy, this.ageMin = 3, this.ageMax = 10});
   factory GameInfo.fromJson(Object? v) {
     final m = asJson(v);
     return GameInfo(
@@ -335,6 +335,8 @@ class GameInfo {
       level: _i(m['level'], 1),
       plays: _i(m['plays']),
       lastAccuracy: m['last_accuracy'] == null ? null : _i(m['last_accuracy']),
+      ageMin: (m['age'] is List && (m['age'] as List).length == 2) ? _i((m['age'] as List)[0], 3) : 3,
+      ageMax: (m['age'] is List && (m['age'] as List).length == 2) ? _i((m['age'] as List)[1], 10) : 10,
     );
   }
   final String game;
@@ -348,8 +350,18 @@ class GameInfo {
   final int plays;
   final int? lastAccuracy;
 
+  /// The ages (youngest, oldest) the game suits best. Every game still works for every child.
+  final int ageMin;
+  final int ageMax;
+
   /// True when this game was made with the given track in mind.
   bool suits(String track) => forTracks.contains(track);
+
+  /// Is a child of [age] inside the range? A null age (birthday unknown) fits everything.
+  bool fitsAge(int? age) => age == null || (age >= ageMin && age <= ageMax);
+
+  /// "Ages 3-5".
+  String get ageLabel => ageMin == ageMax ? '$ageMin' : '$ageMin-$ageMax';
 }
 
 class ActivityStep {
@@ -367,7 +379,7 @@ class ActivityStep {
 
 /// A calm or movement activity.
 class CalmActivity {
-  CalmActivity({required this.activity, required this.kind, required this.title, required this.about, required this.cycles, required this.steps});
+  CalmActivity({required this.activity, required this.kind, required this.title, required this.about, required this.cycles, required this.steps, this.emoji = '', this.ageMin = 3, this.ageMax = 10});
   factory CalmActivity.fromJson(Object? v) {
     final m = asJson(v);
     return CalmActivity(
@@ -377,6 +389,9 @@ class CalmActivity {
       about: Bilingual.fromJson(m['about']),
       cycles: _i(m['cycles'], 1),
       steps: asJsonList(m['steps']).map(ActivityStep.fromJson).toList(),
+      emoji: _s(m['emoji']),
+      ageMin: (m['age'] is List && (m['age'] as List).length == 2) ? _i((m['age'] as List)[0], 3) : 3,
+      ageMax: (m['age'] is List && (m['age'] as List).length == 2) ? _i((m['age'] as List)[1], 10) : 10,
     );
   }
   final String activity;
@@ -385,6 +400,11 @@ class CalmActivity {
   final Bilingual about;
   final int cycles;
   final List<ActivityStep> steps;
+  final String emoji;
+  final int ageMin;
+  final int ageMax;
+
+  bool fitsAge(int? age) => age == null || (age >= ageMin && age <= ageMax);
 
   /// How long one full run takes, in seconds, if followed by the clock.
   int get totalSeconds => cycles * steps.fold<int>(0, (a, s) => a + s.seconds);

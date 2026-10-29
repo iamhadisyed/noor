@@ -95,4 +95,27 @@ void main() {
     expect(a, b, reason: 'a new signature must not refetch the same picture');
     expect(a, isNot(c));
   });
+
+  group('game pictures', () {
+    testWidgets('the clock face draws at the size asked for', (t) async {
+      await t.pumpWidget(_wrap(const Center(child: ClockFace(hour: 3, minute: 15, size: 200))));
+      expect(t.getSize(find.byType(ClockFace)), const Size(200, 200));
+    });
+
+    testWidgets('confetti ends by itself and says so', (t) async {
+      var done = false;
+      await t.pumpWidget(MaterialApp(home: Scaffold(body: SizedBox.expand(child: ConfettiBurst(onDone: () => done = true)))));
+      await t.pump(const Duration(milliseconds: 300));
+      expect(done, isFalse);
+      await t.pump(const Duration(seconds: 2));
+      expect(done, isTrue);
+    });
+
+    test('every word in the games has a picture (guarded on the server too)', () {
+      expect(ArtIcon.knows('moon'), isTrue);
+      expect(ArtIcon.knows('elephant'), isTrue);
+      expect(ArtIcon.knows('apple'), isTrue);
+      expect(ArtIcon.knows('not-a-picture'), isFalse);
+    });
+  });
 }

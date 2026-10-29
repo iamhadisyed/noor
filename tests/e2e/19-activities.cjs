@@ -20,7 +20,7 @@ const { BASE, OUT, launch, login, check } = require('./lib.cjs');
 
   await page.click('nav.nav >> text=Rewards'); await page.waitForSelector('[data-game]'); await page.waitForTimeout(400);
   const games = await page.$$eval('[data-game]', (els) => els.map((e) => e.getAttribute('data-game')));
-  check('all 19 games are listed', games.length === 19, String(games.length));
+  check('all 30 games are listed', games.length === 30, String(games.length));
   const text = await page.textContent('#content');
   check('the new groups are named', ['Letters and words', 'Colours and groups', 'Feelings', 'Daily routines'].every((g) => text.includes(g)));
   check('games made with extra support in mind are marked', (await page.locator('[data-game=feelings] .chip:has-text("Extra support")').count()) === 1 && (await page.locator('[data-game=spell_picture] .chip:has-text("Extra support")').count()) === 0);

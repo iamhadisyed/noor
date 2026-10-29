@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GameController;
+use App\Http\Controllers\Api\GuidanceController;
 use App\Http\Controllers\Api\GameLibraryController;
 use App\Http\Controllers\Api\HouseholdController;
 use App\Http\Controllers\Api\InsightsController;
@@ -127,6 +128,8 @@ Route::prefix('v1')->group(function () {
         Route::delete('children/{child}', [ChildController::class, 'destroy']);
 
         Route::get('meta', [LessonController::class, 'meta']);
+        Route::get('guidance', [GuidanceController::class, 'index']);
+        Route::get('guidance/{guide}', [GuidanceController::class, 'show']);
         Route::get('task-types', [LessonController::class, 'taskTypes']);
         Route::get('lesson-templates', [LessonController::class, 'templates']);
         Route::get('children/{child}/lessons', [LessonController::class, 'index']);

@@ -39,6 +39,7 @@ const [,, app, port, token, outDir] = process.argv;
   for (const s of steps) {
     try {
       if (s.tap) await tap(s.tap, s);
+      if (s.scroll) { await page.mouse.move(195, 500); await page.mouse.wheel(0, s.scroll); await page.waitForTimeout(600); }
       if (s.click) await page.mouse.click(s.click[0], s.click[1]);
       if (s.draw) { // canvas strokes in CSS pixels: [[x,y],...] per stroke
         for (const stroke of s.draw) {
