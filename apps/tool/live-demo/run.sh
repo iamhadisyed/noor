@@ -31,7 +31,7 @@ for _ in $(seq 1 40); do curl -s -o /dev/null "http://127.0.0.1:$API/api/v1/meta
 
 pin_token() { curl -s -X POST "http://127.0.0.1:$API/api/v1/auth/pin" -H 'Accept: application/json' -H 'Content-Type: application/json' -d "{\"email\":\"$1\",\"pin\":\"$2\"}" | python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])'; }
 export NODE_PATH="${NODE_PATH:-$(npm root -g)}"
-OUT="$ROOT/demo/apps-live"; mkdir -p "$OUT/parent" "$OUT/junior" "$OUT/cool-time"
+OUT="$ROOT/demo/apps-live"; mkdir -p "$OUT/parent" "$OUT/junior" "$OUT/cool-time"; rm -f "$OUT"/parent/*.png "$OUT"/junior/*.png "$OUT"/cool-time/*.png
 
 # the whole contract, against this server (needs dart)
 (cd apps/kindo_core && KINDO_BASE=http://127.0.0.1:$API/api/v1 KINDO_LOG="$ROOT/storage/logs/laravel.log" dart test -t live 2>&1 | tail -3) || true
@@ -43,7 +43,7 @@ STEPS="$HERE/steps-parent.json" node "$HERE/shots.cjs" parent $PARENT "$PARENT_T
 STEPS="$HERE/steps-junior.json" node "$HERE/shots.cjs" junior $JUNIOR "$CHILD_TOKEN" "$OUT/junior"
 
 # cool time: the parent turns on quiet hours for the whole day (through the real screen time API); the child's app then shows the calm screen
-AYAN="$(curl -s "http://127.0.0.1:$API/api/v1/children" -H "Authorization: Bearer $PARENT_TOKEN" -H 'Accept: application/json' | python3 -c 'import sys,json;d=json.load(sys.stdin);d=d.get("data",d);print([c["id"] for c in d if c["name"]=="Ayan"][0])')"
+AYAN="$(curl -s "http://127.0.0.1:$API/api/v1/children" -H "Authorization: Bearer $PARENT_TOKEN" -H 'Accept: application/json' | python3 -c 'import sys,json;d=json.load(sys.stdin);d=d["data"] if isinstance(d,dict) else d;print([c["id"] for c in d if c["name"]=="Ayan"][0])')"
 curl -s -X PATCH "http://127.0.0.1:$API/api/v1/children/$AYAN/screen-time" -H "Authorization: Bearer $PARENT_TOKEN" -H 'Accept: application/json' -H 'Content-Type: application/json' -d '{"enabled":true,"daily_minutes":60,"quiet_start":"00:00","quiet_end":"23:59"}' >/dev/null
 STEPS="$HERE/steps-cool.json" node "$HERE/shots.cjs" junior $JUNIOR "$PARENT_TOKEN" "$OUT/cool-time"
 rm -f "$OUT"/*/failed-*.png

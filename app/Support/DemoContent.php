@@ -33,7 +33,7 @@ class DemoContent
     {
         foreach ($kids as $i => $k) {
             $child = Child::create(['user_id' => $user->id, 'name' => $k['name'], 'date_of_birth' => $k['born'], 'neurotype' => $k['neurotype'], 'track' => $k['track'], 'sensory_mode' => $k['track'] === 'special',
-                'screen_time' => $i === 0 ? ['enabled' => true, 'daily_minutes' => 60, 'quiet_start' => '20:00', 'quiet_end' => '07:00'] : null]);
+                'screen_time' => $i === 0 ? ['enabled' => true, 'daily_minutes' => 120, 'quiet_start' => null, 'quiet_end' => null] : null]);   // no quiet hours here: a demo opened at night must not start in sleepy time
             $this->lessons($user, $child);
             $this->cards($child);
             $this->history($child, $i);

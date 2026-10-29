@@ -1,11 +1,11 @@
 [
  {
-  "wait": 3000,
-  "shot": "01-pick-child"
+  "wait": 3500,
+  "shot": "01-cool-time-quiet-hours"
  },
  {
-  "tap": "Ayan",
-  "wait": 3500,
-  "shot": "02-cool-time"
+  "tap": "I need",
+  "wait": 2500,
+  "shot": "02-needs-still-open"
  }
 ]
