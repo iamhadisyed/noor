@@ -5,7 +5,7 @@ import { state } from '../main.js';
 
 /** Super admin console. Everything here is aggregate or operational; no child names, pictures or voices. */
 export async function render(ctx, params, query, name) {
-  const view = { overview, usage, quality, content, games, announcements, vouchers, alerts, ai, accounts, audit, health }[name] || overview;
+  const view = { overview, usage, quality, content, games, announcements, vouchers, upgrades, alerts, ai, accounts, audit, health }[name] || overview;
   const page = h('div', { class: 'page' }, spinner());
   const out = await view(ctx, page);
   return out || page;
@@ -287,6 +287,36 @@ function givePro(u) {
         try { await api(`/admin/users/${u.id}/grant`, { method: 'POST', body: { days: +days.value, note: note.value.trim() || null } }); close(); toast('Pro time added.'); } catch (e) { err.textContent = errorText(e); }
       } }, 'Give Pro')));
   });
+}
+
+/* ---------- Pro requests: a parent asks, pays, tells us; the owner checks the payment and approves ---------- */
+async function upgrades(ctx, page) {
+  let filter = 'open';
+  const STATUS = { requested: ['Asked, not paid yet', 'chip'], paid_reported: ['Says they have paid', 'chip ink'], approved: ['Approved', 'chip'], rejected: ['Declined', 'chip'] };
+  const draw = async () => {
+    const r = await api(`/admin/upgrades?status=${filter === 'all' ? '' : 'open'}`);
+    const act = (u, approve) => modal((box, close) => {
+      const days = h('input', { class: 'input', type: 'number', id: 'up-days', min: '1', max: '3660', value: r.default_days }), note = h('input', { class: 'input', id: 'up-note', maxlength: '500', placeholder: approve ? 'Optional note' : 'Why (the parent sees this)' });
+      const err = h('div', { class: 'msg-err', role: 'alert' });
+      box.append(h('h2', null, approve ? `Make ${u.user.email} Pro` : `Decline ${u.user.email}`),
+        u.payment_method ? h('p', null, `They paid by ${u.payment_method}, reference ${u.payment_reference}.${u.payment_note ? ' ' + u.payment_note : ''}`) : h('p', { class: 'muted' }, 'They have not said they paid yet.'),
+        approve ? h('div', { class: 'field' }, h('label', { for: 'up-days' }, 'Days of Pro'), days) : null, h('div', { class: 'field' }, h('label', { for: 'up-note' }, 'Note'), note), err,
+        h('div', { class: 'actions' }, h('button', { class: 'btn soft', onclick: close }, 'Cancel'),
+          h('button', { class: `btn ${approve ? 'primary' : 'danger'}`, 'data-act': approve ? 'approve-upgrade' : 'reject-upgrade', onclick: async () => {
+            try { await api(`/admin/upgrades/${u.id}/${approve ? 'approve' : 'reject'}`, { method: 'POST', body: approve ? { days: +days.value, admin_note: note.value.trim() || null } : { admin_note: note.value.trim() } }); toast(approve ? 'Account is now Pro. They were emailed.' : 'Declined.'); close(); draw(); }
+            catch (e) { err.textContent = errorText(e); }
+          } }, approve ? 'Make Pro' : 'Decline')));
+    });
+    page.replaceChildren(head('Pro requests', 'Parents who tapped "Make me Pro". We emailed them how to pay. When they say they have paid, check your account, then approve.', seg(filter, [['open', `Open (${r.open})`], ['all', 'All']], (v) => { filter = v; draw(); })),
+      h('section', { class: 'card', 'data-card': 'upgrades' }, r.data.length ? h('div', { class: 'table-wrap' }, h('table', { class: 'table' }, h('thead', null, h('tr', null, ['Parent', 'Phone', 'Status', 'Payment', 'Asked', ''].map((x) => h('th', null, x)))),
+        h('tbody', null, r.data.map((u) => h('tr', { 'data-upgrade': u.id },
+          h('td', null, h('b', null, u.user.name || '—'), h('div', { class: 'muted' }, u.user.email)), h('td', null, u.phone || '—'),
+          h('td', null, h('span', { class: STATUS[u.status][1] }, STATUS[u.status][0])),
+          h('td', null, u.payment_method ? `${u.payment_method}: ${u.payment_reference}` : '—'), h('td', null, fmt.date(u.requested_at)),
+          h('td', null, ['requested', 'paid_reported'].includes(u.status) ? h('div', { class: 'row' }, h('button', { class: 'btn primary sm', 'data-act': 'open-approve', onclick: () => act(u, true) }, 'Make Pro'), h('button', { class: 'btn soft sm', onclick: () => act(u, false) }, 'Decline')) : (u.days_granted ? `${u.days_granted} days` : '')))))))
+        : h('p', { class: 'muted' }, 'No requests right now.')));
+  };
+  await draw();
 }
 
 /* ---------- vouchers: one-time codes for Pro time ---------- */

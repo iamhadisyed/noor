@@ -29,7 +29,8 @@ function signIn() {
       catch (e2) { if (e2 instanceof ApiError && e2.status === 429) stepCode(e2.data.retry_after || 60); else { err.textContent = errorText(e2); btn.disabled = false; btn.textContent = 'Email me a code'; } }
     } },
       h('div', { class: 'field' }, h('label', { for: 'em' }, 'Email'), input, h('span', { class: 'hint' }, 'We will send a 6-digit code. No password needed.')), err, btn,
-      h('p', { class: 'hint' }, 'By continuing you will be asked to accept our ', h('a', { href: '#/terms' }, 'terms and conditions'), '.'));
+      h('p', { class: 'hint' }, 'By continuing you will be asked to accept our ', h('a', { href: '#/terms' }, 'terms and conditions'), '.'),
+      h('button', { class: 'btn soft sm', type: 'button', style: 'justify-self:start', 'data-act': 'use-pin', onclick: () => { email = input.value.trim().toLowerCase(); stepPin(); } }, 'I have a PIN'));
     box.replaceChildren(h('h1', null, 'Sign in'), h('p', { class: 'muted' }, 'Parents and administrators sign in here, with the same email as the Kindo app.'), form);
     input.focus();
   };
@@ -54,6 +55,22 @@ function signIn() {
     box.replaceChildren(h('h1', null, 'Before you start'), h('p', { class: 'muted' }, 'Please read and accept these terms to create your account.'), body.el,
       h('label', { class: 'check', for: 'tac' }, check, ' I am the parent or guardian of every child I add, and I accept the terms and the privacy notice.'), err, go_,
       h('button', { class: 'btn soft sm', type: 'button', style: 'justify-self:start', onclick: stepEmail }, 'Cancel'));
+  };
+
+  /** Accounts given a 6-digit PIN by the owner (the demo accounts, the administrator) sign in with it. */
+  const stepPin = () => {
+    const em = h('input', { class: 'input', type: 'email', id: 'pe', autocomplete: 'username', value: email, required: true });
+    const pin = h('input', { class: 'input', type: 'password', id: 'pp', inputmode: 'numeric', maxlength: '6', autocomplete: 'current-password', placeholder: '6 digits' });
+    const err = h('div', { class: 'msg-err', role: 'alert' });
+    const btn = h('button', { class: 'btn primary block', type: 'submit' }, 'Sign in');
+    box.replaceChildren(h('h1', null, 'Sign in with a PIN'), h('p', { class: 'muted' }, 'For accounts that were given a 6-digit PIN, such as the demo accounts.'),
+      h('form', { novalidate: true, onsubmit: async (e) => {
+        e.preventDefault(); err.textContent = ''; btn.disabled = true;
+        try { finish(await api('/auth/pin', { method: 'POST', body: { email: em.value.trim().toLowerCase(), pin: pin.value.trim(), device_name: 'web' } })); }
+        catch (e2) { err.textContent = errorText(e2); btn.disabled = false; }
+      } }, h('div', { class: 'field' }, h('label', { for: 'pe' }, 'Email'), em), h('div', { class: 'field' }, h('label', { for: 'pp' }, 'PIN'), pin), err, btn),
+      h('button', { class: 'btn soft sm', type: 'button', style: 'justify-self:start', onclick: stepEmail }, 'Email me a code instead'));
+    (email ? pin : em).focus();
   };
 
   const stepCode = (wait) => {

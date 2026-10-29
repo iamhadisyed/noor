@@ -1,11 +1,126 @@
-# Kindo / Noor (نور) — Laravel backend
+# Kindo (نور)
 
-REST API for the Kindo Junior (child) and Kindo Parent apps: AAC need alerts via FCM, practice-session sync,
-printable PECS PDFs, and Pro-tier AI pediatric reports (Groq pool → Gemini pool failover).
+**Kindo is a learning and communication app for children aged 3 to 10, made for English and Urdu, with extra support for children who need it** (autism, speech delay, and others).
+It has two phone apps and a website, all on one server:
 
-Requires PHP 8.2+. Built on Laravel 12 (Laravel 11 is end-of-life and has open security advisories).
+| | For | What it does |
+|---|---|---|
+| **Kindo Junior** | the child | big friendly tiles: "I need..." picture cards that alert the parent, lessons with tracing and spelling, 39 games, Discover (animals, ocean, space, chemistry, AI), calm activities, and a gentle **cool time** screen when screen time is over |
+| **Kindo Parent** | mum, dad, carers | make lessons with your own pictures and voice, see **what your child did**, set **screen time** and quiet hours, reports, picture cards, a guide for parents of children with autism |
+| **Web portal** (`/portal`) | parents and the owner | everything the Parent app does, plus the **owner console** (accounts, Pro requests, content review, game library, health) |
+| **Laravel server** (this repo) | | the API, sync, reports, AI insights, push alerts, emails, backups |
 
-## Setup
+Parents are in charge. A child never needs an account of their own: the parent signs in once and the Junior app opens for each child.
+
+## What is inside
+
+**For children (Junior app)**
+- **I need...**: picture cards (water, toilet, food, help, hug...) in English and Urdu with voice. One tap alerts the parent's phone at once, even in quiet hours.
+- **Learn**: the lessons the parent made, with pictures and voices, tracing (A to Z, a to z, 0 to 9 and the whole Urdu alphabet), and spelling on an alphabet-order keyboard.
+- **Play**: 39 games that are a *reward* for practising: counting, adding, times tables, completing a times-table row, sharing (division), number words, reading the clock, big and small letters, first and last letters, missing letters, word puzzles, guess the word, opposites, days and months, colours, feelings, daily routines, memory match, patterns, and animal sounds. Each game has an age range (3 to 10) and gets harder as the child does well.
+- **Discover** (free, no play minutes needed): short facts and a quiz for each age on **animals and where they live, under the sea, space and galaxies, matter and chemistry, and AI**, including how AI helps in health, studies and farming, and how to use it safely. A "Did you know?" card follows every right answer.
+- **Calm**: breathing bubble, balloon belly and other calm-down activities.
+- **Cool time**: when the parent's screen time is used up, or in quiet hours, a calm moon-and-stars screen replaces the games and suggests things to do away from the screen. The "I need..." board always still works.
+
+**For parents (Parent app and web portal)**
+- Add children, choose how each one learns (pace, number of choices, quiet praise, sensory mode).
+- Build lessons with photos and your own voice; import a lesson from a photo of a worksheet (Pro).
+- **What your child did**: practice, games, calm times, requests and rewards, newest first. *Free: today. Pro: the last two weeks.*
+- **Screen time** (*Pro*): a daily allowance, quiet hours, today's use, a weekly chart, "give 15 more minutes". The child's app counts the time and enforces the limit **even with no internet**.
+- Reports: weekly numbers, PDF report, per-letter tracing results, milestone cards to share with family, and a weekly AI insight (*Pro*).
+- A **guide for parents of a child with autism** (*Pro*): health checks doctors often ask about, food, exercise, sleep and routines, when to see a doctor soon. It is general information only and says so first and last: *every child is special, ask your own child's doctor.*
+- Family sharing: invite another parent or a specialist.
+
+**Free and Pro**
+
+| | Free | Pro |
+|---|---|---|
+| Children, lessons, picture cards | 1 child, a few lessons and cards | more children, unlimited lessons, more cards |
+| What my child did | today | last 14 days |
+| Screen time and quiet hours | no | yes |
+| Reports, AI insight, parent guide | basic | full |
+| Adverts for the parent (parent app only) | may show | none |
+
+**How a parent gets Pro (no card payment is built in).** In the app or portal tap **Make me Pro** → we email how to pay (bank, Easypaisa, JazzCash... you write the text in `PAYMENT_INSTRUCTIONS`) → the parent pays and taps **I have paid** with the transaction details → the owner opens **Pro requests** in the console, checks the money arrived, and taps **Make Pro** (choose the days). The parent is emailed and every device switches to Pro.
+
+## Try it now: demo and owner accounts
+
+`php artisan migrate --seed` (or `php artisan kindo:install`) creates these **when `APP_ENV` is not `production`**. Sign in with **"I have a PIN"** on the sign-in screen (web portal or either app).
+
+| Account | Email | PIN | Can do |
+|---|---|---|---|
+| **Owner / super admin** | `admin@kindo.local` | `482916` | the owner console: all accounts, Pro requests, content, games, health. Sessions last 12 hours |
+| **Demo parent** | `demo.parent@kindo.local` | `135790` | everything, **no purchase**: Pro features, two children (Ayan, Zara) with a week of activity, screen time on, lessons, cards |
+| **Demo child account** | `demo.child@kindo.local` | `246801` | a parent account holding two children (Mina, 5 and Hamza, 9): sign in on the Kindo Junior app and choose a child |
+
+Demo accounts cannot email, delete, invite or use AI, and they are **reset every night at 03:40** (`kindo:demo-reset`). They have no adverts.
+**On a live site** these defaults are *not* created. Set your own in `.env` (`ADMIN_EMAIL`, `ADMIN_PIN`, `DEMO_ENABLED=true`, `DEMO_PARENT_PIN`, `DEMO_CHILD_PIN`) and run `php artisan kindo:install`, or give any account a PIN with `php artisan kindo:set-pin you@example.com 123456`. Change the default PINs everywhere before you share the site.
+
+## Quick start (developers)
+
+Needs PHP 8.2+ and Composer. The apps need Flutter; the browser tests need Node and Playwright.
+
+```bash
+composer install
+cp .env.example .env && php artisan key:generate
+php artisan migrate --seed          # tables, stock cards, game library, owner and demo accounts (not in production)
+php artisan serve                   # API at /api/v1 and the web portal at /portal/
+php artisan test                    # 350+ PHP tests
+```
+```bash
+cd apps/kindo_core && dart test --exclude-tags live     # shared logic
+cd apps/kindo_parent && flutter test && cd ../kindo_junior && flutter test && cd ../kindo_ui && flutter test
+tests/e2e/run.sh                    # the web portal in a real browser, 21 walkthroughs
+apps/tool/live-demo/run.sh --build  # builds the Flutter apps for the web and runs everything together with screenshots
+```
+Build the phone apps with `flutter build apk --dart-define=KINDO_API=https://YOUR-DOMAIN/api/v1` (see `apps/README.md` and `docs/APP_HANDOFF.md`).
+
+## Configuration (`.env`)
+
+| Setting | What it is for |
+|---|---|
+| `APP_URL`, `APP_TIMEZONE` | the public https address (used in signed links) and the family's time zone, for example `Asia/Karachi` |
+| `MAIL_*` | SMTP so sign-in codes and Pro emails can be sent |
+| `SUPER_ADMIN_EMAILS`, `ADMIN_EMAIL`, `ADMIN_PIN` | who is the owner; the PIN for the owner account |
+| `DEMO_ENABLED`, `DEMO_PARENT_PIN`, `DEMO_CHILD_PIN` | the demo accounts |
+| `PAYMENT_CONTACT_EMAIL`, `PAYMENT_INSTRUCTIONS`, `PRO_DEFAULT_DAYS` | what the "how to pay" email says, and the default length of Pro |
+| `ADS_ENABLED`, `ADMOB_*` | Google adverts for the free parent app (see `docs/LAUNCH_CHECKLIST.md`) |
+| `GROQ_API_KEYS`, `GEMINI_API_KEYS` | AI reports and lesson import (optional) |
+| `FCM_PROJECT_ID` + the Firebase service account file | push alerts to the parent's phone |
+| `KINDO_BACKUP_PASSWORD` | nightly encrypted backups |
+
+## How to use it
+
+**Parent, first day.** Sign in (email code) → add your child → open **Picture cards** and check the words → make a first **lesson** → install **Kindo Junior** on the child's phone or tablet, sign in with the same email, choose the child → turn on **Screen time** (Pro) if you want limits.
+**Child.** Tap *I need...* to ask for something, *Learn* for lessons, *Play* for games (minutes are earned by practising), *Discover* to explore, *Calm* when upset.
+**Owner.** Sign in to `/portal/` as the owner → *Pro requests* to approve payments, *Content review* for flagged lessons, *Game library* to add animal pictures and sounds, *Health* to check the server.
+
+## Documentation
+
+| File | Contents |
+|---|---|
+| `docs/LAUNCH_CHECKLIST.md` | what you still need to do before real families use it: Firebase, store accounts, adverts, legal and medical review, backups |
+| `docs/API.md` | every endpoint |
+| `docs/GAMES.md` | the games, levels, rewards, Discover and screen time rules |
+| `docs/APP_HANDOFF.md` | building and releasing the apps |
+| `docs/SYNC.md` | how offline sync works |
+| `docs/BACKUPS.md` | backups and restore |
+| `docs/PORTAL_PRD.md`, `docs/PROJECT_SCOPE.md` | plan and status |
+
+## Honest limits
+
+- No phone app has been built or run on a phone from this repository; the code, widget tests and web builds are tested. You build the APK and iOS app and publish them.
+- **Adverts**: the settings and the placement are in, but the Google AdMob SDK is not added and no ad has ever been shown. Adverts for children are strictly regulated (COPPA, GDPR-K, Google Families policy): read `docs/LAUNCH_CHECKLIST.md` first.
+- Payments are handled by hand on purpose. There is no card or store payment.
+- The autism guide and the AI texts are **general information**. Have a doctor and a child-safety expert read them before launch. The terms and privacy text in `config/legal.php` is a draft for a lawyer.
+- The urdu tracing outlines are simple geometric shapes, not calligraphy. The picture cards and icons are placeholders until a designer supplies final art.
+- Push alerts have not been sent through real Firebase; the AI providers have only been tested with fake responses.
+
+---
+
+# Technical reference
+
+## Setup details
 ```bash
 composer install
 cp .env.example .env && php artisan key:generate
@@ -24,41 +139,7 @@ php artisan test
 ```
 Run `php artisan config:cache` in production; keys are read through `config/kindo.php`, never `env()` at runtime.
 
-## API (`/api/v1`, Sanctum bearer token)
-| Method | Path | Notes |
-|---|---|---|
-| POST | auth/code | email a 6-digit sign-in code (neutral answer, 60 s cooldown) |
-| POST | auth/verify | exchange email + code for a bearer token; first use creates the account |
-| GET/PATCH | me | profile, role, plan |
-| GET/DELETE | me/sessions | list and revoke signed-in devices |
-| POST | auth/logout | |
-| GET | admin/* | super admin only (`SUPER_ADMIN_EMAILS`) |
-| POST | devices | register FCM token |
-| GET/POST | children | free: 1 profile, pro: 4 (402 beyond) |
-| POST | child/alert | logs need + high-priority FCM push to parent devices |
-| GET | children/{id}/needs · POST needs/{id}/acknowledge | live feed |
-| GET/PATCH/DELETE | children/{id} | profile, **track** (standard or special) and **support profile**; delete removes all stored media |
-| GET | task-types | the per-type picture and sound rules, shared by web and app |
-| GET | lesson-templates | starter lessons for the standard and special tracks |
-| GET/POST | children/{id}/lessons (+ `/from-template/{id}`) | free plan: 3 lessons per child |
-| GET | aac-cards | stock cards plus your own (`custom: true`, with signed `icon_url` / `audio_url`) |
-| GET | guidance · guidance/{guide} | parent guides, general information only (Pro; the free plan gets 402 with the section titles). `autism`: health checks doctors often ask about, food, exercise, sleep and routines, when to see a doctor soon, always with the disclaimer first and last, in English and Urdu |
-| POST/PATCH/DELETE | children/{id}/aac-cards · aac-cards/{id} | your own picture cards: multipart `english_label`, `urdu_label`, `category` (needs/food/emotions/activities), `icon`, optional `audio`; free plan 3 per child |
-| POST | children/{id}/lessons/import | Pro: multipart `photo` (+ `language`, `week_number`) → draft lesson via Groq/Gemini vision; photo is not kept; 10 per hour |
-| GET/PATCH/DELETE | lessons/{id} | DELETE archives |
-| POST | lessons/{id}/publish · unpublish · duplicate | publish returns 422 with the exact missing pictures and sounds |
-| POST/PATCH/DELETE | lessons/{id}/tasks · tasks/{id} · reorder | |
-| POST/DELETE | tasks/{id}/media | `kind=image` (re-encoded to a 600 px JPEG) or `kind=audio` (≤150 KB, checked by content); stored privately, served by short-lived signed links |
-| GET | children/{id}/insights/summary · daily · export.csv · report.pdf | parent reports: practice, accuracy, alerts, reply time, lessons (query `days`, `tz`) |
-| GET/POST | needs/{id} · seen · acknowledge | alert status sent → seen → on_the_way, who replied, reply time |
-| GET | admin/overview · usage · quality · alerts · ai-reports · health · audit | super admin reporting: aggregates only, no child names or media |
-| GET/PATCH | admin/users | search accounts; suspend, restore, change plan (audited) |
-| GET | aac-cards · pecs.pdf | free tier: 4 core cards |
-| GET/POST | children/{id}/family | free: 2 cards; photo ≤300 KB, audio ≤150 KB |
-| POST | children/{id}/sessions | offline sync of practice results + mistakes, plus optional `letters[]` (letter, attempts, successes, assisted, deviation) |
-| GET | children/{id}/milestones · milestones/{key}/card.png | milestones reached, and a shareable 1080×1080 PNG card for one (query `lang=en|ur`, `name=0|1`) |
-| GET | children/{id}/letters | per-letter tracing results: accuracy, guide use, drift, trend, status, focus letters (query `days`, `tz`) |
-| POST/GET | children/{id}/reports, reports/latest | Pro only; generated by queued job |
+The full endpoint list is in [`docs/API.md`](docs/API.md).
 
 Apps: the two Flutter apps live in `apps/` (see `apps/README.md`): Kindo Parent and Kindo Junior, on one shared API client, offline sync and widget package. They talk to this server through the same `/api/v1` and `GET /sync` as the web portal, so a change made in one place shows up in the others. What still needs the owner (Firebase files, store accounts, final artwork) is listed in `docs/APP_HANDOFF.md`.
 

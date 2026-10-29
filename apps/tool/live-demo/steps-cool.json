@@ -1,0 +1,11 @@
+[
+ {
+  "wait": 3000,
+  "shot": "01-pick-child"
+ },
+ {
+  "tap": "Ayan",
+  "wait": 3500,
+  "shot": "02-cool-time"
+ }
+]
