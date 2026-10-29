@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:kindo_parent/app.dart';
+import 'package:kindo_parent/screens/family_tools.dart' show AdSlot;
 import 'package:kindo_ui/kindo_ui.dart';
 
 http.Response _j(Object body, [int status = 200]) => http.Response(jsonEncode(body), status, headers: {'content-type': 'application/json'});
@@ -13,11 +14,12 @@ Map<String, dynamic> _ch(String e, int id, Map<String, dynamic> d) => {'entity':
 
 /// A tiny pretend server: just enough for the parent app to show a family.
 String? upgrade;
+bool withAds = false;
 
 MockClient _server(List<String> log, {bool pro = true}) => MockClient((r) async {
       log.add('${r.method} ${r.url.path}');
       final p = r.url.path.replaceFirst('/api/v1', '');
-      if (p == '/me') return _j({'id': 1, 'email': 'mum@example.com', 'name': 'Sana', 'role': 'parent', 'plan': 'free'});
+      if (p == '/me') return _j({'id': 1, 'email': 'mum@example.com', 'name': 'Sana', 'role': 'parent', 'plan': 'free', if (withAds) 'ads': {'child_directed': true, 'personalized': false, 'parent_app_only': true, 'units': {'banner_android': 'ca-app-pub-1/2', 'banner_ios': 'ca-app-pub-1/3'}}});
       if (p == '/meta') return _j({'keyboards': {'english': {'letters': 'abcdefghijklmnopqrstuvwxyz'.split(''), 'direction': 'ltr', 'columns': 7}}});
       if (p == '/sync') {
         return _j({'snapshot': true, 'cursor': 5, 'has_more': false, 'changes': [
@@ -233,6 +235,21 @@ void main() {
     await t.pumpAndSettle();
     expect(find.text('Played: Space quiz'), findsOneWidget);
     expect(find.text('You are seeing today only.'), findsOneWidget);
+    s.stopAutoSync();
+  });
+
+  testWidgets('adverts: a free parent with ads switched on loads the home screen safely (no ad on a test machine), and never in the child text', (t) async {
+    withAds = true;
+    addTearDown(() => withAds = false);
+    await t.binding.setSurfaceSize(const Size(500, 1800));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    final s = await _signedIn([]);
+    await t.pumpWidget(ParentApp(session: s));
+    await t.pumpAndSettle();
+    expect(s.user?.raw['ads'], isNotNull);
+    expect(find.text('Hello'), findsNothing);
+    expect(find.byType(AdSlot), findsOneWidget);
+    expect(find.textContaining('Ad (removed with Pro)'), findsNothing, reason: 'nothing is shown until an ad has really loaded');
     s.stopAutoSync();
   });
 }

@@ -34,7 +34,7 @@ Repo: `iamhadisyed/noor` · Stack: Laravel 12, PHP 8.2+, Sanctum, DomPDF, vanill
 | Discover | Animals and habitats, under the sea, space, chemistry, AI: 58 bilingual facts by age, five free quizzes with "Did you know?" | ✅ content needs expert review |
 | Games | 39 games, ages 3 to 10: tables, division, number words, capital/small letters added; every English letter has a picture word | ✅ |
 | Tracing | digits, A to Z, a to z, the Urdu alphabet (simple geometric outlines, not calligraphy) | ✅ |
-| Adverts | Settings and placement only (free parents, parent app, child-directed, off by default); AdMob SDK not added | 🟡 see `docs/LAUNCH_CHECKLIST.md` |
+| Adverts | AdMob banner in the Parent app for free parents (child-directed, non-personalised, G-rated, off by default, Google test ids until the owner adds real ones) | 🟡 not run on a phone; see `docs/LAUNCH_CHECKLIST.md` |
 | Privacy tools | Download all my data (zip with pictures and voices) and delete my account with an emailed code, in the portal and the API; private media; terms record | ✅ (no per-photo consent record yet) |
 | Household sharing | Invite a second parent by email (max 3), accept after signing in, shared children, lessons, rewards and alerts, either can reply, shared plan, owner-only deletion; invitations and Family card in the portal | ✅ |
 | Announcements | Super admin publishes a message (info or important, optional schedule); parents see it above every portal page and in the app via `GET /announcements`, and can dismiss it | ✅ |

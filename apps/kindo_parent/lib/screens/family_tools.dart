@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kindo_ui/kindo_ui.dart';
 import 'package:provider/provider.dart';
 
+import '../ads/ad_banner.dart';
 import '../widgets.dart';
 
 /// "What did my child do?" (everyone sees today; Pro shows the last two weeks and screen time) and screen time rules (Pro).
@@ -363,26 +364,16 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
   }
 }
 
-/// Where a Google advert goes. Adverts are for the free plan in the parent app only, never in the child's app, child-directed and not
-/// personalised (see docs/ADS.md). Until the owner turns adverts on (`ADS_ENABLED`) and the AdMob SDK is added, nothing shows.
+/// A Google AdMob banner at the bottom of the parent's home screen. Only for free parents, only in the parent app, child-directed and not
+/// personalised (see docs/LAUNCH_CHECKLIST.md). The server sends `ads` (in `GET /me`) only when `ADS_ENABLED` is on and no ad is forbidden.
 class AdSlot extends StatelessWidget {
   const AdSlot({super.key});
 
   @override
   Widget build(BuildContext context) {
     final u = context.watch<KindoSession>().user;
-    if (u == null || u.isPro || u.raw['is_demo'] == true || u.raw['ads'] == null) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Semantics(
-        label: context.tr('Advertisement', 'اشتہار'),
-        child: Container(
-          height: 60,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(border: Border.all(color: KindoColors.line), borderRadius: BorderRadius.circular(16)),
-          child: Text(context.tr('Ad (removed with Pro)', 'اشتہار (پرو میں نہیں ہوتا)'), style: Theme.of(context).textTheme.bodySmall),
-        ),
-      ),
-    );
+    final ads = u?.raw['ads'];
+    if (u == null || u.isPro || u.raw['is_demo'] == true || ads is! Map) return const SizedBox.shrink();
+    return Padding(padding: const EdgeInsets.only(top: 16), child: Center(child: AdBanner(ads: asJson(ads))));
   }
 }
