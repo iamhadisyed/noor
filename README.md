@@ -105,6 +105,7 @@ Build the phone apps with `flutter build apk --dart-define=KINDO_API=https://YOU
 | `docs/APP_HANDOFF.md` | building and releasing the apps |
 | `docs/SYNC.md` | how offline sync works |
 | `docs/BACKUPS.md` | backups and restore |
+| `docs/BRAND.md` | the logo, colours, where branding appears and how to change it |
 | `docs/PORTAL_PRD.md`, `docs/PROJECT_SCOPE.md` | plan and status |
 
 ## Honest limits

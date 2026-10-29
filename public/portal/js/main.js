@@ -135,11 +135,12 @@ function shell(active, content) {
   return h('div', { class: 'shell' },
     h('a', { class: 'skip', href: '#content', onclick: (e) => { e.preventDefault(); document.getElementById('content')?.focus(); } }, 'Skip to content'),
     h('aside', { class: 'side' },
-      h('div', { class: 'brand' }, h('div', { class: 'logo', 'aria-hidden': 'true' }, 'K'), 'Kindo'),
+      h('div', { class: 'brand' }, h('img', { class: 'logo', src: '../brand/mark-96.png', alt: '', width: '44', height: '44' }), 'Kindo'),
       h('nav', { class: 'nav', 'aria-label': 'Main' }, items.map((n) => link(n))),
       h('div', { class: 'foot' },
         h('div', { class: 'who' }, h('div', { class: 'av' }, initial(state.user?.name || state.user?.email)), h('div', null, h('b', null, state.user?.name || state.user?.email), h('span', null, role === 'super_admin' ? 'Super admin' : state.user?.plan === 'pro' ? 'Pro plan' : 'Free plan'))),
-        h('button', { class: 'btn soft', onclick: signOut }, icon('logout', 20), 'Sign out'))),
+        h('button', { class: 'btn soft', onclick: signOut }, icon('logout', 20), 'Sign out'),
+        h('div', { class: 'brandline' }, h('img', { src: '../brand/mark-32.png', alt: '' }), 'Kindo · نور'))),
     h('main', { class: 'main', id: 'content', tabindex: '-1' }, announce, content),
     h('nav', { class: 'bottom-nav', 'aria-label': 'Main' }, bottom.map((n) => link(n, 'bottom')), moreBtn), sheet);
 }

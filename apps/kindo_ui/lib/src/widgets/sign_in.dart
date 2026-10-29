@@ -5,11 +5,15 @@ import 'package:provider/provider.dart';
 import '../session.dart';
 import '../theme.dart';
 import 'common.dart';
+import 'kindo_mark.dart';
 
 /// Sign in with an emailed code. If the server says the terms must be accepted (a new account), the terms are shown and the
 /// same code is sent again with the acceptance.
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key, required this.appName, this.tagline, this.onSignedIn});
+  const SignInScreen({super.key, required this.appName, this.tagline, this.onSignedIn, this.softMark = false});
+
+  /// The lavender version of the mark (Kindo Junior).
+  final bool softMark;
   final String appName;
   final String? tagline;
   final VoidCallback? onSignedIn;
@@ -120,6 +124,8 @@ class _SignInScreenState extends State<SignInScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Center(child: KindoMark(size: 84, soft: widget.softMark)),
+                const SizedBox(height: 14),
                 Text(widget.appName, style: Theme.of(context).textTheme.headlineLarge, textAlign: TextAlign.center),
                 if (widget.tagline != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(widget.tagline!, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: KindoColors.gray))),
                 const SizedBox(height: 28),

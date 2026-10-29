@@ -47,7 +47,9 @@ class BragCard
         $this->centred($im, UrduText::shape(self::PRAISE[$lang]), $font, 44, $y, $gray, 840);
 
         imageline($im, 200, $S - 160, $S - 200, $S - 160, $line);
-        $this->centred($im, UrduText::shape(self::MADE_WITH[$lang]), $font, 34, $S - 105, $gray, 700);
+        $made = UrduText::shape(self::MADE_WITH[$lang]);
+        $this->centred($im, $made, $font, 34, $S - 105, $gray, 700);
+        $this->brandMark($im, $font, $made, 34, $S - 105);
 
         ob_start();
         imagepng($im);
@@ -67,6 +69,22 @@ class BragCard
         $x = (int) ((self::SIZE - $w) / 2 - $box[0]);
         $base = $vMid ? (int) ($y - ($box[1] + $box[7]) / 2) : $y;
         imagettftext($im, $px, 0, $x, $base, $color, $font, $text);
+    }
+
+    /** The Kindo mark, just left of the "Made with Kindo" line. */
+    private function brandMark($im, string $font, string $text, int $px, int $baseline): void
+    {
+        $file = public_path('brand/mark-96.png');
+        if (! is_file($file) || ! ($mark = @imagecreatefrompng($file))) {
+            return;
+        }
+        $box = imagettfbbox($px, 0, $font, $text);
+        $w = $box[2] - $box[0];
+        $size = 64;
+        $x = (int) (self::SIZE / 2 - $w / 2 - $size - 20);
+        $y = $baseline - 44;
+        imagealphablending($im, true);
+        imagecopyresampled($im, $mark, max(60, $x), $y, 0, 0, $size, $size, imagesx($mark), imagesy($mark));
     }
 
     private function star($im, float $cx, float $cy, float $r, int $color): void

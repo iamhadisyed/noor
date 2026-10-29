@@ -11,7 +11,7 @@ function signIn() {
   let email = '', cooldownTimer = null;
   const box = h('div', { class: 'box' });
   const left = h('section', { class: 'left' },
-    h('div', { class: 'brand' }, h('div', { class: 'logo', 'aria-hidden': 'true' }, 'K'), 'Kindo'),
+    h('div', { class: 'brand' }, h('img', { class: 'logo', src: '../brand/mark-96.png', alt: '', width: '44', height: '44' }), 'Kindo'),
     h('h1', null, 'Learning that fits ', h('mark', null, 'every'), ' child.'),
     h('p', null, 'Build Urdu and English lessons with your own pictures and voices, for ordinary learners and for children who need extra support. Follow every step from one place.'));
   const right = h('section', { class: 'right' }, box);
@@ -123,6 +123,6 @@ function welcome() {
     try { state.user = await api('/me', { method: 'PATCH', body: { name: input.value.trim() } }); go('#/children?new=1'); } catch (e2) { err.textContent = errorText(e2); }
   } }, h('div', { class: 'field' }, h('label', { for: 'nm' }, 'What should we call you?'), input), err, h('button', { class: 'btn primary block', type: 'submit' }, 'Continue'));
   return h('div', { class: 'login' },
-    h('section', { class: 'left' }, h('div', { class: 'brand' }, h('div', { class: 'logo', 'aria-hidden': 'true' }, 'K'), 'Kindo'), h('h1', null, 'Welcome to ', h('mark', null, 'Kindo')), h('p', null, 'Your email is verified. Next, add your child and build a first lesson together.')),
+    h('section', { class: 'left' }, h('div', { class: 'brand' }, h('img', { class: 'logo', src: '../brand/mark-96.png', alt: '', width: '44', height: '44' }), 'Kindo'), h('h1', null, 'Welcome to ', h('mark', null, 'Kindo')), h('p', null, 'Your email is verified. Next, add your child and build a first lesson together.')),
     h('section', { class: 'right' }, h('div', { class: 'box' }, h('h1', null, 'Nice to meet you'), form)));
 }

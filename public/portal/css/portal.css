@@ -95,7 +95,10 @@ h3 { font-size: 18px; line-height: 1.25; font-weight: 700; letter-spacing: -.2px
 .shell { display: grid; grid-template-columns: var(--sidebar) 1fr; min-height: 100vh; }
 .side { position: sticky; top: 0; height: 100vh; padding: 24px 18px; display: flex; flex-direction: column; gap: 8px; background: var(--lavender); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }   /* a long menu scrolls inside the panel instead of spilling out of it */
 .brand { display: flex; align-items: center; gap: 12px; padding: 4px 10px clamp(8px, 2.4vh, 22px); font-weight: 800; font-size: 24px; letter-spacing: -.5px; }
-.brand .logo { width: 44px; height: 44px; border-radius: 15px; background: var(--ink); color: var(--orchid); display: grid; place-items: center; font-size: 24px; }
+.brand .logo { width: 44px; height: 44px; border-radius: 15px; display: block; flex: none; }
+.brandline { font-size: 12px; color: var(--gray); text-align: center; padding: 6px 0 2px; }
+.brandline img { width: 16px; height: 16px; vertical-align: -3px; margin-right: 6px; border-radius: 5px; }
+@media (max-height: 960px) { .brandline { display: none; } }
 .nav { display: grid; gap: 4px; }
 .nav a { display: flex; align-items: center; gap: 14px; min-height: clamp(38px, 5.6vh, 50px); flex: none; padding: 0 16px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 16px; }
 .nav a:hover { background: rgba(255, 255, 255, .45); }

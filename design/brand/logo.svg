@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Kindo">
+  <rect width="100" height="100" rx="26" fill="#120c15"/>
+  <g stroke="#e697f2" stroke-width="13" stroke-linecap="round" fill="none"><path d="M34 27V73"/><path d="M40 52L62 33"/><path d="M45 50L68 73"/></g>
+  <path d="M79 11L81.8 18.2L89 21L81.8 23.8L79 31L76.2 23.8L69 21L76.2 18.2Z" fill="#fff0ad"/>
+</svg>
