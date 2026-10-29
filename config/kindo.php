@@ -7,13 +7,13 @@ return [
     // Outside production the defaults below make a fresh install usable at once; IN PRODUCTION there is no default: set ADMIN_EMAIL and ADMIN_PIN,
     // or the seeder makes a random PIN and shows it once. Change the PIN any time with `php artisan kindo:set-pin <email> <pin>`.
     'admin' => [
-        'email' => strtolower(trim((string) env('ADMIN_EMAIL', env('APP_ENV') === 'production' ? '' : 'admin@kindo.local'))),
-        'pin' => (string) env('ADMIN_PIN', env('APP_ENV') === 'production' ? '' : '482916'),
+        'email' => strtolower(trim((string) (env('ADMIN_EMAIL') ?: (env('APP_ENV') === 'production' ? '' : 'admin@kindo.local')))),
+        'pin' => (string) (env('ADMIN_PIN') ?: (env('APP_ENV') === 'production' ? '' : '482916')),
     ],
     // Super admins are configured, never self-service. Comma-separated emails (the admin account above is always one of them).
     'super_admins' => array_values(array_unique(array_filter(array_map(fn ($e) => strtolower(trim($e)), array_merge(
         explode(',', (string) env('SUPER_ADMIN_EMAILS', '')),
-        [(string) env('ADMIN_EMAIL', env('APP_ENV') === 'production' ? '' : 'admin@kindo.local')],
+        [(string) (env('ADMIN_EMAIL') ?: (env('APP_ENV') === 'production' ? '' : 'admin@kindo.local'))],
     ))))),
 
     // Making a parent Pro by hand: the parent taps "Make me Pro", we email how to pay, they send the payment details, the owner marks them paid.
