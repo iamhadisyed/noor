@@ -26,6 +26,11 @@ class DemoSeeder extends Seeder
 
             return;
         }
+        if (! extension_loaded('gd')) {   // the demo lessons store pictures, which needs PHP's GD extension
+            $this->command?->warn('Demo accounts skipped: the PHP "gd" extension is not enabled. Enable it in php.ini (extension=gd), then run: php artisan db:seed --class=DemoSeeder');
+
+            return;
+        }
         $this->account('parent', 'Demo Parent', [
             ['name' => 'Ayan', 'born' => now()->subYears(6)->subMonths(3)->toDateString(), 'neurotype' => 'autism_spectrum', 'track' => 'special'],
             ['name' => 'Zara', 'born' => now()->subYears(8)->subMonths(1)->toDateString(), 'neurotype' => 'neurotypical', 'track' => 'standard'],
