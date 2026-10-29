@@ -1,0 +1,11 @@
+[
+ {
+  "wait": 3500,
+  "shot": "01-cool-time-quiet-hours"
+ },
+ {
+  "tap": "I need",
+  "wait": 2500,
+  "shot": "02-needs-still-open"
+ }
+]

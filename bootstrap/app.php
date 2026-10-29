@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias(['role' => \App\Http\Middleware\EnsureRole::class, 'idempotent' => \App\Http\Middleware\Idempotent::class]);
+        $middleware->alias(['role' => \App\Http\Middleware\EnsureRole::class, 'idempotent' => \App\Http\Middleware\Idempotent::class, 'demo.safe' => \App\Http\Middleware\NotForDemo::class]);
         $middleware->prependToGroup('api', \App\Http\Middleware\ForceJson::class);
         $middleware->appendToGroup('api', \App\Http\Middleware\EnsureActive::class);
         $middleware->appendToGroup('api', \App\Http\Middleware\CleanInput::class);

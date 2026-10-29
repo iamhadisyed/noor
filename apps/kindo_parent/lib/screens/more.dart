@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../widgets.dart';
 import 'cards.dart';
 import 'children.dart';
+import 'family_tools.dart';
 import 'guidance.dart';
 import 'rewards.dart';
 
@@ -340,6 +341,10 @@ class PlanScreen extends StatelessWidget {
                 else if (!pro) Text(context.tr('${free['children']} child, ${free['lessons_per_child']} lessons, ${free['family_cards']} family cards and ${free['custom_cards_per_child']} own picture cards for each child.', '${free['children']} بچہ، ${free['lessons_per_child']} اسباق، ${free['family_cards']} خاندانی کارڈ اور ہر بچے کے ${free['custom_cards_per_child']} اپنے تصویری کارڈ۔')),
               ]),
             ),
+            if (!pro) ...[
+              const SizedBox(height: 12),
+              FilledButton(onPressed: () => push(context, const UpgradeScreen()), child: Text(context.tr('Make me Pro', 'مجھے پرو بنائیں'))),
+            ],
             SectionTitle(context.tr('Have a voucher code?', 'کیا آپ کے پاس واؤچر کوڈ ہے؟')),
             FilledButton(
               onPressed: () async {

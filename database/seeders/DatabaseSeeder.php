@@ -11,5 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call(AacCardSeeder::class);
         $this->call(LessonTemplateSeeder::class);
         $this->call(GameItemSeeder::class);
+        $this->call(AdminSeeder::class);
+        $this->call(DemoSeeder::class);
     }
 }

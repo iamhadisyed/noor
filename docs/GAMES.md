@@ -99,6 +99,26 @@ Every game now carries `age` = `[youngest, oldest]` in `GET games` and in the `g
 
 Six more (11 in all): `balloon_belly`, `bubble_blowing` (breathing), `animal_stretch`, `slow_simon` (movement), `body_scan`, `good_things` (for older children). Every activity now has `emoji` and `age` for the shelf.
 
+### Tables, matching and Discover quizzes (ages 3 to 10)
+
+Nine more (39 games in all). Rounds use the same shapes as above; `expression` carries the big text or emoji shown above the choices.
+
+| Game | Ages | What the child does |
+|---|---|---|
+| `table_row` | 6-10 | fills the gap in a times-table row: `3, 6, ?, 12, 15` |
+| `division_facts` | 8-10 | shares equally: `12 ÷ 3` |
+| `case_match` | 4-7 | matches a capital letter with its small letter (and the other way round); look-alikes (b/d, p/q, m/n, u/v) from level 3 |
+| `number_word` | 5-8 | matches `7` with `seven` (or `سات`), and the other way round, up to twenty |
+| `science_animals`, `science_ocean`, `science_space`, `science_chemistry`, `science_ai` | 3-10 | a question from the Discover facts for the child's age (`config/learn.php`). Each round also carries `learn` {key, emoji, title, text} so the app shows a **"Did you know?"** card after a right answer |
+
+The `science_*` quizzes are **free**: they do not need play minutes, start when the balance is zero, and spend nothing (`free: true` in `config/games.php`). They are never a reward and never locked. Facts are written for children in English and Urdu; the AI topic always says AI can be wrong and to tell a grown-up if something feels wrong. Discover reading pages: `GET learn` and `GET learn/{topic}?age=`.
+
+**Words.** Every English letter A to Z has at least one picture word (`ice`, `juice`, `nose`, `queen`, `umbrella`, `van`, `xylophone`, `yoyo`, `zebra`...), and 27 Urdu letters start at least one picture word; the Urdu letters that no common children's word begins with (`ث ح ذ ض ظ ف ی`, and the non-initial forms) have none. A test checks this, and that every picture key has a drawing in `art.dart`.
+
+### Screen time and cool time (Pro)
+
+Rules are stored on the child (`screen_time`): `enabled`, `daily_minutes`, `quiet_start`, `quiet_end`. They are sent to the child's app in `GET /sync` only while the household has Pro and the rules are on, so a lapsed Pro plan stops the limits at the next sync. The child's app (`ScreenTimeGuard`) counts foreground seconds on the device, per day, and reports them with `POST children/{id}/screen-time/usage` through the offline outbox. When the allowance is gone, or it is quiet hours, a full-screen **cool time** screen opens over everything. It offers the "I need..." board and a "Grown-ups: check again" button, which asks the server whether a parent gave extra minutes. Parents give minutes from their own app or portal; the child's device has no button for it, so a child cannot give themselves more time.
+
 ## 4. Content that has to be supplied
 
 - **Animal pictures and sounds.** The two listening games use the animal library. The 12 animal names are seeded (`php artisan db:seed --class=GameItemSeeder` on an existing install); the super admin uploads a picture and the sound each animal makes in **Game library**. An animal is used only when it has both, and the listening games open when at least 4 are ready. Use sounds you have the right to use (your own recordings, or public-domain / CC0 libraries) and keep them under 150 KB (about 3 to 5 seconds). No animal sounds are shipped with the code.

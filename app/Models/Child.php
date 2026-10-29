@@ -10,9 +10,9 @@ class Child extends Model
 {
     protected $table = 'children';
 
-    protected $fillable = ['user_id', 'name', 'date_of_birth', 'neurotype', 'track', 'support_profile', 'sensory_mode', 'avatar_id', 'reward_settings'];
+    protected $fillable = ['user_id', 'name', 'date_of_birth', 'neurotype', 'track', 'support_profile', 'sensory_mode', 'avatar_id', 'reward_settings', 'screen_time'];
 
-    protected $casts = ['date_of_birth' => 'date', 'sensory_mode' => 'boolean', 'support_profile' => 'array', 'reward_settings' => 'array'];
+    protected $casts = ['date_of_birth' => 'date', 'sensory_mode' => 'boolean', 'support_profile' => 'array', 'reward_settings' => 'array', 'screen_time' => 'array'];
 
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function familyMembers(): HasMany { return $this->hasMany(FamilyMember::class); }

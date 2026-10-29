@@ -166,7 +166,7 @@ void main() {
   test('every game can be started, played with the runner and finished', () async {
     await api.addBonusMinutes(child.id, 60);
     final games = await api.games(child.id);
-    expect(games.length, greaterThanOrEqualTo(30));
+    expect(games.length, greaterThanOrEqualTo(39));
     var played = 0;
     for (final info in games.where((g) => g.available)) {
       final start = await api.startGame(child.id, info.game, rounds: 5, language: 'en');
@@ -190,7 +190,7 @@ void main() {
       expect(done['accuracy'], 100);
       played++;
     }
-    expect(played, greaterThanOrEqualTo(28), reason: 'the two animal sound games need an administrator to add pictures and sounds first');
+    expect(played, greaterThanOrEqualTo(37), reason: 'the two animal sound games need an administrator to add pictures and sounds first');
   });
 
   test('a locked game says why', () async {

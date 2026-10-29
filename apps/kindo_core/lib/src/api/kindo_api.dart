@@ -20,6 +20,12 @@ class KindoApi {
     return (token: '${r['token']}', user: UserProfile.fromJson(r['user']), isNew: r['is_new'] == true);
   }
 
+  /// Sign in with an email and a 6-digit PIN (accounts given a PIN by the owner, such as the demo accounts). Wrong tries are limited by the server.
+  Future<({String token, UserProfile user})> signInWithPin(String email, String pin, {String? deviceName}) async {
+    final r = asJson(await client.post('/auth/pin', body: {'email': email, 'pin': pin, if (deviceName != null) 'device_name': deviceName}));
+    return (token: '${r['token']}', user: UserProfile.fromJson(r['user']));
+  }
+
   Future<void> logout() => client.post('/auth/logout');
   Future<UserProfile> me() async => UserProfile.fromJson(await client.get('/me'));
   Future<UserProfile> updateMe({required String name, String? phone}) async => UserProfile.fromJson(await client.patch('/me', body: {'name': name, 'phone': phone}));
@@ -191,5 +197,25 @@ class KindoApi {
   // ---- parent guides (Pro) ----
   /// A parent guide such as `autism`. A 402 [ApiException] (see [ApiException.needsUpgrade]) carries a `preview` of the section titles in its body.
   Future<Json> guidance(String guide) async => asJson(await client.get('/guidance/$guide'));
+
+  // ---- Discover (free): topics and facts by age ----
+  Future<List<Json>> learnTopics() async => asJsonList(asJson(await client.get('/learn'))['topics']);
+  Future<Json> learnTopic(String topic, {int? age}) async => asJson(await client.get('/learn/$topic', query: {'age': age}));
+
+  // ---- What a child did, and screen time (the week and the rules are Pro; a free plan sees today only) ----
+  Future<Json> activity(int childId, {int days = 7, String? tz}) async => asJson(await client.get('/children/$childId/activity', query: {'days': days, 'tz': tz}));
+  /// Throws a 402 [ApiException] with [ApiException.needsUpgrade] on a free plan.
+  Future<Json> screenTime(int childId) async => asJson(await client.get('/children/$childId/screen-time'));
+  /// Any of `enabled`, `daily_minutes` (10 to 600), `quiet_start` and `quiet_end` ("HH:MM", both or neither).
+  Future<Json> saveScreenTime(int childId, Json rules) async => asJson(await client.patch('/children/$childId/screen-time', body: rules));
+  /// The child's app reports time used (at most an hour per report).
+  Future<Json> reportScreenTime(int childId, int seconds, {String? date}) async => asJson(await client.post('/children/$childId/screen-time/usage', body: {'seconds': seconds, if (date != null) 'date': date}));
+  Future<Json> extendScreenTime(int childId, int minutes) async => asJson(await client.post('/children/$childId/screen-time/extend', body: {'minutes': minutes}));
+
+  // ---- Asking for Kindo Pro: request, then tell us once you have paid; the owner approves by hand ----
+  Future<Json> upgradeStatus() async => asJson(await client.get('/billing/upgrade'));
+  Future<Json> requestUpgrade({String? phone, String? note}) async => asJson(await client.post('/billing/upgrade', body: {if (phone != null) 'phone': phone, if (note != null) 'note': note}));
+  Future<Json> reportPayment({required String method, required String reference, String? note}) async =>
+      asJson(await client.post('/billing/upgrade/paid', body: {'payment_method': method, 'payment_reference': reference, if (note != null) 'payment_note': note}));
   Future<Json> sync({int? cursor}) async => asJson(await client.get('/sync', query: {'cursor': cursor}));
 }

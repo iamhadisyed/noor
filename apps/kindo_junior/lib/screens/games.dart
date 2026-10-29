@@ -279,7 +279,33 @@ class _GameScreenState extends State<GameScreen> {
       _burst = !quiet;
     });
     final slow = context.read<KindoSession>().currentChild!.support.slow;
-    Future<void>.delayed(Duration(milliseconds: slow ? 1200 : 700), () => mounted ? _advance() : null);
+    // a "Did you know?" card needs time to read
+    final learn = _run.current['learn'] is Map;
+    Future<void>.delayed(Duration(milliseconds: learn ? (slow ? 7000 : 5000) : (slow ? 1200 : 700)), () => mounted ? _advance() : null);
+  }
+
+  /// The fact behind a right answer in the Discover quizzes. The round moves on by itself once there has been time to read it.
+  List<Widget> _didYouKnow(Map learn, String lang) {
+    final text = (learn['text'] as Map?)?[lang] ?? (learn['text'] as Map?)?['en'] ?? '';
+    final title = (learn['title'] as Map?)?[lang] ?? (learn['title'] as Map?)?['en'] ?? '';
+    return [
+      const SizedBox(height: 18),
+      Semantics(
+        label: context.tr('Did you know?', 'کیا آپ جانتے ہیں؟'),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: const Color(0xFFFFF4C9), borderRadius: BorderRadius.circular(24)),
+          child: Column(children: [
+            Text('${learn['emoji'] ?? '💡'}  ${context.tr('Did you know?', 'کیا آپ جانتے ہیں؟')}', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 6),
+            Text('$title', style: Theme.of(context).textTheme.titleSmall, textAlign: TextAlign.center),
+            const SizedBox(height: 4),
+            Text('$text', textAlign: TextAlign.center, textDirection: lang == 'ur' ? TextDirection.rtl : TextDirection.ltr),
+          ]),
+        ),
+      ),
+    ];
   }
 
   void _wrongTap(int i) {
@@ -340,6 +366,7 @@ class _GameScreenState extends State<GameScreen> {
               RoundKind.scramble => _scramble(round, s),
               RoundKind.guess => _guess(round, s),
             },
+            if (_right && round['learn'] is Map) ..._didYouKnow(round['learn'] as Map, lang),
           ]),
         ),
         if (_burst) Positioned.fill(child: ConfettiBurst(onDone: () => mounted ? setState(() => _burst = false) : null)),

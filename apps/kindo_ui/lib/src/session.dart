@@ -128,6 +128,16 @@ class KindoSession extends ChangeNotifier {
     unawaited(refresh());
   }
 
+  /// Sign in with a 6-digit PIN (accounts given one by the owner, such as the demo accounts).
+  Future<void> signInWithPin(String email, String pin) async {
+    final r = await api.signInWithPin(email.trim(), pin.trim());
+    token = r.token;
+    user = r.user;
+    await store.write(_kToken, r.token);
+    notifyListeners();
+    unawaited(refresh());
+  }
+
   Future<void> signOut({bool callServer = true}) async {
     if (callServer && signedIn) {
       try {

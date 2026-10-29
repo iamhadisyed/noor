@@ -143,7 +143,7 @@ class OwnershipSweepTest extends TestCase
     }
 
     /** Routes that are meant to be reachable without signing in. Everything else under /api/v1 must refuse a request with no token. */
-    private const PUBLIC = ['api/v1/auth/code', 'api/v1/auth/verify', 'api/v1/legal/terms'];
+    private const PUBLIC = ['api/v1/auth/code', 'api/v1/auth/verify', 'api/v1/auth/pin', 'api/v1/legal/terms'];
 
     public function test_every_route_refuses_a_request_with_no_sign_in(): void
     {

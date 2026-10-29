@@ -4,7 +4,10 @@ import 'package:provider/provider.dart';
 
 /// Loads something from the server and shows it, with a loading spinner, an error with "Try again", and pull to refresh.
 class Load<T> extends StatefulWidget {
-  const Load({super.key, required this.future, required this.builder, this.keyValue});
+  const Load({super.key, required this.future, required this.builder, this.keyValue, this.lockedBuilder});
+
+  /// Shown instead of an error when the server says this needs a plan upgrade (402).
+  final WidgetBuilder? lockedBuilder;
   final Future<T> Function() future;
   final Widget Function(BuildContext context, T data, Future<void> Function() reload) builder;
 
@@ -38,6 +41,8 @@ class _LoadState<T> extends State<Load<T>> {
   Widget build(BuildContext context) => FutureBuilder<T>(
         future: _f,
         builder: (context, snap) {
+          final e = snap.error;
+          if (e is ApiException && e.needsUpgrade && widget.lockedBuilder != null) return widget.lockedBuilder!(context);
           if (snap.hasError) return ErrorBox(snap.error!, onRetry: _reload);
           if (!snap.hasData) return const Loading();
           return widget.builder(context, snap.data as T, _reload);

@@ -34,6 +34,8 @@ const routes = [
   { path: '/rewards', view: lazy('./views/rewards.js'), role: 'parent', nav: 'rewards' },
   { path: '/reports', view: lazy('./views/reports.js'), role: 'parent', nav: 'reports' },
   { path: '/alerts', view: lazy('./views/alerts.js'), role: 'parent', nav: 'alerts' },
+  { path: '/activity', view: lazy('./views/family.js'), role: 'parent', nav: 'activity', name: 'activity' },
+  { path: '/screen-time', view: lazy('./views/family.js'), role: 'parent', nav: 'screen-time', name: 'screen-time' },
   { path: '/guide', view: lazy('./views/guidance.js'), role: 'parent', nav: 'guide' },
   { path: '/settings', view: lazy('./views/settings.js'), nav: 'settings' },
   { path: '/admin', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-overview', name: 'overview' },
@@ -45,13 +47,14 @@ const routes = [
   { path: '/admin/quality', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-quality', name: 'quality' },
   { path: '/admin/alerts', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-alerts', name: 'alerts' },
   { path: '/admin/ai', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-ai', name: 'ai' },
+  { path: '/admin/upgrades', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-upgrades', name: 'upgrades' },
   { path: '/admin/accounts', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-accounts', name: 'accounts' },
   { path: '/admin/audit', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-audit', name: 'audit' },
   { path: '/admin/health', view: lazy('./views/admin.js'), role: 'super_admin', nav: 'a-health', name: 'health' },
 ];
 const NAV = {
-  parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['cards', '#/cards', 'image', 'Cards'], ['rewards', '#/rewards', 'star', 'Rewards'], ['specialists', '#/specialists', 'shield', 'Specialists'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['guide', '#/guide', 'spark', 'Parent guide'], ['settings', '#/settings', 'gear', 'Settings']],
-  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-games', '#/admin/games', 'star', 'Game library'], ['a-news', '#/admin/announcements', 'bell', 'Announcements'], ['a-vouchers', '#/admin/vouchers', 'list', 'Vouchers'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
+  parent: [['home', '#/', 'home', 'Dashboard'], ['children', '#/children', 'kids', 'Children'], ['lessons', '#/lessons', 'book', 'Lessons'], ['cards', '#/cards', 'image', 'Cards'], ['rewards', '#/rewards', 'star', 'Rewards'], ['specialists', '#/specialists', 'shield', 'Specialists'], ['activity', '#/activity', 'pulse', 'Activity'], ['screen-time', '#/screen-time', 'heart', 'Screen time'], ['reports', '#/reports', 'chart', 'Reports'], ['alerts', '#/alerts', 'bell', 'Alerts'], ['guide', '#/guide', 'spark', 'Parent guide'], ['settings', '#/settings', 'gear', 'Settings']],
+  super_admin: [['a-overview', '#/admin', 'pulse', 'Overview'], ['a-usage', '#/admin/usage', 'chart', 'Usage'], ['a-quality', '#/admin/quality', 'shield', 'Quality'], ['a-content', '#/admin/content', 'flag', 'Content review'], ['a-games', '#/admin/games', 'star', 'Game library'], ['a-news', '#/admin/announcements', 'bell', 'Announcements'], ['a-vouchers', '#/admin/vouchers', 'list', 'Vouchers'], ['a-alerts', '#/admin/alerts', 'bell', 'Alerts'], ['a-ai', '#/admin/ai', 'spark', 'AI reports'], ['a-upgrades', '#/admin/upgrades', 'star', 'Pro requests'], ['a-accounts', '#/admin/accounts', 'users', 'Accounts'], ['a-audit', '#/admin/audit', 'list', 'Audit log'], ['a-health', '#/admin/health', 'heart', 'Health'], ['settings', '#/settings', 'gear', 'Settings']],
 };
 
 export const go = (hash) => { if (location.hash === hash) route(); else location.hash = hash; };

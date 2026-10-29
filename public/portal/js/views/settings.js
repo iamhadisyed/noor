@@ -117,6 +117,33 @@ function notificationsCard() {
   return box;
 }
 
+/** Ask for Pro: we email how to pay; once they have paid the parent tells us how; the owner approves by hand. */
+function upgradeRequest(redraw) {
+  const box = h('div', { style: 'margin-top:16px;display:grid;gap:10px', 'data-card': 'upgrade-request' }, h('div', { class: 'spinner', role: 'status', 'aria-label': 'Loading' }));
+  const err = h('div', { class: 'msg-err', role: 'alert' });
+  const draw = async () => {
+    let d;
+    try { d = await api('/billing/upgrade'); } catch (e) { box.replaceChildren(h('p', { class: 'msg-err' }, errorText(e))); return; }
+    const r = d.request, st = r?.status;
+    if (!r || st === 'approved' || st === 'rejected') {
+      const phone = h('input', { class: 'input', id: 'up-phone', type: 'tel', placeholder: 'Phone number (optional)', 'aria-label': 'Phone number' });
+      box.replaceChildren(st === 'rejected' ? h('p', { class: 'msg-err' }, `Your last request was not approved${r.admin_note ? ': ' + r.admin_note : ''}. You can ask again.`) : null,
+        h('b', null, 'Want more? Get Kindo Pro'), h('p', { style: 'color:var(--ink-2)' }, 'Screen time limits, two weeks of activity, reports, more children and lessons, no adverts.'), phone, err,
+        h('button', { class: 'btn primary', 'data-act': 'make-pro', onclick: async () => { err.textContent = ''; try { await api('/billing/upgrade', { method: 'POST', body: { phone: phone.value.trim() || null } }); toast('We emailed you how to pay.'); draw(); } catch (e) { err.textContent = errorText(e); } } }, 'Make me Pro'));
+    } else if (st === 'requested') {
+      const method = h('input', { class: 'input', id: 'up-method', placeholder: 'e.g. bank transfer, Easypaisa, JazzCash', 'aria-label': 'How did you pay' });
+      const ref = h('input', { class: 'input', id: 'up-ref', placeholder: 'Transaction number or the name on the receipt', 'aria-label': 'Payment reference' });
+      box.replaceChildren(h('b', null, 'We emailed you how to pay.'), h('p', { style: 'white-space:pre-line' }, d.payment.instructions || ''), d.payment.contact_email ? h('p', null, h('a', { href: `mailto:${d.payment.contact_email}` }, d.payment.contact_email)) : null,
+        h('b', null, 'After you have paid, tell us how'), method, ref, err,
+        h('button', { class: 'btn primary', 'data-act': 'i-paid', onclick: async () => { err.textContent = ''; try { await api('/billing/upgrade/paid', { method: 'POST', body: { payment_method: method.value.trim(), payment_reference: ref.value.trim() } }); toast('Thank you. We will check and switch you to Pro.'); draw(); } catch (e) { err.textContent = errorText(e); } } }, 'I have paid'));
+    } else {
+      box.replaceChildren(h('b', null, 'Thank you. We are checking your payment.'), h('p', { style: 'color:var(--ink-2)' }, 'We will switch your account to Pro and email you. This usually takes a short while.'));
+    }
+  };
+  draw();
+  return box;
+}
+
 /** The plan, when it ends, and a place to enter a voucher code. */
 function planCard(m) {
   const box = h('section', { class: 'card lav', 'data-card': 'plan' }, h('h2', null, 'Plan'), h('div', { class: 'spinner', role: 'status', 'aria-label': 'Loading' }));
@@ -140,7 +167,7 @@ function planCard(m) {
         try { await api('/billing/redeem', { method: 'POST', body: { code: code.value } }); toast('Pro time added. Thank you!'); state.user = await api('/me'); draw(); } catch (er) { err.textContent = errorText(er); }
       } }, h('div', { class: 'field' }, h('label', { for: 'vc' }, pro ? 'Add more time with a voucher code' : 'Have a voucher code?'), code), err, h('button', { class: 'btn primary', type: 'submit', 'data-act': 'redeem' }, 'Use code')),
       b.history.length ? h('div', { style: 'margin-top:16px' }, h('b', null, 'Your Pro time'), h('div', { class: 'list', style: 'margin-top:8px' }, b.history.slice(0, 5).map((x) => h('div', { class: 'item', style: 'background:rgba(255,255,255,.55)' }, h('div', { class: 'grow' }, h('b', null, `${x.days} days`), h('span', null, `${SRC[x.source] || x.source} · until ${fmt.date(x.ends_at)}`)))))) : null,
-      pro || b.store_purchase ? null : h('p', { class: 'hint', style: 'margin-top:12px;color:var(--ink-2)' }, 'Buying inside the app is coming soon. Until then, ask us for a voucher code.'));
+      pro || b.via_household ? null : upgradeRequest(draw));
   };
   draw();
   return box;

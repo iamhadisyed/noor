@@ -1,279 +1,52 @@
 [
  {
-  "wait": 3500,
-  "shot": "01-home"
+  "wait": 3000,
+  "shot": "01-who-is-playing"
+ },
+ {
+  "tap": "Mina",
+  "wait": 3000,
+  "shot": "02-home"
  },
  {
   "tap": "I need",
-  "wait": 3500,
-  "shot": "02-needs-board"
- },
- {
-  "tap": "Water",
-  "exact": true,
-  "wait": 900,
-  "shot": "03-needs-sent"
- },
- {
-  "tap": "Back",
-  "wait": 800
- },
- {
-  "tap": "Learn",
-  "wait": 1000,
-  "shot": "04-lessons"
- },
- {
-  "tap": "Week 1",
-  "wait": 1800,
-  "shot": "05-trace-letter"
- },
- {
-  "draw": [
-   [
-    [
-     90.0,
-     669.0
-    ],
-    [
-     195.0,
-     389.0
-    ],
-    [
-     300.0,
-     669.0
-    ]
-   ],
-   [
-    [
-     132.0,
-     571.0
-    ],
-    [
-     258.0,
-     571.0
-    ]
-   ]
-  ],
-  "wait": 300,
-  "shot": "06-trace-drawn"
- },
- {
-  "tap": "Done",
-  "wait": 800,
-  "shot": "07-well-done"
- },
- {
-  "tap": "Next",
-  "wait": 1500,
-  "shot": "08-trace-number"
- },
- {
-  "draw": [
-   [
-    [
-     90.0,
-     389.0
-    ],
-    [
-     300.0,
-     389.0
-    ],
-    [
-     160.0,
-     669.0
-    ]
-   ]
-  ],
-  "wait": 200
- },
- {
-  "tap": "Done",
-  "wait": 800
- },
- {
-  "tap": "Next",
-  "wait": 1500,
-  "shot": "09-pick-picture"
- },
- {
-  "click": [
-   195,
-   532
-  ],
-  "wait": 1500
- },
- {
-  "tap": "Next",
-  "wait": 1800,
-  "shot": "10-spell"
- },
- {
-  "click": [
-   95,
-   597
-  ]
- },
- {
-  "click": [
-   245,
-   597
-  ]
- },
- {
-  "click": [
-   195,
-   597
-  ],
-  "wait": 400,
-  "shot": "11-spell-typed"
- },
- {
-  "tap": "Done",
-  "wait": 900
- },
- {
-  "tap": "Next",
-  "wait": 1800,
-  "shot": "12-social-story"
- },
- {
-  "click": [
-   195,
-   272
-  ],
-  "wait": 1500
- },
- {
-  "tap": "Next",
   "wait": 3000,
-  "shot": "13-finished"
- },
- {
-  "tap": "Done",
-  "wait": 1200,
-  "shot": "14-home-after"
+  "shot": "03-needs-board"
  },
  {
   "tap": "Back",
   "wait": 800
  },
  {
-  "tap": "Play",
-  "wait": 3000,
-  "shot": "15-games"
+  "tap": "Discover",
+  "wait": 2500,
+  "shot": "04-discover"
  },
  {
-  "scroll": 900,
-  "wait": 500
+  "tap": "Space and galaxies",
+  "wait": 2500,
+  "shot": "05-space-facts"
  },
  {
-  "wait": 300,
-  "shot": "15a-games-shelf-1"
- },
- {
-  "scroll": 900,
-  "wait": 500
- },
- {
-  "wait": 300,
-  "shot": "15a-games-shelf-2"
- },
- {
-  "scroll": 900,
-  "wait": 500
- },
- {
-  "wait": 300,
-  "shot": "15a-games-shelf-3"
- },
- {
-  "scroll": 900,
-  "wait": 500
- },
- {
-  "wait": 300,
-  "shot": "15a-games-shelf-4"
- },
- {
-  "click": [
-   95,
-   750
-  ],
-  "wait": 3500,
-  "shot": "15b-word-puzzle"
+  "tap": "Play the quiz",
+  "wait": 2500,
+  "shot": "06-space-quiz"
  },
  {
   "tap": "Back",
-  "wait": 900
- },
- {
-  "click": [
-   290,
-   750
-  ],
-  "wait": 3500
- },
- {
-  "click": [
-   40,
-   720
-  ]
- },
- {
-  "click": [
-   90,
-   720
-  ]
- },
- {
-  "wait": 500,
-  "shot": "15c-guess-the-word"
+  "wait": 800
  },
  {
   "tap": "Back",
-  "wait": 900
- },
- {
-  "click": [
-   290,
-   550
-  ],
-  "wait": 3500,
-  "shot": "15d-read-the-clock"
+  "wait": 800
  },
  {
   "tap": "Back",
-  "wait": 900
- },
- {
-  "tap": "Back",
-  "wait": 900
+  "wait": 800
  },
  {
   "tap": "Calm",
   "wait": 1500,
-  "shot": "16-calm"
- },
- {
-  "click": [
-   195,
-   190
-  ],
-  "wait": 1500,
-  "shot": "17-calm-activity"
- },
- {
-  "tap": "Back",
-  "wait": 500
- },
- {
-  "tap": "Back",
-  "wait": 500
- },
- {
-  "tap": "My family",
-  "wait": 2500,
-  "shot": "18-family-game"
+  "shot": "07-calm"
  }
 ]

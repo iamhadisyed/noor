@@ -90,7 +90,7 @@ class ChildController extends Controller
     {
         $defaults = $c->track === 'special' ? self::SUPPORT_SPECIAL : self::SUPPORT_STANDARD;
 
-        return $c->toArray() + ['support' => array_merge($defaults, $c->support_profile ?? []), 'rewards' => app(\App\Services\RewardService::class)->summary($c)];
+        return array_merge($c->toArray(), ['screen_time' => app(\App\Services\ScreenTime::class)->effective($c)]) + ['support' => array_merge($defaults, $c->support_profile ?? []), 'rewards' => app(\App\Services\RewardService::class)->summary($c)];
     }
 
     private function supportRules(): array

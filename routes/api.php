@@ -7,6 +7,10 @@ use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\GuidanceController;
+use App\Http\Controllers\Api\LearnController;
+use App\Http\Controllers\Api\ScreenTimeController;
+use App\Http\Controllers\Api\UpgradeController;
+use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\GameLibraryController;
 use App\Http\Controllers\Api\HouseholdController;
 use App\Http\Controllers\Api\InsightsController;
@@ -34,6 +38,7 @@ Route::prefix('v1')->group(function () {
     Route::get('legal/terms', [AuthController::class, 'terms']);
     Route::post('auth/code', [AuthController::class, 'requestCode'])->middleware('throttle:otp-request');
     Route::post('auth/verify', [AuthController::class, 'verify'])->middleware('throttle:otp-verify');
+    Route::post('auth/pin', [AuthController::class, 'pin'])->middleware('throttle:otp-verify');
 
     // Pictures and sounds: the signed, short-lived link is the credential (works in <img> and <audio>).
     Route::get('media/{task}/{kind}', [MediaController::class, 'show'])->name('media.show')->middleware('signed');
@@ -52,16 +57,22 @@ Route::prefix('v1')->group(function () {
         Route::patch('me/notifications', [NotificationPrefsController::class, 'update']);
         Route::get('billing', [BillingController::class, 'show']);
         Route::post('billing/redeem', [BillingController::class, 'redeem'])->middleware('throttle:10,60,billing-redeem');
+        Route::get('billing/upgrade', [UpgradeController::class, 'show']);
+        Route::post('billing/upgrade', [UpgradeController::class, 'request'])->middleware(['demo.safe', 'throttle:5,60,billing-upgrade']);
+        Route::post('billing/upgrade/paid', [UpgradeController::class, 'paid'])->middleware(['demo.safe', 'throttle:10,60,billing-upgrade-paid']);
         Route::post('me/terms', [AuthController::class, 'acceptTerms']);
         Route::get('me/export', [PrivacyController::class, 'export'])->middleware('throttle:3,60,me-export');
-        Route::post('me/delete-code', [PrivacyController::class, 'requestDeleteCode'])->middleware('throttle:5,60,me-delete-code');
-        Route::delete('me', [PrivacyController::class, 'destroy'])->middleware('throttle:10,60,me');
+        Route::post('me/delete-code', [PrivacyController::class, 'requestDeleteCode'])->middleware(['demo.safe', 'throttle:5,60,me-delete-code']);
+        Route::delete('me', [PrivacyController::class, 'destroy'])->middleware(['demo.safe', 'throttle:10,60,me']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::get('me/sessions', [AuthController::class, 'sessions']);
         Route::delete('me/sessions/{id}', [AuthController::class, 'revokeSession']);
 
         Route::middleware('role:super_admin')->prefix('admin')->group(function () {
             Route::get('ping', fn () => response()->json(['ok' => true]));
+            Route::get('upgrades', [UpgradeController::class, 'adminIndex']);
+            Route::post('upgrades/{id}/approve', [UpgradeController::class, 'approve']);
+            Route::post('upgrades/{id}/reject', [UpgradeController::class, 'reject']);
             Route::get('overview', [AdminController::class, 'overview']);
             Route::get('usage', [AdminController::class, 'usage']);
             Route::get('quality', [AdminController::class, 'quality']);
@@ -96,7 +107,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::get('household', [HouseholdController::class, 'show']);
-        Route::post('household/invite', [HouseholdController::class, 'invite'])->middleware('throttle:10,60,household-invite');
+        Route::post('household/invite', [HouseholdController::class, 'invite'])->middleware(['demo.safe', 'throttle:10,60,household-invite']);
         Route::delete('household/members/{id}', [HouseholdController::class, 'remove']);
         Route::delete('household/joined/{id}', [HouseholdController::class, 'leave']);
         Route::post('household/invitations/{id}/accept', [HouseholdController::class, 'accept']);
@@ -128,13 +139,15 @@ Route::prefix('v1')->group(function () {
         Route::delete('children/{child}', [ChildController::class, 'destroy']);
 
         Route::get('meta', [LessonController::class, 'meta']);
+        Route::get('learn', [LearnController::class, 'index']);
+        Route::get('learn/{topic}', [LearnController::class, 'show']);
         Route::get('guidance', [GuidanceController::class, 'index']);
         Route::get('guidance/{guide}', [GuidanceController::class, 'show']);
         Route::get('task-types', [LessonController::class, 'taskTypes']);
         Route::get('lesson-templates', [LessonController::class, 'templates']);
         Route::get('children/{child}/lessons', [LessonController::class, 'index']);
         Route::post('children/{child}/lessons', [LessonController::class, 'store']);
-        Route::post('children/{child}/lessons/import', [LessonImportController::class, 'store'])->middleware('throttle:10,60,children-lessons-import');
+        Route::post('children/{child}/lessons/import', [LessonImportController::class, 'store'])->middleware(['demo.safe', 'throttle:10,60,children-lessons-import']);
         Route::post('children/{child}/lessons/from-template/{template}', [LessonController::class, 'fromTemplate']);
         Route::get('lessons/{lesson}', [LessonController::class, 'show']);
         Route::patch('lessons/{lesson}', [LessonController::class, 'update']);
@@ -181,12 +194,18 @@ Route::prefix('v1')->group(function () {
         Route::post('children/{child}/games/{game}/start', [GameController::class, 'start'])->middleware('throttle:60,1,children-games-start');
         Route::post('game-sessions/{id}/finish', [GameController::class, 'finish']);
 
+        Route::get('children/{child}/activity', [ActivityLogController::class, 'index']);
+        Route::get('children/{child}/screen-time', [ScreenTimeController::class, 'show']);
+        Route::patch('children/{child}/screen-time', [ScreenTimeController::class, 'update']);
+        Route::post('children/{child}/screen-time/usage', [ScreenTimeController::class, 'usage'])->middleware('throttle:120,1,screen-time-usage');
+        Route::post('children/{child}/screen-time/extend', [ScreenTimeController::class, 'extend'])->middleware('throttle:20,60,screen-time-extend');
+
         Route::get('children/{child}/insights/summary', [InsightsController::class, 'summary']);
         Route::get('children/{child}/letters', [InsightsController::class, 'letters']);
         Route::get('children/{child}/insights/daily', [InsightsController::class, 'daily']);
         Route::get('children/{child}/insights/report.pdf', [InsightsController::class, 'exportPdf'])->middleware('throttle:20,1,children-insights-report-pdf');
         Route::get('children/{child}/insights/export.csv', [InsightsController::class, 'exportCsv']);
-        Route::post('children/{child}/reports', [ReportController::class, 'generate']);
+        Route::post('children/{child}/reports', [ReportController::class, 'generate'])->middleware('demo.safe');
         Route::get('children/{child}/reports/latest', [ReportController::class, 'latest']);
     });
 });

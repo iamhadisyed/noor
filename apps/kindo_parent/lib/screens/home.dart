@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../widgets.dart';
 import 'cards.dart';
 import 'children.dart';
+import 'family_tools.dart';
 import 'guidance.dart';
 import 'lessons.dart';
 import 'rewards.dart';
@@ -44,6 +45,8 @@ class HomeScreen extends StatelessWidget {
             padding: EdgeInsets.zero,
             child: Column(children: [
               NavRow(icon: Icons.add_circle_outline_rounded, title: context.tr('Make a lesson', 'سبق بنائیں'), subtitle: context.tr('Words, pictures, tracing', 'الفاظ، تصویریں، لکھائی'), onTap: () => push(context, NewLessonScreen(child: child))),
+              NavRow(icon: Icons.timeline_rounded, title: context.tr('What ${child.name} did', '${child.name} نے کیا کیا'), subtitle: context.tr('Practice, games, calm times, requests', 'مشق، کھیل، سکون، درخواستیں'), onTap: () => push(context, ActivityScreen(child: child))),
+              NavRow(icon: Icons.bedtime_outlined, title: context.tr('Screen time', 'اسکرین ٹائم'), subtitle: context.tr('Daily limit and quiet hours (Pro)', 'روزانہ حد اور خاموش اوقات (پرو)'), onTap: () => push(context, ScreenTimeScreen(child: child))),
               NavRow(icon: Icons.photo_library_outlined, title: context.tr('Picture cards', 'تصویری کارڈ'), subtitle: context.tr('What your child can ask for', 'آپ کا بچہ کیا مانگ سکتا ہے'), onTap: () => push(context, const CardsScreen())),
               NavRow(icon: Icons.emoji_events_outlined, title: context.tr('Games and play time', 'کھیل اور وقت'), subtitle: context.tr('${child.balanceMinutes} minutes saved', '${child.balanceMinutes} منٹ جمع ہیں'), onTap: () => push(context, RewardsScreen(child: child))),
               if (child.neurotype == 'autism_spectrum') NavRow(icon: Icons.menu_book_outlined, title: context.tr('A guide for parents', 'والدین کے لیے رہنما'), subtitle: context.tr('Health checks, food and exercise (Pro)', 'صحت کے معائنے، خوراک اور ورزش (پرو)'), onTap: () => push(context, const GuidanceScreen())),
@@ -51,6 +54,7 @@ class HomeScreen extends StatelessWidget {
             ]),
           ),
           const _Announcements(),
+          const AdSlot(),
         ],
       ]),
     );

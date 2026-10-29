@@ -28,6 +28,9 @@ class ArtIcon extends StatelessWidget {
     'chair': '🪑', 'clock': '⏰', 'snake': '🐍', 'mouse': '🐭', 'train': '🚆', 'river': '🏞️', 'rabbit': '🐰', 'flower': '🌸', 'school': '🏫', 'garden': '🌻',
     'monkey': '🐵', 'pencil': '✏️', 'bottle': '🍼', 'rainbow': '🌈', 'giraffe': '🦒', 'penguin': '🐧', 'dolphin': '🐬', 'elephant': '🐘', 'egg': '🥚', 'hat': '🎩',
     'bag': '🎒', 'shoe': '👟', 'key': '🔑', 'bell': '🔔', 'pen': '🖊️', 'cup': '☕',
+    'ice': '🧊', 'juice': '🧃', 'nose': '👃', 'queen': '👸', 'umbrella': '☂️', 'van': '🚐', 'xylophone': '🎹', 'yoyo': '🪀', 'zebra': '🦓', 'owl': '🦉',
+    'duck': '🦆', 'butterfly': '🦋', 'parrot': '🦜', 'glasses': '👓', 'balloon': '🎈', 'lemon': '🍋', 'whale': '🐋', 'pear': '🍐', 'ear': '👂', 'hand': '✋',
+    'ant': '🐜', 'sock': '🧦', 'jar': '🫙',
     'wash_hands': '🧼', 'sit_down': '🪑', 'eat': '🍽️', 'drink': '🥛', 'clean_up': '🧹',
   };
 

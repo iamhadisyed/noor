@@ -10,6 +10,7 @@ use App\Models\LoginCode;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -114,6 +115,49 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Sign in with a six-digit PIN. Only accounts that were given a PIN on the server (the owner's admin account and the public demo accounts)
+     * can use it; everyone else signs in with the emailed code. Same answer for an unknown email, an account without a PIN and a wrong PIN,
+     * and five wrong tries lock the account for fifteen minutes.
+     */
+    public function pin(Request $request): JsonResponse
+    {
+        $data = $request->validate(['email' => 'required|email:rfc|max:191', 'pin' => 'required|digits:6', 'device_name' => 'nullable|string|max:60']);
+        $email = strtolower($data['email']);
+        $bad = response()->json(['message' => 'That email or PIN is not right.'], 422);
+        $user = User::where('email', $email)->first();
+
+        if (! $user || ! $user->pin_hash) {
+            Hash::check($data['pin'], '$2y$12$abcdefghijklmnopqrstuuJ6xk0t8m6gq8m0o3kqz1m5yq0Yw9m2e');   // spend the same time, so timing does not tell which emails exist
+            AuditLog::record(null, 'auth.pin_failed', null, ['email_hash' => substr(hash('sha256', $email), 0, 12)]);
+
+            return $bad;
+        }
+        if ($user->pin_locked_until && $user->pin_locked_until->isFuture()) {
+            $wait = max(1, (int) ceil(now()->diffInMinutes($user->pin_locked_until, true)));
+
+            return response()->json(['message' => "Too many wrong tries. Please wait {$wait} minutes and try again.", 'retry_after' => $wait * 60], 429)->header('Retry-After', (string) ($wait * 60));
+        }
+        if (! Hash::check($data['pin'], $user->pin_hash)) {
+            $failed = $user->pin_failed + 1;
+            $user->forceFill($failed >= 5 ? ['pin_failed' => 0, 'pin_locked_until' => now()->addMinutes(15)] : ['pin_failed' => $failed])->save();
+            AuditLog::record($user, 'auth.pin_failed', $user);
+
+            return $bad;
+        }
+        if (! $user->isActive()) {
+            return response()->json(['message' => 'This account is unavailable.'], 403);
+        }
+
+        $user->forceFill(['pin_failed' => 0, 'pin_locked_until' => null, 'last_login_at' => now(), 'email_verified_at' => $user->email_verified_at ?? now()])->save();
+        // demo accounts sign in for a day only; the owner's admin session is as short as an emailed-code admin session
+        $expires = $user->isSuperAdmin() ? now()->addHours((int) config('kindo.admin_token_ttl_hours')) : ($user->is_demo ? now()->addDay() : now()->addDays((int) config('kindo.token_ttl_days')));
+        $token = $user->createToken($data['device_name'] ?? 'web', ['*'], $expires);
+        AuditLog::record($user, 'auth.login_pin', $user, ['device' => $data['device_name'] ?? 'web']);
+
+        return response()->json(['token' => $token->plainTextToken, 'expires_at' => $expires->toIso8601String(), 'is_new' => false, 'user' => $this->present($user)]);
+    }
+
     public function me(Request $request): JsonResponse
     {
         return response()->json($this->present($request->user()));
@@ -167,7 +211,22 @@ class AuthController extends Controller
         return ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'phone' => $u->phone, 'role' => $u->role,
             'plan' => $u->isPro() ? 'pro' : 'free', 'email_verified' => (bool) $u->email_verified_at,
             'shared_children' => \App\Models\SpecialistAccess::where('user_id', $u->id)->where('status', 'active')->count(),
-            'terms_required' => ! $u->isSuperAdmin() && $u->terms_version !== config('legal.version'), 'terms_version' => config('legal.version')];
+            'is_demo' => (bool) $u->is_demo,
+            'ads' => $this->ads($u),
+            'terms_required' => ! $u->isSuperAdmin() && ! $u->is_demo && $u->terms_version !== config('legal.version'), 'terms_version' => config('legal.version')];
+    }
+
+    /**
+     * Ads are shown only to parents on the free plan, only in the parent app, and never to a child. This tells the app whether to show them and
+     * which units to use (config/ads.php, filled in from the .env when the owner has an AdMob account). Null for Pro, demo and when switched off.
+     */
+    private function ads(User $u): ?array
+    {
+        if (! config('ads.enabled') || $u->is_demo || $u->isSuperAdmin() || $u->hasProAccess()) {
+            return null;
+        }
+
+        return ['child_directed' => true, 'personalized' => false, 'parent_app_only' => true, 'units' => config('ads.units')];
     }
 
     /** The public terms and privacy text (also shown before sign-up). */
