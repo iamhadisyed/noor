@@ -84,7 +84,7 @@ Build the phone apps with `flutter build apk --dart-define=KINDO_API=https://YOU
 | `SUPER_ADMIN_EMAILS`, `ADMIN_EMAIL`, `ADMIN_PIN` | who is the owner; the PIN for the owner account |
 | `DEMO_ENABLED`, `DEMO_PARENT_PIN`, `DEMO_CHILD_PIN` | the demo accounts |
 | `PAYMENT_CONTACT_EMAIL`, `PAYMENT_INSTRUCTIONS`, `PRO_DEFAULT_DAYS` | what the "how to pay" email says, and the default length of Pro |
-| `ADS_ENABLED`, `ADMOB_*` | Google adverts for the free parent app (see `docs/LAUNCH_CHECKLIST.md`) |
+| `ADS_ENABLED`, `ADMOB_BANNER_ANDROID`, `ADMOB_BANNER_IOS` | Google adverts for free parents in the Parent app (see `docs/LAUNCH_CHECKLIST.md`) |
 | `GROQ_API_KEYS`, `GEMINI_API_KEYS` | AI reports and lesson import (optional) |
 | `FCM_PROJECT_ID` + the Firebase service account file | push alerts to the parent's phone |
 | `KINDO_BACKUP_PASSWORD` | nightly encrypted backups |
@@ -110,7 +110,7 @@ Build the phone apps with `flutter build apk --dart-define=KINDO_API=https://YOU
 ## Honest limits
 
 - No phone app has been built or run on a phone from this repository; the code, widget tests and web builds are tested. You build the APK and iOS app and publish them.
-- **Adverts**: the settings and the placement are in, but the Google AdMob SDK is not added and no ad has ever been shown. Adverts for children are strictly regulated (COPPA, GDPR-K, Google Families policy): read `docs/LAUNCH_CHECKLIST.md` first.
+- **Adverts**: the AdMob banner is wired into the Parent app for free parents (child-directed, non-personalised, G-rated, off until `ADS_ENABLED=true`), using Google's test ids until you add yours. It has not been run on a phone. Adverts for children are strictly regulated (COPPA, GDPR-K, Google Families policy): read `docs/LAUNCH_CHECKLIST.md` first.
 - Payments are handled by hand on purpose. There is no card or store payment.
 - The autism guide and the AI texts are **general information**. Have a doctor and a child-safety expert read them before launch. The terms and privacy text in `config/legal.php` is a draft for a lawyer.
 - The urdu tracing outlines are simple geometric shapes, not calligraphy. The picture cards and icons are placeholders until a designer supplies final art.

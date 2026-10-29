@@ -21,11 +21,17 @@ What is built is tested, but a few things can only be done by you, the owner. Wo
 - [ ] Final artwork and sounds: icons and picture cards are placeholders (shapes and emoji); animal pictures and sounds are uploaded in **Game library**.
 
 ## 4. Adverts (Google AdMob)
-Kindo is for children, so adverts are heavily restricted. What the code does: adverts are only for **free parents**, only in the **parent app** (never in the child's app), always **child-directed** and **not personalised**, and are **off** unless `ADS_ENABLED=true`. Demo, owner and Pro accounts never get them.
-- [ ] Create an AdMob account and add both apps. When asked, say the apps are **directed at children** (Tag for Child-Directed Treatment). Choose a **max ad content rating of G**.
-- [ ] Add the AdMob SDK (`google_mobile_ads`) to the Parent app and put the unit ids in `.env` (`ADMOB_ANDROID_APP_ID`, `ADMOB_IOS_APP_ID`, `ADMOB_BANNER_ANDROID`, `ADMOB_BANNER_IOS`). The placeholder box `AdSlot` in `apps/kindo_parent/lib/screens/family_tools.dart` is where the banner goes. **This SDK is not added yet and no advert has been tested.**
-- [ ] Follow Google Play Families Policy and Apple Kids Category rules; Apple does not allow third-party adverts in the Kids category, so choose the category with that in mind.
-- [ ] Update the privacy notice to say what the adverts collect.
+Kindo is for children, so adverts are heavily restricted. What the code does: the **Parent app** shows one AdMob banner at the bottom of the home screen to **free parents only**. Never in the child's app, never for Pro, demo or owner accounts, never on the web build. Every request is marked **child-directed** and **under the age of consent**, **non-personalised**, and limited to **G-rated** ads. The server sends the `ads` block only when `ADS_ENABLED=true`; without it nothing loads.
+
+The SDK (`google_mobile_ads`) is in the Parent app. Out of the box it uses **Google's test ids**, so you can see test banners in a debug build. To go live:
+- [ ] Create an AdMob account, add the Android and iOS apps, and when asked say the apps are **directed at children**. Set the maximum ad content rating to **G**.
+- [ ] Create one **banner** ad unit per platform.
+- [ ] Server `.env`: `ADS_ENABLED=true`, `ADMOB_BANNER_ANDROID`, `ADMOB_BANNER_IOS` (and the two app ids for your records).
+- [ ] Android: build with the real app id: `flutter build appbundle -PadmobAppId=ca-app-pub-XXXX~YYYY ...` (or put `admobAppId=...` in `apps/kindo_parent/android/gradle.properties`). iOS: replace `GADApplicationIdentifier` in `apps/kindo_parent/ios/Runner/Info.plist`. **If you forget, a release build shows Google test ads, not yours.**
+- [ ] A release build never falls back to test unit ids: with no `ADMOB_BANNER_*` set it shows no ad at all.
+- [ ] Follow Google Play Families Policy. Apple does not allow third-party adverts in the Kids category, so choose a different App Store category for the Parent app (it is a parent tool) and keep the Junior app ad-free.
+- [ ] Update the privacy notice to say what the adverts collect. Ask a lawyer about consent rules where your users live (COPPA, GDPR-K).
+- [ ] Not yet tested on a real phone: run a debug build, confirm a test banner appears, then a release build with your ids.
 
 ## 5. Legal and safety
 - [ ] Have a lawyer review `config/legal.php` (terms and privacy). It is a draft. Raise `version` to ask parents to accept a new text.
