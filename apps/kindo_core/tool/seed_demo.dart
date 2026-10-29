@@ -65,7 +65,7 @@ Future<void> main(List<String> args) async {
   UploadFile pic(String name) => UploadFile(File('$pics/$name.png').readAsBytesSync(), '$name.png', contentType: 'image/png');
   UploadFile voice(double hz) => UploadFile(tone(hz), 'voice.wav', contentType: 'audio/wav');
 
-  final ayan = await api.createChild(name: 'Ayan', dateOfBirth: '2020-05-04', neurotype: 'autism_spectrum');
+  final ayan = await api.createChild(name: 'Ayan', dateOfBirth: '2018-05-04', neurotype: 'autism_spectrum');
   final lesson = await api.createLesson(ayan.id, title: 'Week 1: letters and numbers', language: 'both');
   await api.addTask(lesson.id, {'type': 'trace_letter', 'title': 'Trace the letter A', 'target': 'A', 'instruction': 'Follow the dots'});
   await api.addTask(lesson.id, {'type': 'trace_number', 'title': 'Trace the number 7', 'target': '7'});

@@ -98,7 +98,7 @@ class GamesTest extends TestCase
                             $this->assertSame(count($r['steps']), count($r['answer_order']));
                             continue;
                         }
-                        if ($game === 'spell_picture') {
+                        if (in_array($game, ['spell_picture', 'scramble', 'hangman'], true)) {
                             $this->assertNotSame('', $r['target']);
                             continue;
                         }

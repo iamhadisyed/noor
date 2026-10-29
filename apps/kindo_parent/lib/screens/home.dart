@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../widgets.dart';
 import 'cards.dart';
 import 'children.dart';
+import 'guidance.dart';
 import 'lessons.dart';
 import 'rewards.dart';
 
@@ -45,6 +46,7 @@ class HomeScreen extends StatelessWidget {
               NavRow(icon: Icons.add_circle_outline_rounded, title: context.tr('Make a lesson', 'سبق بنائیں'), subtitle: context.tr('Words, pictures, tracing', 'الفاظ، تصویریں، لکھائی'), onTap: () => push(context, NewLessonScreen(child: child))),
               NavRow(icon: Icons.photo_library_outlined, title: context.tr('Picture cards', 'تصویری کارڈ'), subtitle: context.tr('What your child can ask for', 'آپ کا بچہ کیا مانگ سکتا ہے'), onTap: () => push(context, const CardsScreen())),
               NavRow(icon: Icons.emoji_events_outlined, title: context.tr('Games and play time', 'کھیل اور وقت'), subtitle: context.tr('${child.balanceMinutes} minutes saved', '${child.balanceMinutes} منٹ جمع ہیں'), onTap: () => push(context, RewardsScreen(child: child))),
+              if (child.neurotype == 'autism_spectrum') NavRow(icon: Icons.menu_book_outlined, title: context.tr('A guide for parents', 'والدین کے لیے رہنما'), subtitle: context.tr('Health checks, food and exercise (Pro)', 'صحت کے معائنے، خوراک اور ورزش (پرو)'), onTap: () => push(context, const GuidanceScreen())),
               NavRow(icon: Icons.tune_rounded, title: context.tr('How ${child.name} learns', 'سیکھنے کا انداز'), subtitle: context.tr('Pace, help, praise', 'رفتار، مدد، تعریف'), onTap: () => push(context, ChildFormScreen(child: child))),
             ]),
           ),

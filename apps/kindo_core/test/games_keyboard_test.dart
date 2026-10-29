@@ -10,6 +10,8 @@ void main() {
       expect(GameRunner.kindOf({'target': 'cat', 'keyboard': 'english'}), RoundKind.spell);
       expect(GameRunner.kindOf({'steps': [], 'answer_order': ['a']}), RoundKind.order);
       expect(GameRunner.kindOf({'pairs': [], 'cards': 4}), RoundKind.memory);
+      expect(GameRunner.kindOf({'mode': 'scramble', 'target': 'cat', 'keyboard': 'english', 'letters': ['t', 'a', 'c']}), RoundKind.scramble);
+      expect(GameRunner.kindOf({'mode': 'guess', 'target': 'cat', 'keyboard': 'english'}), RoundKind.guess);
     });
 
     test('only the first try counts, but a child can always try again', () {
@@ -42,6 +44,34 @@ void main() {
       g.next();
       expect(g.answerSpelling('کتاب').correct, isTrue);
       expect(g.answerSpelling('کتب').correct, isFalse);
+    });
+
+    test('a word puzzle and a guessing game are scored like spelling: first try only', () {
+      final r = GameRunner(session([
+        {'mode': 'scramble', 'target': 'cat', 'keyboard': 'english', 'letters': ['t', 'a', 'c']},
+        {'mode': 'guess', 'target': 'dog', 'keyboard': 'english'},
+      ]));
+      expect(r.kind, RoundKind.scramble);
+      expect(r.answerSpelling('act').correct, isFalse);
+      expect(r.answerSpelling('cat').firstTry, isFalse, reason: 'a second try never scores');
+      r.next();
+      expect(r.kind, RoundKind.guess);
+      expect(r.answerSpelling('').correct, isFalse, reason: 'the game ended without the word being found');
+      r.next();
+      expect(r.report().correct, 0);
+    });
+
+    test('a game says which ages it suits, and a child of any age or an unknown age fits sensibly', () {
+      final g = GameInfo.fromJson({'game': 'scramble', 'category': 'language', 'title': {'en': 'Word puzzle', 'ur': ''}, 'age': [7, 10]});
+      expect(g.ageLabel, '7-10');
+      expect(g.fitsAge(8), isTrue);
+      expect(g.fitsAge(4), isFalse);
+      expect(g.fitsAge(null), isTrue);
+      final old = GameInfo.fromJson({'game': 'count', 'category': 'math', 'title': {'en': 'x', 'ur': ''}});
+      expect(old.fitsAge(9), isTrue, reason: 'an older server sends no ages: every game fits');
+      final calm = CalmActivity.fromJson({'activity': 'balloon_belly', 'kind': 'breathing', 'emoji': '🎈', 'age': [3, 7], 'steps': [], 'title': {}, 'about': {}});
+      expect(calm.emoji, '🎈');
+      expect(calm.fitsAge(9), isFalse);
     });
 
     test('a routine must be tapped in the right order', () {

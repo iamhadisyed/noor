@@ -16,6 +16,12 @@ enum RoundKind {
 
   /// A board of `pairs` to flip and match (`memory_match`).
   memory,
+
+  /// Jumbled `letters` to tap into the order of the word `target` (`scramble`, "word puzzle").
+  scramble,
+
+  /// Guess the secret word `target` one letter at a time, with a few misses allowed (`hangman`, "guess the word").
+  guess,
 }
 
 class RoundResult {
@@ -59,6 +65,8 @@ class GameRunner {
 
   static RoundKind kindOf(Json round) {
     if (round.containsKey('answer_order')) return RoundKind.order;
+    if (round['mode'] == 'scramble') return RoundKind.scramble;
+    if (round['mode'] == 'guess') return RoundKind.guess;
     if (round.containsKey('pairs')) return RoundKind.memory;
     if (round.containsKey('target') && round.containsKey('keyboard')) return RoundKind.spell;
     return RoundKind.choice;
@@ -89,9 +97,10 @@ class GameRunner {
     return _record(optionIndex == (current['answer_index'] as num).toInt());
   }
 
-  /// The child typed a word.
+  /// The child typed a word (spelling), built it from jumbled letters (puzzle), or solved the guessing game. Pass an empty string when the
+  /// guessing game ended without the word being found, so it counts as not right.
   RoundResult answerSpelling(String typed) {
-    assert(kind == RoundKind.spell);
+    assert(kind == RoundKind.spell || kind == RoundKind.scramble || kind == RoundKind.guess);
     return _record(sameWord(typed, '${current['target']}'));
   }
 

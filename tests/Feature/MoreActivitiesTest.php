@@ -261,8 +261,11 @@ class MoreActivitiesTest extends TestCase
         $c = $this->parent();   // a child with no play minutes at all can still use them
         $list = collect($this->getJson('/api/v1/activities')->assertOk()->json('activities'))->keyBy('activity');
 
-        $this->assertEqualsCanonicalizing(['breathing_bubble', 'five_senses', 'squeeze_release', 'slow_count', 'movement_break'], $list->keys()->all());
+        $this->assertEqualsCanonicalizing(['breathing_bubble', 'five_senses', 'squeeze_release', 'slow_count', 'movement_break', 'balloon_belly', 'bubble_blowing', 'animal_stretch', 'slow_simon', 'body_scan', 'good_things'], $list->keys()->all());
         foreach ($list as $a) {
+            $this->assertNotEmpty($a['emoji'], 'every activity has a picture the app can show');
+            $this->assertCount(2, $a['age']);
+            $this->assertLessThanOrEqual(10, $a['age'][1]);
             $this->assertNotEmpty($a['title']['en']);
             $this->assertNotEmpty($a['title']['ur']);
             $this->assertNotEmpty($a['steps']);

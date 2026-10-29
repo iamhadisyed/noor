@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../widgets.dart';
 import 'cards.dart';
 import 'children.dart';
+import 'guidance.dart';
 import 'rewards.dart';
 
 class MoreScreen extends StatelessWidget {
@@ -33,6 +34,7 @@ class MoreScreen extends StatelessWidget {
           NavRow(icon: Icons.add_rounded, title: context.tr('Add a child', 'بچہ شامل کریں'), onTap: () => push(context, const ChildFormScreen())),
           NavRow(icon: Icons.photo_library_outlined, title: context.tr('Picture and family cards', 'تصویری اور خاندانی کارڈ'), onTap: child == null ? null : () => push(context, const CardsScreen())),
           NavRow(icon: Icons.emoji_events_outlined, title: context.tr('Games and play time', 'کھیل اور وقت'), onTap: child == null ? null : () => push(context, RewardsScreen(child: child))),
+          NavRow(icon: Icons.menu_book_outlined, title: context.tr('Autism guide for parents', 'آٹزم: والدین کے لیے رہنما'), subtitle: context.tr('Health checks, food, exercise. Pro', 'صحت کے معائنے، خوراک، ورزش۔ پرو'), onTap: () => push(context, const GuidanceScreen())),
           NavRow(icon: Icons.support_agent_rounded, title: context.tr('Therapists and teachers', 'تھراپسٹ اور اساتذہ'), onTap: child == null ? null : () => push(context, SpecialistsScreen(child: child))),
         ]),
       ),

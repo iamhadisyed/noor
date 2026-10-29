@@ -12,20 +12,38 @@ http.Response _j(Object body, [int status = 200]) => http.Response(jsonEncode(bo
 Map<String, dynamic> _ch(String e, int id, Map<String, dynamic> d) => {'entity': e, 'id': id, 'op': 'upsert', 'data': d};
 
 /// A tiny pretend server: just enough for the parent app to show a family.
-MockClient _server(List<String> log) => MockClient((r) async {
+MockClient _server(List<String> log, {bool pro = true}) => MockClient((r) async {
       log.add('${r.method} ${r.url.path}');
       final p = r.url.path.replaceFirst('/api/v1', '');
       if (p == '/me') return _j({'id': 1, 'email': 'mum@example.com', 'name': 'Sana', 'role': 'parent', 'plan': 'free'});
       if (p == '/meta') return _j({'keyboards': {'english': {'letters': 'abcdefghijklmnopqrstuvwxyz'.split(''), 'direction': 'ltr', 'columns': 7}}});
       if (p == '/sync') {
         return _j({'snapshot': true, 'cursor': 5, 'has_more': false, 'changes': [
-          _ch('child', 1, {'id': 1, 'name': 'Ayan', 'track': 'special', 'support': {'pace': 'slow'}}),
+          _ch('child', 1, {'id': 1, 'name': 'Ayan', 'track': 'special', 'neurotype': 'autism_spectrum', 'support': {'pace': 'slow'}}),
           _ch('lesson', 3, {'id': 3, 'child_id': 1, 'title': 'Colours week', 'status': 'published', 'week_number': 1, 'tasks': []}),
           _ch('need', 9, {'id': 9, 'child_id': 1, 'need_type': 'water', 'status': 'sent'}),
         ]});
       }
       if (p == '/children/1/insights/summary') return _j({'practice': {'minutes': 12, 'accuracy_pct': 80, 'sessions': 3}, 'needs': {'total': 4}, 'calm': {'minutes': 2}});
       if (p == '/announcements') return _j([]);
+      if (p == '/guidance/autism') {
+        const title = {'en': 'A guide for parents of a child with autism', 'ur': 'رہنما'};
+        if (!pro) {
+          return _j({'message': 'Pro', 'upgrade': true, 'title': title, 'preview': [{'key': 'tests', 'title': {'en': 'Health checks doctors often ask about', 'ur': 'معائنے'}}, {'key': 'food', 'title': {'en': 'Food and eating', 'ur': 'خوراک'}}]}, 402);
+        }
+        return _j({
+          'guide': 'autism',
+          'title': title,
+          'disclaimer': {'en': 'This is general information only. It is not medical advice. Please talk to your own child\'s doctor.', 'ur': 'یہ صرف عمومی معلومات ہیں۔'},
+          'closing': {'en': 'This guide is not a replacement for your child\'s doctor.', 'ur': 'ڈاکٹر کی جگہ نہیں'},
+          'sections': [
+            {'key': 'tests', 'title': {'en': 'Health checks doctors often ask about', 'ur': 'معائنے'}, 'intro': {'en': 'There is no blood test that can diagnose autism.', 'ur': 'x'}, 'items': [
+              {'title': {'en': 'Iron and ferritin', 'ur': 'آئرن'}, 'text': {'en': 'Low iron is common in children.', 'ur': 'x'}},
+            ]},
+            {'key': 'food', 'title': {'en': 'Food and eating', 'ur': 'خوراک'}, 'intro': {'en': 'No food or diet treats or cures autism.', 'ur': 'x'}, 'items': []},
+          ],
+        });
+      }
       if (p.endsWith('/acknowledge')) return _j({'id': 9, 'child_id': 1, 'need_type': 'water', 'status': 'on_the_way'});
       if (p.endsWith('/seen')) return _j({'id': 9, 'child_id': 1, 'need_type': 'water', 'status': 'seen'});
       return _j({});
@@ -93,6 +111,49 @@ void main() {
     await t.pumpAndSettle();
     expect(find.text('اسباق'), findsOneWidget);
     expect(Directionality.of(t.element(find.text('اسباق'))), TextDirection.rtl);
+    s.stopAutoSync();
+  });
+
+  testWidgets('the autism guide (Pro): the warning comes first and last, and the sections open with plain words', (t) async {
+    await t.binding.setSurfaceSize(const Size(500, 1600));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    final s = await _signedIn([]);
+    await t.pumpWidget(ParentApp(session: s));
+    await t.pumpAndSettle();
+    // a child with autism gets the guide on the home screen
+    await t.scrollUntilVisible(find.text('A guide for parents'), 200, scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text('A guide for parents'));
+    await t.pumpAndSettle();
+    expect(find.text('Please read first'), findsOneWidget);
+    expect(find.textContaining('not medical advice'), findsOneWidget);
+    expect(find.textContaining('Please talk to your own child'), findsOneWidget);
+    expect(t.getTopLeft(find.text('Please read first')).dy < t.getTopLeft(find.text('Health checks doctors often ask about')).dy, isTrue);
+    await t.tap(find.text('Health checks doctors often ask about'));
+    await t.pumpAndSettle();
+    expect(find.textContaining('no blood test that can diagnose autism'), findsOneWidget);
+    expect(find.text('Iron and ferritin'), findsOneWidget);
+    await t.scrollUntilVisible(find.text('Remember'), 300, scrollable: find.byType(Scrollable).last);
+    expect(find.textContaining('not a replacement for your child'), findsOneWidget);
+    s.stopAutoSync();
+  });
+
+  testWidgets('the autism guide on the free plan says it is part of Pro and lists what is inside', (t) async {
+    final store = MemoryStore();
+    await store.write('kindo.token', 'tok');
+    final s = KindoSession(store: store, defaultBaseUrl: 'https://k.test/api/v1', httpClient: _server([], pro: false));
+    await s.init();
+    await t.binding.setSurfaceSize(const Size(500, 1600));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    await t.pumpWidget(ParentApp(session: s));
+    await t.pumpAndSettle();
+    await t.tap(find.text('More'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Autism guide for parents'));
+    await t.pumpAndSettle();
+    expect(find.text('This guide is part of Kindo Pro.'), findsOneWidget);
+    expect(find.text('- Food and eating'), findsOneWidget);
+    expect(find.textContaining('not medical advice'), findsNothing, reason: 'nothing of the guide is given away');
+    expect(find.text('See plans'), findsOneWidget);
     s.stopAutoSync();
   });
 }

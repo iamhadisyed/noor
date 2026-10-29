@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs the portal end-to-end suite against a throwaway local server (real Laravel app, sqlite file, emails written to the log).
-# Needs: php, node, and Playwright (`npm i -g playwright` + a browser). Usage: tests/e2e/run.sh
+# Needs: php, node, and Playwright (`npm i -g playwright` + a browser). Usage: tests/e2e/run.sh [file-pattern, e.g. 20-guidance]
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 DB="$(mktemp -d)/e2e.sqlite"; touch "$DB"
@@ -14,5 +14,5 @@ SERVER=$!; trap 'kill $SERVER 2>/dev/null || true' EXIT
 for i in $(seq 1 40); do curl -sf http://127.0.0.1:8099/portal/ >/dev/null && break; sleep 0.25; done
 export NODE_PATH="${NODE_PATH:-$(npm root -g)}"
 status=0
-for t in tests/e2e/[0-9]*.cjs; do echo "── $(basename "$t")"; node "$t" || status=1; done
+for t in tests/e2e/${1:-[0-9]*}.cjs; do echo "── $(basename "$t")"; node "$t" || status=1; done
 exit $status

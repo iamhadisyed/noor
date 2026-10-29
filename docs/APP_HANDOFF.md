@@ -119,6 +119,11 @@ Design rule: no clutter, no timers when `no_timers` is on, slow pace when `pace`
 - [ ] **Calm activities** (`GET activities`): build one breathing screen and one step-by-step screen that read the steps from the server (the `cue` drives the picture; `seconds` is the pace). Always reachable, also from the needs board for a child who is upset. No score, no sound unless the parent turns it on. Report with `POST children/{id}/activities/{activity}/done`.
 - [ ] **Games**: 11 more, listed with their round shapes in `docs/GAMES.md`. Put the games whose `for` includes the child's track first. `feelings`, `routine_order` and `match_same` are made for children who need more support: no clock, one clear instruction, and gentle wrong-answer feedback ("try again", never a buzzer).
 
+## 3c. Parent guide (Pro)
+
+- [ ] `GET guidance/autism`: the guide with `disclaimer`, `closing`, and `sections[]` (`tests`, `food`, `exercise`, `daily`, `doctor`), each with `intro` and `items[]` of `title` and `text`, every string in `en` and `ur`. The free plan gets 402 with the section titles in `preview`; show those and the plan screen. **Always show the disclaimer first and the closing note last, never collapsed.** Never present any of it as medical advice, and do not add claims of your own.
+- [ ] Round kinds added for the new games: `mode: scramble` and `mode: guess` (no `options`; scored with the spelling call), `pattern`, `hour`/`minute`, `number`, `scale` (see `docs/GAMES.md`). Games and calm activities carry `age` and `emoji`.
+
 ## 4. Games and play time
 
 Read `docs/GAMES.md`. Summary:

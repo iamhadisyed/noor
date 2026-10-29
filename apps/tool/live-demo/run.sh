@@ -32,7 +32,10 @@ for _ in $(seq 1 40); do curl -s -o /dev/null "http://127.0.0.1:$API/api/v1/meta
 seed() { (cd apps/kindo_core && KINDO_BASE=http://127.0.0.1:$API/api/v1 KINDO_LOG="$ROOT/storage/logs/laravel.log" dart run tool/seed_demo.dart "$1" | tail -1 | python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])'); }
 export NODE_PATH="${NODE_PATH:-$(npm root -g)}"
 OUT="$ROOT/demo/apps-live"; mkdir -p "$OUT/parent" "$OUT/junior"
-STEPS="$HERE/steps-parent.json" node "$HERE/shots.cjs" parent $PARENT "$(seed parent-demo@kindo.test)" "$OUT/parent"
+PARENT_TOKEN="$(seed parent-demo@kindo.test)"
+# the parent guide is a Pro feature: give the demo parent Pro, the way an admin gift would
+php artisan tinker --execute='App\Models\User::where("email", "parent-demo@kindo.test")->update(["subscription_tier" => "pro"]);' >/dev/null 2>&1 || true
+STEPS="$HERE/steps-parent.json" node "$HERE/shots.cjs" parent $PARENT "$PARENT_TOKEN" "$OUT/parent"
 STEPS="$HERE/steps-junior.json" node "$HERE/shots.cjs" junior $JUNIOR "$(seed junior-demo@kindo.test)" "$OUT/junior"
 rm -f "$OUT"/*/failed-*.png
 echo "Screenshots are in $OUT"

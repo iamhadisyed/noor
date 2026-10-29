@@ -23,8 +23,16 @@ class ArtIcon extends StatelessWidget {
     'wake_up': '⏰', 'wash_face': '🧼', 'brush_teeth': '🪥', 'eat_breakfast': '🥣', 'get_dressed': '👕', 'pack_bag': '🎒',
     'bath': '🛁', 'pajamas': '🩳', 'story': '📖', 'sleep': '😴',
     'wet': '💧', 'soap': '🧼', 'scrub': '👐', 'rinse': '🚿', 'dry': '🧻',
+    'moon': '🌙', 'sun': '☀️', 'tree': '🌳', 'book': '📖', 'rain': '🌧️', 'milk': '🥛', 'frog': '🐸', 'bear': '🐻', 'lion': '🦁', 'cake': '🎂',
+    'door': '🚪', 'ship': '🚢', 'house': '🏠', 'water': '💧', 'horse': '🐴', 'plant': '🌱', 'cloud': '☁️', 'pizza': '🍕', 'tiger': '🐯', 'bread': '🍞',
+    'chair': '🪑', 'clock': '⏰', 'snake': '🐍', 'mouse': '🐭', 'train': '🚆', 'river': '🏞️', 'rabbit': '🐰', 'flower': '🌸', 'school': '🏫', 'garden': '🌻',
+    'monkey': '🐵', 'pencil': '✏️', 'bottle': '🍼', 'rainbow': '🌈', 'giraffe': '🦒', 'penguin': '🐧', 'dolphin': '🐬', 'elephant': '🐘', 'egg': '🥚', 'hat': '🎩',
+    'bag': '🎒', 'shoe': '👟', 'key': '🔑', 'bell': '🔔', 'pen': '🖊️', 'cup': '☕',
     'wash_hands': '🧼', 'sit_down': '🪑', 'eat': '🍽️', 'drink': '🥛', 'clean_up': '🧹',
   };
+
+  /// Does this name have a drawing (shape, face or emoji)? Anything else shows as a letter in a circle.
+  static bool knows(String name) => _shapes.contains(name) || _faces.contains(name) || _emoji.containsKey(name);
 
   @override
   Widget build(BuildContext context) {

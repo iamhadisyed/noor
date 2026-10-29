@@ -116,7 +116,7 @@ class _BodyState extends State<_Body> {
             for (final g in games)
               SwitchListTile(
                 title: Text(ur ? g.title.ur : g.title.en),
-                subtitle: Text(!g.available ? context.tr('Needs content from the Kindo team', 'کنڈو ٹیم کے مواد کی ضرورت ہے') : g.plays == 0 ? context.tr('Not played yet', 'ابھی نہیں کھیلا') : context.tr('Level ${g.level}, played ${g.plays} times', 'لیول ${g.level}، ${g.plays} بار کھیلا')),
+                subtitle: Text('${context.tr('Ages ${g.ageLabel}', 'عمر ${g.ageLabel}')}  -  ${!g.available ? context.tr('Needs content from the Kindo team', 'کنڈو ٹیم کے مواد کی ضرورت ہے') : g.plays == 0 ? context.tr('Not played yet', 'ابھی نہیں کھیلا') : context.tr('Level ${g.level}, played ${g.plays} times', 'لیول ${g.level}، ${g.plays} بار کھیلا')}'),
                 secondary: g.forTracks.length == 1 && g.forTracks.first == 'special' ? const Icon(Icons.favorite_border_rounded) : null,
                 value: g.enabled,
                 onChanged: g.available ? (v) => toggle(g, v) : null,
