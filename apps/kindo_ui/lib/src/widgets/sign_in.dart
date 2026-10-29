@@ -21,7 +21,7 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final _email = TextEditingController();
   final _code = TextEditingController();
-  bool _sent = false, _busy = false;
+  bool _sent = false, _busy = false, _pin = false;
 
   @override
   void dispose() {
@@ -42,6 +42,19 @@ class _SignInScreenState extends State<SignInScreen> {
       _busy = false;
       if (ok == true) _sent = true;
     });
+  }
+
+  Future<void> _signInPin() async {
+    final s = context.read<KindoSession>();
+    setState(() => _busy = true);
+    try {
+      await s.signInWithPin(_email.text, _code.text);
+      widget.onSignedIn?.call();
+    } on ApiException catch (e) {
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _verify({bool accept = false}) async {
@@ -112,16 +125,18 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 28),
                 KindoCard(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    Text(_sent ? 'Enter the code' : 'Sign in', style: Theme.of(context).textTheme.titleLarge),
+                    Text(_pin ? 'Sign in with a PIN' : (_sent ? 'Enter the code' : 'Sign in'), style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 14),
-                    TextField(controller: _email, enabled: !_sent, keyboardType: TextInputType.emailAddress, autofillHints: const [AutofillHints.email], decoration: const InputDecoration(labelText: 'Email')),
-                    if (_sent) ...[
+                    TextField(controller: _email, enabled: !_sent || _pin, keyboardType: TextInputType.emailAddress, autofillHints: const [AutofillHints.email], decoration: const InputDecoration(labelText: 'Email')),
+                    if (_sent || _pin) ...[
                       const SizedBox(height: 12),
-                      TextField(controller: _code, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Code from your email')),
+                      TextField(controller: _code, keyboardType: TextInputType.number, obscureText: _pin, maxLength: _pin ? 6 : null, decoration: InputDecoration(labelText: _pin ? '6-digit PIN' : 'Code from your email')),
                     ],
                     const SizedBox(height: 18),
-                    FilledButton(onPressed: _busy ? null : (_sent ? _verify : _send), child: Text(_busy ? 'Please wait...' : (_sent ? 'Sign in' : 'Email me a code'))),
-                    if (_sent) TextButton(onPressed: _busy ? null : () => setState(() => _sent = false), child: const Text('Use a different email')),
+                    FilledButton(onPressed: _busy ? null : (_pin ? _signInPin : (_sent ? _verify : _send)), child: Text(_busy ? 'Please wait...' : (_pin || _sent ? 'Sign in' : 'Email me a code'))),
+                    if (_sent && !_pin) TextButton(onPressed: _busy ? null : () => setState(() => _sent = false), child: const Text('Use a different email')),
+                    // demo and owner accounts are given a PIN; everyone else uses the emailed code
+                    if (!_sent) TextButton(onPressed: _busy ? null : () => setState(() { _pin = !_pin; _code.clear(); }), child: Text(_pin ? 'Email me a code instead' : 'I have a PIN')),
                   ]),
                 ),
               ]),

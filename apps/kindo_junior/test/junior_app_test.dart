@@ -14,7 +14,7 @@ Map<String, dynamic> _ch(String e, int id, Map<String, dynamic> d) => {'entity':
 final _letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
 /// A tiny pretend server: one child, one lesson with a choice task and a spelling task, the stock cards, and a game.
-MockClient _server(List<String> log, {Map<String, dynamic>? support}) => MockClient((r) async {
+MockClient _server(List<String> log, {Map<String, dynamic>? support, Map<String, dynamic>? screenTime}) => MockClient((r) async {
       final p = r.url.path.replaceFirst('/api/v1', '');
       log.add('${r.method} $p${r.body.isEmpty ? '' : ' ${r.body}'}');
       if (p == '/me') return _j({'id': 1, 'email': 'mum@example.com', 'name': 'Sana', 'role': 'parent', 'plan': 'free'});
@@ -27,7 +27,7 @@ MockClient _server(List<String> log, {Map<String, dynamic>? support}) => MockCli
       }
       if (p == '/sync') {
         return _j({'snapshot': true, 'cursor': 5, 'has_more': false, 'changes': [
-          _ch('child', 1, {'id': 1, 'name': 'Ayan', 'track': 'special', 'rewards': {'balance_minutes': 5}, 'date_of_birth': '${DateTime.now().year - 5}-01-01', 'support': support ?? {'pace': 'slow', 'max_choices': 2, 'praise': 'quiet'}}),
+          _ch('child', 1, {'id': 1, 'name': 'Ayan', 'track': 'special', 'rewards': {'balance_minutes': 5}, 'date_of_birth': '${DateTime.now().year - 5}-01-01', 'support': support ?? {'pace': 'slow', 'max_choices': 2, 'praise': 'quiet'}, 'screen_time': screenTime}),
           _ch('lesson', 3, {'id': 3, 'child_id': 1, 'title': 'Fruit', 'status': 'published', 'week_number': 1, 'language': 'english', 'tasks': [
             {'id': 30, 'position': 1, 'type': 'pick_picture', 'title': 'Which is the apple?', 'options': {'choices': ['Banana', 'Apple', 'Mango'], 'correct': 1}},
             {'id': 31, 'position': 2, 'type': 'spell_word', 'title': 'Spell cat', 'target': 'cat', 'keyboard': 'english'},
@@ -62,15 +62,26 @@ MockClient _server(List<String> log, {Map<String, dynamic>? support}) => MockCli
           {'prompt': {'en': 'What time is it?', 'ur': 'وقت'}, 'hour': 3, 'minute': 0, 'options': ['3:00', '6:00'], 'answer_index': 0},
         ]});
       }
+      if (p == '/learn') {
+        return _j({'topics': [
+          {'topic': 'space', 'emoji': '🚀', 'color': '#B9A2F5', 'title': {'en': 'Space and galaxies', 'ur': 'خلا'}, 'about': {'en': 'Travel past the Moon.', 'ur': 'چاند'}, 'game': 'science_space', 'facts': 12},
+          {'topic': 'ai', 'emoji': '🤖', 'color': '#F9A8D4', 'title': {'en': 'AI and smart helpers', 'ur': 'اے آئی'}, 'about': {'en': 'What is AI?', 'ur': 'اے آئی کیا ہے'}, 'game': 'science_ai', 'facts': 12},
+        ]});
+      }
+      if (p == '/learn/space') {
+        return _j({'topic': 'space', 'game': 'science_space', 'facts': [
+          {'key': 'moon', 'emoji': '🌙', 'title': {'en': 'The Moon', 'ur': 'چاند'}, 'text': {'en': 'The Moon goes around the Earth.', 'ur': 'چاند زمین کے گرد گھومتا ہے'}},
+        ]});
+      }
       if (p == '/children/1/sessions') return _j({'id': 1, 'reward': {'earned': 2}}, 201);
       if (p == '/child/alert') return _j({'id': 9}, 201);
       return _j({});
     });
 
-Future<KindoSession> _signedIn(List<String> log, {Map<String, dynamic>? support}) async {
+Future<KindoSession> _signedIn(List<String> log, {Map<String, dynamic>? support, Map<String, dynamic>? screenTime}) async {
   final store = MemoryStore();
   await store.write('kindo.token', 'tok');
-  final s = KindoSession(store: store, defaultBaseUrl: 'https://k.test/api/v1', httpClient: _server(log, support: support));
+  final s = KindoSession(store: store, defaultBaseUrl: 'https://k.test/api/v1', httpClient: _server(log, support: support, screenTime: screenTime));
   await s.init();
   await s.refresh();
   return s;
@@ -87,6 +98,52 @@ void main() {
     await s.init();
     await _open(t, s);
     expect(find.text('Email me a code'), findsOneWidget);
+  });
+
+  testWidgets('cool time: when the allowance is used the child sees a calm screen, can still say what they need, and nothing else', (t) async {
+    final log = <String>[];
+    final s = await _signedIn(log, screenTime: {'enabled': true, 'daily_minutes': 0});
+    await _open(t, s);
+    expect(find.text('Cool time!'), findsOneWidget);
+    expect(find.text('Play'), findsNothing);
+    expect(find.text('Hello, Ayan!'), findsNothing);
+    await t.tap(find.text('I need...'));
+    await t.pumpAndSettle();
+    expect(find.text('Water'), findsOneWidget, reason: 'the needs board stays open');
+    s.stopAutoSync();
+  });
+
+  testWidgets('sleepy time: quiet hours show the resting screen even when time is left', (t) async {
+    final s = await _signedIn([], screenTime: {'enabled': true, 'daily_minutes': 60, 'quiet_start': '00:00', 'quiet_end': '23:59'});
+    await _open(t, s);
+    expect(find.text('Sleepy time'), findsOneWidget);
+    s.stopAutoSync();
+  });
+
+  testWidgets('with screen time switched off the child is never locked', (t) async {
+    final s = await _signedIn([], screenTime: {'enabled': false, 'daily_minutes': 0});
+    await _open(t, s);
+    expect(find.text('Cool time!'), findsNothing);
+    expect(find.text('Hello, Ayan!'), findsOneWidget);
+    s.stopAutoSync();
+  });
+
+  testWidgets('discover: topics by theme, facts for the age, and a way into the quiz', (t) async {
+    await t.binding.setSurfaceSize(const Size(500, 2200));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    final log = <String>[];
+    final s = await _signedIn(log);
+    await _open(t, s);
+    await t.tap(find.text('Discover'));
+    await t.pumpAndSettle();
+    expect(find.text('Space and galaxies'), findsOneWidget);
+    expect(find.text('AI and smart helpers'), findsOneWidget);
+    await t.tap(find.text('Space and galaxies'));
+    await t.pumpAndSettle();
+    expect(find.text('The Moon'), findsOneWidget);
+    expect(find.text('Play the quiz'), findsOneWidget);
+    expect(log.any((l) => l.startsWith('GET /learn/space')), isTrue);
+    s.stopAutoSync();
   });
 
   testWidgets('home greets the child and shows big tiles', (t) async {

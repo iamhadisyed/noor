@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../widgets/gate.dart';
 import 'calm.dart';
+import 'discover.dart';
 import 'family_game.dart';
 import 'games.dart';
 import 'lessons.dart';
@@ -94,6 +95,7 @@ class _JuniorShellState extends State<JuniorShell> with WidgetsBindingObserver {
       _Tile(context.tr('I need...', 'مجھے چاہیے...'), Icons.record_voice_over_rounded, KindoColors.butter, () => goTo(context, const NeedsBoard())),
       _Tile(context.tr('Learn', 'سیکھیں'), Icons.menu_book_rounded, KindoColors.lilac, () => goTo(context, const LessonsList()), badge: lessons.isEmpty ? null : '${lessons.length}'),
       _Tile(context.tr('Play', 'کھیلیں'), Icons.sports_esports_rounded, KindoColors.lavender, () => goTo(context, const GamesHub()), badge: child.balanceMinutes > 0 ? '${child.balanceMinutes}m' : null),
+      _Tile(context.tr('Discover', 'دریافت'), Icons.rocket_launch_rounded, const Color(0xFFB7D8FF), () => goTo(context, const DiscoverHub())),
       _Tile(context.tr('Calm', 'سکون'), Icons.spa_rounded, const Color(0xFFCFE8DB), () => goTo(context, const CalmHub())),
       if (family.length >= 2) _Tile(context.tr('My family', 'میرا خاندان'), Icons.family_restroom_rounded, KindoColors.cream, () => goTo(context, const FamilyGame())),
     ];

@@ -16,15 +16,19 @@ List<List<Pt>> carefulTrace(GlyphShape g) => [for (final s in g.strokes) trace(s
 
 void main() {
   group('StrokeLibrary', () {
-    test('every digit, every English capital and four Urdu letters have a shape', () {
+    test('every digit, capital, small letter and the whole Urdu alphabet have a shape', () {
       for (final c in '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')) {
         expect(StrokeLibrary.lookup(c), isNotNull, reason: c);
       }
-      for (final c in ['ا', 'ب', 'پ', 'ت']) {
+      for (final c in 'abcdefghijklmnopqrstuvwxyz'.split('')) {
+        expect(StrokeLibrary.lookup(c)!.id, c, reason: 'small $c has its own shape');
+      }
+      for (final c in 'ا آ ب پ ت ٹ ث ج چ ح خ د ڈ ذ ر ڑ ز ژ س ش ص ض ط ظ ع غ ف ق ک گ ل م ن ں و ہ ھ ی ے'.split(' ')) {
         expect(StrokeLibrary.lookup(c), isNotNull, reason: c);
       }
-      expect(StrokeLibrary.lookup('a')!.id, 'A', reason: 'lower case finds the capital');
-      expect(StrokeLibrary.lookup('ز'), isNull);
+      expect(StrokeLibrary.lookup('ء'), isNull, reason: 'the hamza has no stroke of its own');
+      expect(StrokeLibrary.lookup('ئ'), isNull);
+      expect(StrokeLibrary.lookup('ؤ'), isNull);
       expect(StrokeLibrary.lookup(''), isNull);
     });
 

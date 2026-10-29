@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -12,6 +12,8 @@ http.Response _j(Object body, [int status = 200]) => http.Response(jsonEncode(bo
 Map<String, dynamic> _ch(String e, int id, Map<String, dynamic> d) => {'entity': e, 'id': id, 'op': 'upsert', 'data': d};
 
 /// A tiny pretend server: just enough for the parent app to show a family.
+String? upgrade;
+
 MockClient _server(List<String> log, {bool pro = true}) => MockClient((r) async {
       log.add('${r.method} ${r.url.path}');
       final p = r.url.path.replaceFirst('/api/v1', '');
@@ -44,6 +46,19 @@ MockClient _server(List<String> log, {bool pro = true}) => MockClient((r) async 
           ],
         });
       }
+      if (p == '/children/1/screen-time' && r.method == 'GET') {
+        if (!pro) return _j({'message': 'Pro', 'upgrade': true}, 402);
+        return _j({'settings': {'enabled': true, 'daily_minutes': 60, 'quiet_start': '20:00', 'quiet_end': '07:00'}, 'today': {'date': '2025-01-02', 'used_seconds': 1200, 'allowed_seconds': 3600, 'locked': false}, 'week': [{'date': '2025-01-01', 'seconds': 600}, {'date': '2025-01-02', 'seconds': 1200}]});
+      }
+      if (p == '/children/1/screen-time/extend') return _j({'ok': true});
+      if (p == '/children/1/activity') {
+        return _j({'days': 1, 'limited': !pro, 'summary': {'practice_minutes': 7, 'game_minutes': 5, 'calm_sessions': 1, 'asked_for': 2}, 'items': [
+          {'kind': 'game', 'at': '2025-01-02T10:00:00+00:00', 'title': 'Played: Space quiz', 'minutes': 5, 'detail': '4 of 5 right first time'},
+        ], if (!pro) 'upgrade_hint': 'More with Pro'});
+      }
+      if (p == '/billing/upgrade' && r.method == 'GET') return _j({'request': upgrade == null ? null : {'status': upgrade}, 'payment': {'instructions': 'Pay by bank transfer', 'contact_email': 'pay@kindo.example'}});
+      if (p == '/billing/upgrade' && r.method == 'POST') { upgrade = 'requested'; return _j({'request': {'status': 'requested'}}, 201); }
+      if (p == '/billing/upgrade/paid') { upgrade = 'paid_reported'; return _j({'request': {'status': 'paid_reported'}}); }
       if (p.endsWith('/acknowledge')) return _j({'id': 9, 'child_id': 1, 'need_type': 'water', 'status': 'on_the_way'});
       if (p.endsWith('/seen')) return _j({'id': 9, 'child_id': 1, 'need_type': 'water', 'status': 'seen'});
       return _j({});
@@ -154,6 +169,70 @@ void main() {
     expect(find.text('- Food and eating'), findsOneWidget);
     expect(find.textContaining('not medical advice'), findsNothing, reason: 'nothing of the guide is given away');
     expect(find.text('See plans'), findsOneWidget);
+    s.stopAutoSync();
+  });
+
+  testWidgets('screen time (Pro): shows the rules and today, and extra minutes can be given', (t) async {
+    await t.binding.setSurfaceSize(const Size(500, 1800));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    final log = <String>[];
+    final s = await _signedIn(log);
+    await t.pumpWidget(ParentApp(session: s));
+    await t.pumpAndSettle();
+    await t.scrollUntilVisible(find.text('Screen time'), 200, scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text('Screen time'));
+    await t.pumpAndSettle();
+    expect(find.textContaining('Daily time: 60 minutes'), findsOneWidget);
+    expect(find.textContaining('Used 20 of 60 minutes'), findsOneWidget);
+    expect(find.text('From 20:00'), findsOneWidget);
+    await t.tap(find.text('+15 more minutes'));
+    await t.pumpAndSettle();
+    expect(log.any((l) => l.contains('/children/1/screen-time/extend')), isTrue);
+    s.stopAutoSync();
+  });
+
+  testWidgets('screen time on the free plan says it is Pro and offers the Pro request', (t) async {
+    await t.binding.setSurfaceSize(const Size(500, 1800));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    upgrade = null;
+    final store = MemoryStore();
+    await store.write('kindo.token', 'tok');
+    final s = KindoSession(store: store, defaultBaseUrl: 'https://k.test/api/v1', httpClient: _server([], pro: false));
+    await s.init();
+    await t.pumpWidget(ParentApp(session: s));
+    await t.pumpAndSettle();
+    await t.scrollUntilVisible(find.text('Screen time'), 200, scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text('Screen time'));
+    await t.pumpAndSettle();
+    expect(find.text('This is part of Kindo Pro'), findsOneWidget);
+    await t.tap(find.text('Get Pro'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Make me Pro'));
+    await t.pumpAndSettle();
+    expect(find.text('We emailed you how to pay.'), findsOneWidget);
+    expect(find.text('Pay by bank transfer'), findsOneWidget);
+    await t.enterText(find.widgetWithText(TextField, 'How did you pay? (e.g. bank, Easypaisa, JazzCash)'), 'Easypaisa');
+    await t.enterText(find.widgetWithText(TextField, 'Transaction number or name on the receipt'), 'TX12345');
+    await t.tap(find.text('I have paid'));
+    await t.pumpAndSettle();
+    expect(find.textContaining('We are checking your payment'), findsOneWidget);
+    s.stopAutoSync();
+  });
+
+  testWidgets('what the child did: a timeline of today, with a nudge to Pro on the free plan', (t) async {
+    await t.binding.setSurfaceSize(const Size(500, 1800));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    final store = MemoryStore();
+    await store.write('kindo.token', 'tok');
+    final s = KindoSession(store: store, defaultBaseUrl: 'https://k.test/api/v1', httpClient: _server([], pro: false));
+    await s.init();
+    await t.pumpWidget(ParentApp(session: s));
+    await t.pumpAndSettle();
+    await t.scrollUntilVisible(find.text('What Ayan did'), 200, scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text('What Ayan did'));
+    await t.pumpAndSettle();
+    expect(find.text('Played: Space quiz'), findsOneWidget);
+    expect(find.text('You are seeing today only.'), findsOneWidget);
     s.stopAutoSync();
   });
 }
