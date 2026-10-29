@@ -18,7 +18,8 @@
 </head>
 <body>
     <div style="text-align:center; margin-bottom: 5px;">
-        <span style="font-size: 10pt; color: #757575;">KINDO Visual Communication System (PECS) — Cut along dashed lines &amp; laminate</span>
+        <img src="{{ public_path('brand/mark-96.png') }}" style="width: 7mm; height: 7mm; vertical-align: middle; margin-right: 2mm;" alt="">
+        <span style="font-size: 10pt; color: #757575; vertical-align: middle;"><b style="color:#120c15;">Kindo</b> · Visual Communication System (PECS) — Cut along dashed lines &amp; laminate</span>
     </div>
     <table class="grid">
         @foreach($cards->chunk(2) as $row)
@@ -49,5 +50,6 @@
         </tr>
         @endforeach
     </table>
+    <div style="position: fixed; bottom: -8mm; left: 0; right: 0; text-align: center; font-size: 7pt; color: #9a96a3;">Kindo · learning that fits every child</div>
 </body>
 </html>

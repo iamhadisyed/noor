@@ -21,6 +21,7 @@
 </head>
 <body>
 @php($p = $s['practice'])
+    <div style="margin-bottom: 4mm;"><img src="{{ public_path('brand/mark-96.png') }}" style="width: 9mm; height: 9mm; vertical-align: middle; margin-right: 2mm;" alt=""><b style="font-size: 13pt; vertical-align: middle;">Kindo</b></div>
     <h1>{{ $ur($child->name, 80, '#120c15', 'name') }} — progress report</h1>
     <div class="muted">{{ $from->format('j M Y') }} to {{ $to->format('j M Y') }}</div>
 
@@ -65,6 +66,6 @@
     <ul>@foreach($milestones as $m)<li>{{ $m['title']['en'] }}&nbsp;<span class="muted">{{ $m['earned_on'] ? '('.$m['earned_on'].')' : '' }}</span></li>@endforeach</ul>
     @endif
 
-    <div class="foot">Made with Kindo. This report shows practice results only; it is not a medical assessment.</div>
+    <div class="foot"><img src="{{ public_path('brand/mark-32.png') }}" style="width: 4mm; height: 4mm; vertical-align: middle; margin-right: 1.5mm;" alt="">Made with Kindo. This report shows practice results only; it is not a medical assessment.</div>
 </body>
 </html>

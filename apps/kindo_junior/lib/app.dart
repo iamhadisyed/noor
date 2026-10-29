@@ -55,7 +55,7 @@ class _JuniorAppState extends State<JuniorApp> {
             home: !s.ready
                 ? const Scaffold(body: Loading())
                 : !s.signedIn
-                    ? SignInScreen(appName: 'Kindo Junior', tagline: s.lang == 'ur' ? 'پہلے والدین سائن ان کریں' : 'A parent signs in first')
+                    ? SignInScreen(appName: 'Kindo Junior', softMark: true, tagline: s.lang == 'ur' ? 'پہلے والدین سائن ان کریں' : 'A parent signs in first')
                     : child == null || s.currentChildId == null && s.children.length > 1
                         ? const ChildPicker()
                         : const JuniorShell(),

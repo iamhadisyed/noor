@@ -11,6 +11,7 @@ export 'src/theme.dart';
 export 'src/widgets/art.dart';
 export 'src/widgets/breathing.dart';
 export 'src/widgets/common.dart';
+export 'src/widgets/kindo_mark.dart';
 export 'src/widgets/media_pick.dart';
 export 'src/widgets/net_media.dart';
 export 'src/widgets/sign_in.dart';
